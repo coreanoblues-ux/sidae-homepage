@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -55,8 +56,7 @@ export default function SuperAdmin() {
   // 회원 승인
   const approveMutation = useMutation({
     mutationFn: async (userId: string) => {
-      const res = await apiRequest('POST', '/api/superadmin/approve-user', { userId });
-      return res.json();
+      return await apiRequest<any>('/api/superadmin/approve-user', { method: 'POST', body: { userId } });
     },
     onSuccess: () => {
       toast({ title: "승인 완료", description: "회원이 성공적으로 승인되었습니다." });
@@ -70,8 +70,7 @@ export default function SuperAdmin() {
   // 회원 거절
   const rejectMutation = useMutation({
     mutationFn: async ({ userId, memo }: { userId: string; memo?: string }) => {
-      const res = await apiRequest('POST', '/api/superadmin/reject-user', { userId, memo });
-      return res.json();
+      return await apiRequest<any>('/api/superadmin/reject-user', { method: 'POST', body: { userId, memo } });
     },
     onSuccess: () => {
       toast({ title: "거절 완료", description: "회원 신청이 거절되었습니다." });
@@ -88,8 +87,7 @@ export default function SuperAdmin() {
 
   const addImageMutation = useMutation({
     mutationFn: async (imageData: { url: string; caption?: string }) => {
-      const res = await apiRequest('POST', '/api/superadmin/gallery', imageData);
-      return res.json();
+      return await apiRequest<any>('/api/superadmin/gallery', { method: 'POST', body: imageData });
     },
     onSuccess: () => {
       toast({ title: "추가 완료", description: "갤러리 이미지가 추가되었습니다." });
@@ -105,8 +103,7 @@ export default function SuperAdmin() {
   // 갤러리 이미지 삭제
   const deleteImageMutation = useMutation({
     mutationFn: async (imageId: string) => {
-      const res = await apiRequest('DELETE', `/api/superadmin/gallery/${imageId}`);
-      return res.json();
+      return await apiRequest<any>(`/api/superadmin/gallery/${imageId}`, { method: 'DELETE' });
     },
     onSuccess: () => {
       toast({ title: "삭제 완료", description: "갤러리 이미지가 삭제되었습니다." });
@@ -120,8 +117,7 @@ export default function SuperAdmin() {
   // 갤러리 이미지 가시성 토글
   const toggleImageMutation = useMutation({
     mutationFn: async (imageId: string) => {
-      const res = await apiRequest('POST', `/api/superadmin/gallery/${imageId}/toggle`);
-      return res.json();
+      return await apiRequest<any>(`/api/superadmin/gallery/${imageId}/toggle`, { method: 'POST' });
     },
     onSuccess: () => {
       toast({ title: "변경 완료", description: "이미지 가시성이 변경되었습니다." });
@@ -144,13 +140,15 @@ export default function SuperAdmin() {
 
   const addVideoMutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await apiRequest('POST', '/api/admin/videos', {
-        ...data,
-        isPublished: data.isPublished === "true",
-        accessStart: data.accessStart ? new Date(data.accessStart).toISOString() : undefined,
-        accessEnd: data.accessEnd ? new Date(data.accessEnd).toISOString() : undefined,
+      return await apiRequest<any>('/api/admin/videos', {
+        method: 'POST',
+        body: {
+          ...data,
+          isPublished: data.isPublished === "true",
+          accessStart: data.accessStart ? new Date(data.accessStart).toISOString() : undefined,
+          accessEnd: data.accessEnd ? new Date(data.accessEnd).toISOString() : undefined,
+        }
       });
-      return res.json();
     },
     onSuccess: () => {
       toast({ title: "추가 완료", description: "동영상 링크가 추가되었습니다." });
