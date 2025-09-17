@@ -254,7 +254,7 @@ export default function CourseDetail() {
               <CardContent>
                 <div className="flex items-center space-x-4 mb-4">
                   <img
-                    src="@assets/IMG_6558_1758101099677.JPG"
+                    src="/images/IMG_6558_1758101099677.JPG"
                     alt="시대영재 학원 원장"
                     className="w-16 h-16 rounded-full object-cover"
                   />

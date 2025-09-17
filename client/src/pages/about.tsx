@@ -34,7 +34,7 @@ export default function About() {
 
             <div className="fade-in">
               <img
-                src="@assets/IMG_6558_1758101099677.JPG"
+                src="/images/IMG_6558_1758101099677.JPG"
                 alt="시대영재 학원 원장 프로필 사진"
                 className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover aspect-[4/5]"
                 data-testid="img-profile-main"
@@ -120,7 +120,7 @@ export default function About() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="grid grid-cols-2 gap-4">
               <img
-                src="@assets/IMG_6558_1758101099677.JPG"
+                src="/images/IMG_6558_1758101099677.JPG"
                 alt="TIME 잡지 스타일 TOEIC 포트레이트"
                 className="rounded-xl shadow-lg object-cover aspect-[3/4] w-full"
                 data-testid="img-profile-formal"

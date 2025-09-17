@@ -5,9 +5,9 @@ import { Camera, Image, Users, Building } from "lucide-react";
 export default function GalleryPage() {
   // Gallery images organized by category
   const instructorImages = [
-    "@assets/IMG_6558_1758101099677.JPG",
-    "@assets/IMG_6559_1758101109393.JPG",
-    "@assets/IMG_6544_1758101075476.JPG",
+    "/images/IMG_6558_1758101099677.JPG",
+    "/images/IMG_6559_1758101109393.JPG",
+    "/images/IMG_6544_1758101075476.JPG",
   ];
 
   const classroomImages = [
