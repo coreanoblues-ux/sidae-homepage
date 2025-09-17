@@ -7,6 +7,7 @@ import {
   notices,
   approvals,
   galleryImages,
+  programs,
   type User,
   type UpsertUser,
   type Course,
@@ -20,6 +21,8 @@ import {
   type Approval,
   type GalleryImage,
   type InsertGalleryImage,
+  type Program,
+  type InsertProgram,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, sql, isNull } from "drizzle-orm";
@@ -68,6 +71,15 @@ export interface IStorage {
   updateGalleryImage(id: string, image: Partial<InsertGalleryImage>): Promise<GalleryImage>;
   deleteGalleryImage(id: string): Promise<void>;
   toggleGalleryImageVisibility(id: string): Promise<GalleryImage>;
+  
+  // Program operations
+  getPrograms(): Promise<Program[]>;
+  getActivePrograms(): Promise<Program[]>;
+  getProgram(id: string): Promise<Program | undefined>;
+  getProgramBySlug(slug: string): Promise<Program | undefined>;
+  createProgram(program: InsertProgram): Promise<Program>;
+  updateProgram(id: string, program: Partial<InsertProgram>): Promise<Program>;
+  deleteProgram(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -331,6 +343,43 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedImage;
+  }
+
+  // Program operations
+  async getPrograms(): Promise<Program[]> {
+    return await db.select().from(programs).orderBy(asc(programs.order), asc(programs.createdAt));
+  }
+
+  async getActivePrograms(): Promise<Program[]> {
+    return await db.select().from(programs).where(eq(programs.isActive, true)).orderBy(asc(programs.order), asc(programs.createdAt));
+  }
+
+  async getProgram(id: string): Promise<Program | undefined> {
+    const [program] = await db.select().from(programs).where(eq(programs.id, id));
+    return program;
+  }
+
+  async getProgramBySlug(slug: string): Promise<Program | undefined> {
+    const [program] = await db.select().from(programs).where(eq(programs.slug, slug));
+    return program;
+  }
+
+  async createProgram(program: InsertProgram): Promise<Program> {
+    const [newProgram] = await db.insert(programs).values(program).returning();
+    return newProgram;
+  }
+
+  async updateProgram(id: string, program: Partial<InsertProgram>): Promise<Program> {
+    const [updatedProgram] = await db
+      .update(programs)
+      .set({ ...program, updatedAt: new Date() })
+      .where(eq(programs.id, id))
+      .returning();
+    return updatedProgram;
+  }
+
+  async deleteProgram(id: string): Promise<void> {
+    await db.delete(programs).where(eq(programs.id, id));
   }
 }
 

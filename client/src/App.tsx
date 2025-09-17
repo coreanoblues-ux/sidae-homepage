@@ -22,6 +22,7 @@ import AdminVideos from "@/pages/admin/videos";
 import AdminCourses from "@/pages/admin/courses";
 import AdminNotices from "@/pages/admin/notices";
 import SuperAdmin from "@/pages/superadmin";
+import ProgramPage from "@/pages/program";
 import NotFound from "@/pages/not-found";
 
 // Redirect component for route aliases
@@ -44,6 +45,7 @@ function Router() {
           <Route path="/about" component={About} />
           <Route path="/courses" component={Courses} />
           <Route path="/gallery" component={Gallery} />
+          <Route path="/program/:slug" component={ProgramPage} />
         </>
       ) : (
         <>
@@ -52,6 +54,7 @@ function Router() {
           <Route path="/courses" component={Courses} />
           <Route path="/courses/:id" component={CourseDetail} />
           <Route path="/gallery" component={Gallery} />
+          <Route path="/program/:slug" component={ProgramPage} />
           <Route path="/account" component={Account} />
           <Route path="/admin" component={Admin} />
           <Route path="/admin/dashboard" component={AdminDashboard} />

@@ -2,8 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertCourseSchema, insertVideoSchema, insertNoticeSchema, insertGalleryImageSchema } from "@shared/schema";
+import { insertCourseSchema, insertVideoSchema, insertNoticeSchema, insertGalleryImageSchema, insertProgramSchema } from "@shared/schema";
 import { z } from "zod";
+import sanitizeHtml from "sanitize-html";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -96,6 +97,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching gallery images:", error);
       res.status(500).json({ message: "Failed to fetch gallery images" });
+    }
+  });
+
+  // Public program routes
+  app.get('/api/programs', async (req, res) => {
+    try {
+      const programs = await storage.getActivePrograms();
+      res.json(programs);
+    } catch (error) {
+      console.error("Error fetching programs:", error);
+      res.status(500).json({ message: "Failed to fetch programs" });
+    }
+  });
+
+  app.get('/api/programs/:slug', async (req, res) => {
+    try {
+      const program = await storage.getProgramBySlug(req.params.slug);
+      if (!program) {
+        return res.status(404).json({ message: "Program not found" });
+      }
+      if (!program.isActive) {
+        return res.status(404).json({ message: "Program not found" });
+      }
+      
+      // Sanitize HTML content before sending to client
+      const sanitizedProgram = {
+        ...program,
+        content: sanitizeHtml(program.content, {
+          allowedTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'strong', 'em', 'br', 'a'],
+          allowedAttributes: {
+            'a': ['href', 'title']
+          },
+          allowedSchemes: ['http', 'https', 'mailto']
+        }),
+        curriculum: program.curriculum ? sanitizeHtml(program.curriculum, {
+          allowedTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'strong', 'em', 'br', 'a'],
+          allowedAttributes: {
+            'a': ['href', 'title']
+          },
+          allowedSchemes: ['http', 'https', 'mailto']
+        }) : program.curriculum
+      };
+      
+      res.json(sanitizedProgram);
+    } catch (error) {
+      console.error("Error fetching program:", error);
+      res.status(500).json({ message: "Failed to fetch program" });
     }
   });
 
@@ -465,6 +513,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error toggling gallery image visibility:", error);
       res.status(500).json({ message: "Failed to toggle gallery image visibility" });
+    }
+  });
+
+  // Superadmin program management routes
+  app.get('/api/superadmin/programs', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const programs = await storage.getPrograms();
+      res.json(programs);
+    } catch (error) {
+      console.error("Error fetching programs:", error);
+      res.status(500).json({ message: "Failed to fetch programs" });
+    }
+  });
+
+  app.post('/api/superadmin/programs', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const programData = insertProgramSchema.parse(req.body);
+      const program = await storage.createProgram(programData);
+      res.json(program);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid program data", errors: error.errors });
+      }
+      console.error("Error creating program:", error);
+      res.status(500).json({ message: "Failed to create program" });
+    }
+  });
+
+  app.get('/api/superadmin/programs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const program = await storage.getProgram(req.params.id);
+      if (!program) {
+        return res.status(404).json({ message: "Program not found" });
+      }
+      res.json(program);
+    } catch (error) {
+      console.error("Error fetching program:", error);
+      res.status(500).json({ message: "Failed to fetch program" });
+    }
+  });
+
+  app.put('/api/superadmin/programs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const programData = insertProgramSchema.partial().parse(req.body);
+      const program = await storage.updateProgram(req.params.id, programData);
+      res.json(program);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid program data", errors: error.errors });
+      }
+      console.error("Error updating program:", error);
+      res.status(500).json({ message: "Failed to update program" });
+    }
+  });
+
+  app.delete('/api/superadmin/programs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      await storage.deleteProgram(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting program:", error);
+      res.status(500).json({ message: "Failed to delete program" });
     }
   });
 

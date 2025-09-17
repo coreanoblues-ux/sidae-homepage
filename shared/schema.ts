@@ -107,6 +107,23 @@ export const galleryImages = pgTable("gallery_images", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// 프로그램 정보 테이블 (관리자가 편집 가능한 프로그램 소개 페이지)
+export const programs = pgTable("programs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: varchar("slug").unique().notNull(), // URL용 (middle-school, high-school, exam-prep)
+  title: varchar("title").notNull(), // 프로그램 제목
+  subtitle: text("subtitle"), // 부제목
+  description: text("description"), // 간단 설명
+  content: text("content").notNull(), // 상세 내용 (HTML/Markdown)
+  features: text("features").array().default(sql`ARRAY[]::text[]`), // 주요 특징들
+  targetStudents: text("target_students"), // 대상 학생
+  curriculum: text("curriculum"), // 커리큘럼 정보
+  isActive: boolean("is_active").default(true).notNull(),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   approvals: many(approvals, { relationName: "user_approvals" }),
@@ -192,6 +209,12 @@ export const insertGalleryImageSchema = createInsertSchema(galleryImages).omit({
   createdAt: true,
 });
 
+export const insertProgramSchema = createInsertSchema(programs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -206,4 +229,6 @@ export type Notice = typeof notices.$inferSelect;
 export type InsertNotice = z.infer<typeof insertNoticeSchema>;
 export type GalleryImage = typeof galleryImages.$inferSelect;
 export type InsertGalleryImage = z.infer<typeof insertGalleryImageSchema>;
+export type Program = typeof programs.$inferSelect;
+export type InsertProgram = z.infer<typeof insertProgramSchema>;
 export type Approval = typeof approvals.$inferSelect;

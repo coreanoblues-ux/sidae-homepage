@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { Star, Trophy, University, Presentation, Video, Phone, Calendar, Medal, Laptop, ChartLine, MapPin, Mail, NotebookPen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -235,10 +236,10 @@ export default function Landing() {
                 <p className="text-muted-foreground mb-4">
                   탄탄한 문법 만들기와 정확하고 빠른 독해 습관 만들기로 고등학교 진학 완벽 준비
                 </p>
-                <div className="flex items-center text-sm text-primary font-medium">
+                <Link href="/program/middle-school" className="flex items-center text-sm text-primary font-medium hover:underline" data-testid="link-program-middle">
                   <span>중등부 커리큘럼 보기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
-                </div>
+                </Link>
               </CardContent>
             </Card>
 
@@ -251,10 +252,10 @@ export default function Landing() {
                 <p className="text-muted-foreground mb-4">
                   (일반고/특목고) 서술형 문제 정복과 SYNTAX구문독해로 대학입시 완벽 대비
                 </p>
-                <div className="flex items-center text-sm text-primary font-medium">
+                <Link href="/program/high-school" className="flex items-center text-sm text-primary font-medium hover:underline" data-testid="link-program-high">
                   <span>고등부 커리큘럼 보기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
-                </div>
+                </Link>
               </CardContent>
             </Card>
 
@@ -267,10 +268,10 @@ export default function Landing() {
                 <p className="text-muted-foreground mb-4">
                   학교별 내신 및 수능지문에 대한 정독&스킬 강의로 실전 점수 향상 보장
                 </p>
-                <div className="flex items-center text-sm text-primary font-medium">
+                <Link href="/program/exam-prep" className="flex items-center text-sm text-primary font-medium hover:underline" data-testid="link-program-exam">
                   <span>내신/수능 프로그램 보기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
-                </div>
+                </Link>
               </CardContent>
             </Card>
           </div>
