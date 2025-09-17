@@ -296,6 +296,16 @@ export default function Landing() {
 
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Medal className="text-primary w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">내신과 수능 두마리를 확실히 잡아 주는 영어 잘하는 학원</h4>
+                    <p className="text-muted-foreground">체계적인 커리큘럼으로 내신과 수능 모두 완벽 대비</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center flex-shrink-0">
                     <University className="text-blue-600 dark:text-blue-400 w-6 h-6" />
                   </div>
