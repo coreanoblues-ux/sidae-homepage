@@ -300,7 +300,7 @@ export default function Landing() {
                     <Medal className="text-primary w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground">내신과 수능 두마리를 확실히 잡아 주는 영어 잘하는 학원</h4>
+                    <h4 className="font-semibold text-foreground">내신과 수능 두마리 토끼를 확실히 잡아 주는 영어 잘하는 학원</h4>
                     <p className="text-muted-foreground">체계적인 커리큘럼으로 내신과 수능 모두 완벽 대비</p>
                   </div>
                 </div>
@@ -492,7 +492,7 @@ export default function Landing() {
                     {/* 구글 지도 */}
                     <div className="mt-4">
                       <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3263.8942749934447!2d126.91171731525267!3d35.13967588030889!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35718c4a1f6b8a8d%3A0x8c7e4c4f5e9a2a2a!2z6rSR7KO87Yq465Oc7IucIOuCqOq1rCDrsJnshKDspJzslZnroZwxNg!5e0!3m2!1sko!2skr!4v1234567890123"
+                        src={`https://maps.google.com/maps?width=200&height=200&hl=ko&q=${encodeURIComponent('광주광역시 남구 봉선중앙로16 시대영재학원')}&ie=UTF8&t=&z=17&iwloc=B&output=embed`}
                         width="200" 
                         height="200" 
                         style={{border: 0, borderRadius: '8px'}} 
@@ -500,6 +500,7 @@ export default function Landing() {
                         loading="lazy" 
                         referrerPolicy="no-referrer-when-downgrade"
                         className="shadow-md"
+                        title="시대영재학원 위치"
                       ></iframe>
                     </div>
                   </div>
