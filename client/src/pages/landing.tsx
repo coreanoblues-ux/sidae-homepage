@@ -179,7 +179,7 @@ export default function Landing() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">강남 1타강사</p>
-                      <p className="text-sm text-gray-600">영단기 현강 대표</p>
+                      <p className="text-sm text-gray-600">(전)영단기 현강 전타임 마감강사</p>
                     </div>
                   </div>
                 </div>
