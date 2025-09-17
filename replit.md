@@ -1,6 +1,6 @@
 # Overview
 
-This is a full-stack academy website built for "정우석 영어학원" (Jung Woo Seok English Academy), featuring a sophisticated role-based learning management system. The application provides a polished American tech company aesthetic with minimal design, clean typography, and smooth animations. It supports multi-tier user authentication (guest, pending, verified, admin) with time-controlled video access and comprehensive admin management capabilities.
+This is a full-stack academy website built for "시대영재 학원" (Sidae Young Jae Academy), featuring a sophisticated role-based learning management system specialized in middle and high school entrance exam English education. The application provides a polished American tech company aesthetic with minimal design, clean typography, and smooth animations. It supports multi-tier user authentication (guest, pending, verified, admin) with time-controlled video access and comprehensive admin management capabilities.
 
 # User Preferences
 

@@ -71,7 +71,7 @@ export default function Home() {
               안녕하세요, {user?.firstName || "회원"}님!
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              정우석 영어학원에 오신 것을 환영합니다. 오늘도 영어 실력 향상을 위해 함께 노력해봐요.
+              시대영재 학원에 오신 것을 환영합니다. 오늘도 영어 실력 향상을 위해 함께 노력해봐요.
             </p>
             
             <div className="flex items-center justify-center mb-8">

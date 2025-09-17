@@ -56,16 +56,13 @@ export default function Landing() {
     }
   };
 
-  // Gallery images
+  // Gallery images - 실제 시대영재 학원 이미지들
   const galleryImages = [
-    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
-    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
-    "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
-    "https://images.unsplash.com/photo-1497486751825-1233686d5d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
-    "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
-    "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
-    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "@assets/IMG_6558_1758101099677.JPG",
+    "@assets/IMG_6544_1758101075476.JPG",
+    "@assets/IMG_6554_1758101087993.JPG",
+    "@assets/IMG_6556_1758101093935.JPG",
+    "@assets/IMG_6559_1758101109393.JPG",
   ];
 
   return (
@@ -80,14 +77,14 @@ export default function Landing() {
                 토익 만점 강사의 검증된 커리큘럼
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
-                영어 실력의<br />
+                중고등부<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-                  완전한 변화
+                  입시영어 전문
                 </span>
               </h1>
               <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
-                캐나다 Bishop's University 졸업, 해커스·영단기 인기강사 출신<br />
-                <strong>정우석 원장</strong>과 함께하는 프리미엄 영어 교육
+                강남영단기 1타강사, 해커스 50만뷰+ 인기강사, TOEIC 990점<br />
+                <strong>캐나다국적 원장</strong>과 함께하는 입시영어 전문교육
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
@@ -97,24 +94,27 @@ export default function Landing() {
                 >
                   <a href="/api/login">
                     <Video className="mr-2 w-5 h-5" />
-                    온라인 강의 시작하기
+                    입시 커리큘럼 보기
                   </a>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
                   className="px-8 py-4 border-2 border-white text-white font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all"
+                  asChild
                 >
-                  <Phone className="mr-2 w-5 h-5" />
-                  상담 문의하기
+                  <a href="tel:062-462-0990">
+                    <Phone className="mr-2 w-5 h-5" />
+                    062-462-0990
+                  </a>
                 </Button>
               </div>
             </div>
 
             <div className="fade-in lg:ml-8">
               <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1000"
-                alt="정우석 원장 프로필 사진"
+                src="@assets/IMG_6558_1758101099677.JPG"
+                alt="시대영재 학원 원장 프로필 사진"
                 className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover aspect-[4/5]"
               />
 
@@ -153,10 +153,10 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              왜 정우석 영어학원인가?
+              왜 시대영재 학원인가?
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              검증된 강사진과 체계적인 커리큘럼으로 여러분의 영어 실력을 한 단계 높여드립니다.
+              중고등부 입시영어에 특화된 차별화된 커리큘럼으로 확실한 성적 향상을 보장합니다.
             </p>
           </div>
 
@@ -166,12 +166,12 @@ export default function Landing() {
                 <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                   <Medal className="text-primary w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-card-foreground mb-4">검증된 강사진</h3>
+                <h3 className="text-xl font-semibold text-card-foreground mb-4">중등부 프로그램</h3>
                 <p className="text-muted-foreground mb-4">
-                  해커스, 영단기 출신 인기강사의 노하우와 캐나다 유학 경험을 바탕으로 한 실용적인 영어 교육
+                  탄탄한 문법 만들기와 정확하고 빠른 독해 습관 만들기로 고등학교 진학 완벽 준비
                 </p>
                 <div className="flex items-center text-sm text-primary font-medium">
-                  <span>더 알아보기</span>
+                  <span>중등부 커리큘럼 보기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
                 </div>
               </CardContent>
@@ -182,12 +182,12 @@ export default function Landing() {
                 <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                   <Laptop className="text-primary w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-card-foreground mb-4">온라인 학습 시스템</h3>
+                <h3 className="text-xl font-semibold text-card-foreground mb-4">고등부 프로그램</h3>
                 <p className="text-muted-foreground mb-4">
-                  언제 어디서나 접근 가능한 온라인 강의 플랫폼으로 효율적인 학습을 지원합니다
+                  (일반고/특목고) 서술형 문제 정복과 SYNTAX구문독해로 대학입시 완벽 대비
                 </p>
                 <div className="flex items-center text-sm text-primary font-medium">
-                  <span>시스템 체험하기</span>
+                  <span>고등부 커리큘럼 보기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
                 </div>
               </CardContent>
@@ -198,12 +198,12 @@ export default function Landing() {
                 <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                   <ChartLine className="text-primary w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-card-foreground mb-4">맞춤형 커리큘럼</h3>
+                <h3 className="text-xl font-semibold text-card-foreground mb-4">내신 & 수능 대비</h3>
                 <p className="text-muted-foreground mb-4">
-                  개인별 수준과 목표에 맞춘 체계적인 학습 계획으로 확실한 실력 향상을 보장합니다
+                  학교별 내신 및 수능지문에 대한 정독&스킬 강의로 실전 점수 향상 보장
                 </p>
                 <div className="flex items-center text-sm text-primary font-medium">
-                  <span>커리큘럼 보기</span>
+                  <span>내신/수능 프로그램 보기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
                 </div>
               </CardContent>
@@ -222,11 +222,11 @@ export default function Landing() {
                 원장 소개
               </div>
               <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-6">
-                정우석 원장
+                실력있는 원장과 탄탄한 강사진
               </h2>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                10년 이상의 영어 교육 경험과 해외 유학 경험을 바탕으로 
-                학생들의 영어 실력 향상을 위해 최선을 다하고 있습니다.
+                강남영단기 1타강사 출신 캐나다국적 원장과 서울대, 경희대, 광주교대 출신 
+                교육학 석사 자격을 갖춘 최고의 강사진이 함께합니다.
               </p>
 
               <div className="space-y-6">
@@ -247,6 +247,11 @@ export default function Landing() {
                   <div>
                     <h4 className="font-semibold text-foreground">TOEIC 990점 만점 달성</h4>
                     <p className="text-muted-foreground">완벽한 영어 실력을 바탕으로 한 체계적인 시험 대비 전략</p>
+                    <img 
+                      src="@assets/IMG_6544_1758101075476.JPG"
+                      alt="TOEIC 990점 만점 성적표"
+                      className="mt-2 rounded-lg shadow-md max-w-48 object-cover"
+                    />
                   </div>
                 </div>
 
@@ -255,8 +260,13 @@ export default function Landing() {
                     <Presentation className="text-green-600 dark:text-green-400 w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground">해커스·영단기 인기 강사</h4>
-                    <p className="text-muted-foreground">대형 학원에서 검증된 강의력과 수많은 학생들의 성공 사례</p>
+                    <h4 className="font-semibold text-foreground">강남영단기 1타강사 & 해커스 50만뷰+</h4>
+                    <p className="text-muted-foreground">현강 1타강사와 인터넷 50만뷰 돌파 인기강사의 검증된 강의력</p>
+                    <img 
+                      src="@assets/IMG_6559_1758101109393.JPG"
+                      alt="해커스 온라인 강의 화면"
+                      className="mt-2 rounded-lg shadow-md max-w-48 object-cover"
+                    />
                   </div>
                 </div>
               </div>
@@ -270,14 +280,14 @@ export default function Landing() {
             <div className="grid grid-cols-2 gap-4">
               <img
                 src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=800"
-                alt="정우석 원장 프로필"
+                alt="시대영재 학원 원장 프로필"
                 className="rounded-xl shadow-lg object-cover aspect-[3/4] w-full"
               />
 
               <div className="space-y-4">
                 <img
                   src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400"
-                  alt="강의 중인 정우석 원장"
+                  alt="강의 중인 시대영재 학원 원장"
                   className="rounded-xl shadow-lg object-cover aspect-[3/2] w-full"
                 />
 
@@ -300,7 +310,7 @@ export default function Landing() {
               학원 갤러리
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              정우석 영어학원의 교육 환경과 수업 현장을 확인해보세요.
+              시대영재 학원의 교육 환경과 수업 현장을 확인해보세요.
             </p>
           </div>
 
@@ -316,7 +326,7 @@ export default function Landing() {
               수강생 후기
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              정우석 영어학원에서 실제로 성과를 얻은 수강생들의 생생한 후기를 확인해보세요.
+              시대영재 학원에서 실제로 성과를 얻은 수강생들의 생생한 후기를 확인해보세요.
             </p>
           </div>
 
@@ -324,7 +334,7 @@ export default function Landing() {
             {[
               {
                 rating: 5,
-                text: "토익 점수가 650점에서 920점으로 올랐어요! 정우석 원장님의 체계적인 커리큘럼과 개인별 맞춤 지도 덕분입니다.",
+                text: "토익 점수가 650점에서 920점으로 올랐어요! 시대영재 학원 원장님의 체계적인 커리큘럼과 개인별 맞춤 지도 덕분입니다.",
                 author: "김○○ 님",
                 course: "직장인 토익반"
               },
@@ -389,8 +399,8 @@ export default function Landing() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">학원 위치</h4>
-                    <p className="text-muted-foreground">광주광역시 동구 봉선동 교육 1번지</p>
-                    <p className="text-sm text-muted-foreground mt-1">지하철 1호선 봉선역 2번 출구 도보 3분</p>
+                    <p className="text-muted-foreground">광주광역시 남구 봉선중앙로16, 2층</p>
+                    <p className="text-sm text-muted-foreground mt-1">문의전화: 062-462-0990</p>
                   </div>
                 </div>
 
@@ -523,13 +533,13 @@ export default function Landing() {
                   <Presentation className="text-primary-foreground w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold">정우석 영어학원</h3>
-                  <p className="text-sm text-secondary-foreground/70">광주 봉선동 교육 1번지</p>
+                  <h3 className="text-xl font-bold">시대영재 학원</h3>
+                  <p className="text-sm text-secondary-foreground/70">광주광역시 남구 봉선중앙로16, 2층</p>
                 </div>
               </div>
               <p className="text-secondary-foreground/80 mb-4 leading-relaxed">
-                캐나다 Bishop's University 졸업, 토익 만점, 해커스·영단기 출신 인기강사 정우석 원장과 함께 
-                영어 실력의 완전한 변화를 경험해보세요.
+강남영단기 1타강사, 해커스 50만뷰+ 인기강사, TOEIC 990점
+                캐나다국적 원장과 함께하는 중고등부 입시영어 전문교육
               </p>
             </div>
 
@@ -556,7 +566,7 @@ export default function Landing() {
 
           <div className="border-t border-secondary-foreground/20 mt-12 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center text-sm text-secondary-foreground/60">
-              <p>&copy; 2024 정우석 영어학원. All rights reserved.</p>
+              <p>&copy; 2024 시대영재 학원. All rights reserved.</p>
               <div className="flex space-x-6 mt-4 md:mt-0">
                 <a href="#" className="hover:text-primary transition-colors">이용약관</a>
                 <a href="#" className="hover:text-primary transition-colors">개인정보처리방침</a>

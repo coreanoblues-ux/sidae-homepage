@@ -62,8 +62,8 @@ export function Header() {
               <GraduationCap className="text-primary-foreground text-lg" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">정우석 영어학원</h1>
-              <p className="text-xs text-muted-foreground">광주 봉선동 교육 1번지</p>
+              <h1 className="text-xl font-bold text-foreground">시대영재 학원</h1>
+              <p className="text-xs text-muted-foreground">중고등부 입시영어 전문</p>
             </div>
           </Link>
 

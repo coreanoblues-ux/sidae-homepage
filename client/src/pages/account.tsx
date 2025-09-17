@@ -315,7 +315,7 @@ export default function Account() {
                       <div className="text-left">
                         <div className="font-semibold">원장 소개</div>
                         <div className="text-sm text-muted-foreground">
-                          정우석 원장님 프로필
+                          시대영재 학원 원장 프로필
                         </div>
                       </div>
                     </a>
