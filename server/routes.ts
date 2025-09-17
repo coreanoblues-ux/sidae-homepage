@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertCourseSchema, insertVideoSchema, insertNoticeSchema } from "@shared/schema";
+import { insertCourseSchema, insertVideoSchema, insertNoticeSchema, insertGalleryImageSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -86,6 +86,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching notices:", error);
       res.status(500).json({ message: "Failed to fetch notices" });
+    }
+  });
+
+  app.get('/api/gallery', async (req, res) => {
+    try {
+      const images = await storage.getVisibleGalleryImages();
+      res.json(images);
+    } catch (error) {
+      console.error("Error fetching gallery images:", error);
+      res.status(500).json({ message: "Failed to fetch gallery images" });
     }
   });
 
@@ -326,6 +336,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error creating notice:", error);
       res.status(500).json({ message: "Failed to create notice" });
+    }
+  });
+
+  // Superadmin routes
+  app.get('/api/superadmin/pending-users', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const pendingUsers = await storage.getPendingUsers();
+      res.json(pendingUsers);
+    } catch (error) {
+      console.error("Error fetching pending users:", error);
+      res.status(500).json({ message: "Failed to fetch pending users" });
+    }
+  });
+
+  app.post('/api/superadmin/approve-user', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const { userId, memo } = req.body;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      await storage.approveUser(userId, user.id, memo);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error approving user:", error);
+      res.status(500).json({ message: "Failed to approve user" });
+    }
+  });
+
+  app.post('/api/superadmin/reject-user', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const { userId, memo } = req.body;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      await storage.rejectUser(userId, user.id, memo);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error rejecting user:", error);
+      res.status(500).json({ message: "Failed to reject user" });
+    }
+  });
+
+  app.get('/api/superadmin/gallery', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const images = await storage.getGalleryImages();
+      res.json(images);
+    } catch (error) {
+      console.error("Error fetching gallery images:", error);
+      res.status(500).json({ message: "Failed to fetch gallery images" });
+    }
+  });
+
+  app.post('/api/superadmin/gallery', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const imageData = insertGalleryImageSchema.parse(req.body);
+      const image = await storage.createGalleryImage(imageData);
+      res.json(image);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid image data", errors: error.errors });
+      }
+      console.error("Error creating gallery image:", error);
+      res.status(500).json({ message: "Failed to create gallery image" });
+    }
+  });
+
+  app.put('/api/superadmin/gallery/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const imageData = insertGalleryImageSchema.partial().parse(req.body);
+      const image = await storage.updateGalleryImage(req.params.id, imageData);
+      res.json(image);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid image data", errors: error.errors });
+      }
+      console.error("Error updating gallery image:", error);
+      res.status(500).json({ message: "Failed to update gallery image" });
+    }
+  });
+
+  app.delete('/api/superadmin/gallery/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      await storage.deleteGalleryImage(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting gallery image:", error);
+      res.status(500).json({ message: "Failed to delete gallery image" });
+    }
+  });
+
+  app.post('/api/superadmin/gallery/:id/toggle', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const image = await storage.toggleGalleryImageVisibility(req.params.id);
+      res.json(image);
+    } catch (error) {
+      console.error("Error toggling gallery image visibility:", error);
+      res.status(500).json({ message: "Failed to toggle gallery image visibility" });
     }
   });
 

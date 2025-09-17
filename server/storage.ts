@@ -6,6 +6,7 @@ import {
   videoViews,
   notices,
   approvals,
+  galleryImages,
   type User,
   type UpsertUser,
   type Course,
@@ -17,6 +18,8 @@ import {
   type Notice,
   type InsertNotice,
   type Approval,
+  type GalleryImage,
+  type InsertGalleryImage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, sql, isNull } from "drizzle-orm";
@@ -57,6 +60,14 @@ export interface IStorage {
   approveUser(userId: string, adminId: string, memo?: string): Promise<void>;
   rejectUser(userId: string, adminId: string, memo?: string): Promise<void>;
   getUserApprovals(userId: string): Promise<Approval[]>;
+  
+  // Gallery operations
+  getGalleryImages(): Promise<GalleryImage[]>;
+  getVisibleGalleryImages(): Promise<GalleryImage[]>;
+  createGalleryImage(image: InsertGalleryImage): Promise<GalleryImage>;
+  updateGalleryImage(id: string, image: Partial<InsertGalleryImage>): Promise<GalleryImage>;
+  deleteGalleryImage(id: string): Promise<void>;
+  toggleGalleryImageVisibility(id: string): Promise<GalleryImage>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -264,6 +275,62 @@ export class DatabaseStorage implements IStorage {
       .from(approvals)
       .where(eq(approvals.userId, userId))
       .orderBy(desc(approvals.createdAt));
+  }
+
+  // Gallery operations
+  async getGalleryImages(): Promise<GalleryImage[]> {
+    return await db
+      .select()
+      .from(galleryImages)
+      .orderBy(desc(galleryImages.createdAt));
+  }
+
+  async getVisibleGalleryImages(): Promise<GalleryImage[]> {
+    return await db
+      .select()
+      .from(galleryImages)
+      .where(eq(galleryImages.visible, true))
+      .orderBy(desc(galleryImages.createdAt));
+  }
+
+  async createGalleryImage(image: InsertGalleryImage): Promise<GalleryImage> {
+    const [newImage] = await db
+      .insert(galleryImages)
+      .values(image)
+      .returning();
+    return newImage;
+  }
+
+  async updateGalleryImage(id: string, image: Partial<InsertGalleryImage>): Promise<GalleryImage> {
+    const [updatedImage] = await db
+      .update(galleryImages)
+      .set(image)
+      .where(eq(galleryImages.id, id))
+      .returning();
+    return updatedImage;
+  }
+
+  async deleteGalleryImage(id: string): Promise<void> {
+    await db.delete(galleryImages).where(eq(galleryImages.id, id));
+  }
+
+  async toggleGalleryImageVisibility(id: string): Promise<GalleryImage> {
+    const [image] = await db
+      .select()
+      .from(galleryImages)
+      .where(eq(galleryImages.id, id));
+    
+    if (!image) {
+      throw new Error("Gallery image not found");
+    }
+
+    const [updatedImage] = await db
+      .update(galleryImages)
+      .set({ visible: !image.visible })
+      .where(eq(galleryImages.id, id))
+      .returning();
+    
+    return updatedImage;
   }
 }
 
