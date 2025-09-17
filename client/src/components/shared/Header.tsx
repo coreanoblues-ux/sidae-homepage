@@ -124,20 +124,20 @@ export function Header() {
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="flex items-center space-x-2 p-2">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={user.profileImageUrl || undefined} />
+                          <AvatarImage src={(user as any)?.profileImageUrl || undefined} />
                           <AvatarFallback>
-                            {user.firstName?.[0] || user.email?.[0] || "U"}
+                            {(user as any)?.firstName?.[0] || (user as any)?.email?.[0] || "U"}
                           </AvatarFallback>
                         </Avatar>
                         <div className="hidden sm:block text-left">
                           <p className="text-sm font-medium">
-                            {user.firstName || user.email}
+                            {(user as any)?.firstName || (user as any)?.email}
                           </p>
                           <Badge
-                            className={`text-xs ${getRoleBadgeColor(user.role)}`}
+                            className={`text-xs ${getRoleBadgeColor((user as any)?.role || "")}`}
                             variant="secondary"
                           >
-                            {getRoleLabel(user.role)}
+                            {getRoleLabel((user as any)?.role || "")}
                           </Badge>
                         </div>
                       </Button>
@@ -149,7 +149,7 @@ export function Header() {
                           내 계정
                         </Link>
                       </DropdownMenuItem>
-                      {user.role === "ADMIN" && (
+                      {(user as any)?.role === "ADMIN" && (
                         <DropdownMenuItem asChild>
                           <Link href="/admin" className="flex items-center">
                             <GraduationCap className="mr-2 h-4 w-4" />
