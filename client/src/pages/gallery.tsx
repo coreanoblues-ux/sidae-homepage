@@ -1,25 +1,48 @@
+import { useQuery } from "@tanstack/react-query";
 import { Gallery } from "@/components/shared/Gallery";
 import { Card, CardContent } from "@/components/ui/card";
 import { Camera, Image, Users, Building } from "lucide-react";
 
 export default function GalleryPage() {
-  // Gallery images organized by category
-  const instructorImages = [
-    "/images/IMG_6558_1758101099677.JPG",
-    "/images/IMG_6559_1758101109393.JPG",
-    "/images/IMG_6544_1758101075476.JPG",
-  ];
+  // 데이터베이스에서 갤러리 이미지 불러오기 (visible=true인 것만)
+  const { data: galleryImages = [], isLoading, error } = useQuery({
+    queryKey: ['/api/gallery'],
+  });
 
-  const classroomImages = [
-    "@assets/IMG_6554_1758101087993.JPG",
-    "@assets/IMG_6556_1758101093935.JPG",
-  ];
+  // 표시할 이미지들만 필터링 (visible이 true인 것들)
+  const visibleImages = (galleryImages as any[]).filter(img => img.visible);
+  
+  // 카테고리별로 분류 (caption으로 구분하거나 전체를 하나로 표시)
+  const allImages = visibleImages.map((img: any) => img.url);
+  
+  // 로딩 상태
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">갤러리를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const facilityImages = [
-    "@assets/IMG_6544_1758101075476.JPG",
-  ];
-
-  const allImages = [...instructorImages, ...classroomImages, ...facilityImages];
+  // 에러 상태
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">갤러리를 불러올 수 없습니다.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,56 +97,55 @@ export default function GalleryPage() {
             </p>
           </div>
           
-          <Gallery images={allImages} data-testid="gallery-all" />
+          {allImages.length > 0 ? (
+            <Gallery images={allImages} data-testid="gallery-all" />
+          ) : (
+            <div className="text-center py-12">
+              <Image className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg">
+                아직 등록된 갤러리 이미지가 없습니다.
+              </p>
+              <p className="text-muted-foreground text-sm mt-2">
+                곧 멋진 학원 사진들로 채워질 예정입니다.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Categorized Galleries */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          {/* Instructor Section */}
-          <div className="mb-20">
-            <div className="flex items-center mb-8">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-4">
-                <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">시대영재 학원 원장</h2>
-                <p className="text-muted-foreground">원장님의 프로필과 강의 모습</p>
-              </div>
+      {/* Gallery Images with Captions */}
+      {allImages.length > 0 && (
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-bold text-foreground">갤러리 상세</h2>
+              <p className="text-muted-foreground">
+                각 이미지의 설명과 함께 보기
+              </p>
             </div>
-            <Gallery images={instructorImages} data-testid="gallery-instructor" />
-          </div>
-
-          {/* Classroom Section */}
-          <div className="mb-20">
-            <div className="flex items-center mb-8">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-4">
-                <Camera className="w-6 h-6 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">수업 현장</h2>
-                <p className="text-muted-foreground">실제 수업이 진행되는 모습들</p>
-              </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visibleImages.map((image: any) => (
+                <div key={image.id} className="group">
+                  <div className="aspect-square overflow-hidden rounded-lg shadow-lg">
+                    <img 
+                      src={image.url} 
+                      alt={image.caption || '학원 갤러리 이미지'}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      data-testid={`gallery-image-${image.id}`}
+                    />
+                  </div>
+                  {image.caption && (
+                    <p className="mt-3 text-sm text-muted-foreground text-center">
+                      {image.caption}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
-            <Gallery images={classroomImages} data-testid="gallery-classroom" />
           </div>
-
-          {/* Facilities Section */}
-          <div>
-            <div className="flex items-center mb-8">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mr-4">
-                <Building className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">학원 시설</h2>
-                <p className="text-muted-foreground">현대적이고 쾌적한 교육 환경</p>
-              </div>
-            </div>
-            <Gallery images={facilityImages} data-testid="gallery-facilities" />
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Visit Information */}
       <section className="py-20">

@@ -137,7 +137,7 @@ export default function Landing() {
                 </span>
               </h1>
               <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
-                '(전) 강남 영단기 대표강사, (전)해커스 인강' 의 정우석 원장과 함께 하는 시대영재학원
+                '(전) 영단기 현강 대표강사, (전)해커스 인강' 의 정우석 원장과 함께 하는 시대영재학원
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
