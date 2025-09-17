@@ -1,0 +1,438 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Eye, EyeOff, Trash2, Plus, Check, X } from "lucide-react";
+import { useLocation } from "wouter";
+
+const SUPERADMIN_PATH = "/_superadmin";
+
+export default function SuperAdmin() {
+  const { user, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  
+  // 권한 확인 - 관리자가 아니면 404처럼 보이게
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        // 로그인하지 않은 경우 로그인 페이지로
+        window.location.href = `/api/login?next=${encodeURIComponent(SUPERADMIN_PATH)}`;
+      } else if ((user as any)?.role !== 'ADMIN') {
+        // 관리자가 아니면 404로 위장
+        setLocation("/404");
+      }
+    }
+  }, [user, authLoading, setLocation]);
+
+  // 승인 대기 회원 목록
+  const { data: pendingUsers = [], refetch: refetchPendingUsers } = useQuery({
+    queryKey: ['/api/superadmin/pending-users'],
+    enabled: (user as any)?.role === 'ADMIN',
+  });
+
+  // 갤러리 이미지 목록 (관리자용 - 모든 이미지)
+  const { data: galleryImages = [], refetch: refetchGallery } = useQuery({
+    queryKey: ['/api/superadmin/gallery'],
+    enabled: (user as any)?.role === 'ADMIN',
+  });
+
+  // 코스 목록 (동영상 추가용)
+  const { data: courses = [] } = useQuery({
+    queryKey: ['/api/courses'],
+    enabled: (user as any)?.role === 'ADMIN',
+  });
+
+  // 회원 승인
+  const approveMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await apiRequest('POST', '/api/superadmin/approve-user', { userId });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "승인 완료", description: "회원이 성공적으로 승인되었습니다." });
+      refetchPendingUsers();
+    },
+    onError: () => {
+      toast({ title: "오류", description: "승인 처리 중 오류가 발생했습니다.", variant: "destructive" });
+    },
+  });
+
+  // 회원 거절
+  const rejectMutation = useMutation({
+    mutationFn: async ({ userId, memo }: { userId: string; memo?: string }) => {
+      const res = await apiRequest('POST', '/api/superadmin/reject-user', { userId, memo });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "거절 완료", description: "회원 신청이 거절되었습니다." });
+      refetchPendingUsers();
+    },
+    onError: () => {
+      toast({ title: "오류", description: "거절 처리 중 오류가 발생했습니다.", variant: "destructive" });
+    },
+  });
+
+  // 갤러리 이미지 추가
+  const [newImageUrl, setNewImageUrl] = useState("");
+  const [newImageCaption, setNewImageCaption] = useState("");
+
+  const addImageMutation = useMutation({
+    mutationFn: async (imageData: { url: string; caption?: string }) => {
+      const res = await apiRequest('POST', '/api/superadmin/gallery', imageData);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "추가 완료", description: "갤러리 이미지가 추가되었습니다." });
+      setNewImageUrl("");
+      setNewImageCaption("");
+      refetchGallery();
+    },
+    onError: () => {
+      toast({ title: "오류", description: "이미지 추가 중 오류가 발생했습니다.", variant: "destructive" });
+    },
+  });
+
+  // 갤러리 이미지 삭제
+  const deleteImageMutation = useMutation({
+    mutationFn: async (imageId: string) => {
+      const res = await apiRequest('DELETE', `/api/superadmin/gallery/${imageId}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "삭제 완료", description: "갤러리 이미지가 삭제되었습니다." });
+      refetchGallery();
+    },
+    onError: () => {
+      toast({ title: "오류", description: "이미지 삭제 중 오류가 발생했습니다.", variant: "destructive" });
+    },
+  });
+
+  // 갤러리 이미지 가시성 토글
+  const toggleImageMutation = useMutation({
+    mutationFn: async (imageId: string) => {
+      const res = await apiRequest('POST', `/api/superadmin/gallery/${imageId}/toggle`);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "변경 완료", description: "이미지 가시성이 변경되었습니다." });
+      refetchGallery();
+    },
+    onError: () => {
+      toast({ title: "오류", description: "가시성 변경 중 오류가 발생했습니다.", variant: "destructive" });
+    },
+  });
+
+  // 동영상 링크 추가 상태
+  const [videoData, setVideoData] = useState({
+    courseId: "",
+    title: "",
+    externalUrl: "",
+    isPublished: "true",
+    accessStart: "",
+    accessEnd: "",
+  });
+
+  const addVideoMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await apiRequest('POST', '/api/admin/videos', {
+        ...data,
+        isPublished: data.isPublished === "true",
+        accessStart: data.accessStart ? new Date(data.accessStart).toISOString() : undefined,
+        accessEnd: data.accessEnd ? new Date(data.accessEnd).toISOString() : undefined,
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "추가 완료", description: "동영상 링크가 추가되었습니다." });
+      setVideoData({
+        courseId: "",
+        title: "",
+        externalUrl: "",
+        isPublished: "true",
+        accessStart: "",
+        accessEnd: "",
+      });
+    },
+    onError: () => {
+      toast({ title: "오류", description: "동영상 추가 중 오류가 발생했습니다.", variant: "destructive" });
+    },
+  });
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user || (user as any)?.role !== 'ADMIN') {
+    return null; // 404나 로그인 리디렉션 처리됨
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Super Admin · Secret</h1>
+        <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+          비밀 관리자 페이지
+        </Badge>
+      </div>
+
+      <Tabs defaultValue="approvals" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="approvals">가입 승인</TabsTrigger>
+          <TabsTrigger value="gallery">갤러리 관리</TabsTrigger>
+          <TabsTrigger value="videos">동영상 링크</TabsTrigger>
+        </TabsList>
+
+        {/* 가입 승인 관리 */}
+        <TabsContent value="approvals" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>가입 승인 대기</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(pendingUsers as any[]).length === 0 ? (
+                <p className="text-muted-foreground">대기 중인 회원이 없습니다.</p>
+              ) : (
+                <div className="space-y-4">
+                  {(pendingUsers as any[]).map((user: any) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="space-y-1">
+                        <p className="font-medium">{user.email}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : '-'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(user.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => approveMutation.mutate(user.id)}
+                          disabled={approveMutation.isPending}
+                          data-testid={`button-approve-${user.id}`}
+                        >
+                          {approveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                          승인
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => rejectMutation.mutate({ userId: user.id })}
+                          disabled={rejectMutation.isPending}
+                          data-testid={`button-reject-${user.id}`}
+                        >
+                          {rejectMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                          거절
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* 갤러리 관리 */}
+        <TabsContent value="gallery" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>새 이미지 추가</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2">
+                  <Label htmlFor="imageUrl">이미지 URL</Label>
+                  <Input
+                    id="imageUrl"
+                    placeholder="https://..."
+                    value={newImageUrl}
+                    onChange={(e) => setNewImageUrl(e.target.value)}
+                    data-testid="input-image-url"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="imageCaption">캡션 (선택)</Label>
+                  <Input
+                    id="imageCaption"
+                    placeholder="예: 정우석 원장 수업 현장"
+                    value={newImageCaption}
+                    onChange={(e) => setNewImageCaption(e.target.value)}
+                    data-testid="input-image-caption"
+                  />
+                </div>
+              </div>
+              <Button
+                onClick={() => addImageMutation.mutate({ url: newImageUrl, caption: newImageCaption || undefined })}
+                disabled={!newImageUrl || addImageMutation.isPending}
+                data-testid="button-add-image"
+              >
+                {addImageMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                이미지 추가
+              </Button>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(galleryImages as any[]).map((image: any) => (
+              <Card key={image.id}>
+                <CardContent className="p-4 space-y-4">
+                  <img 
+                    src={image.url} 
+                    alt={image.caption || 'gallery'} 
+                    className="w-full h-48 object-cover rounded"
+                    data-testid={`img-gallery-${image.id}`}
+                  />
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground" data-testid={`text-caption-${image.id}`}>
+                      {image.caption || '캡션 없음'}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => toggleImageMutation.mutate(image.id)}
+                        disabled={toggleImageMutation.isPending}
+                        data-testid={`button-toggle-${image.id}`}
+                      >
+                        {image.visible ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
+                        {image.visible ? '숨기기' : '보이기'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => deleteImageMutation.mutate(image.id)}
+                        disabled={deleteImageMutation.isPending}
+                        data-testid={`button-delete-${image.id}`}
+                      >
+                        {deleteImageMutation.isPending ? <Loader2 className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {(galleryImages as any[]).length === 0 && (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <p className="text-muted-foreground">등록된 이미지가 없습니다.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* 동영상 링크 관리 */}
+        <TabsContent value="videos" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>동영상 링크 등록</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="courseSelect">코스</Label>
+                  <Select 
+                    value={videoData.courseId} 
+                    onValueChange={(value) => setVideoData(prev => ({ ...prev, courseId: value }))}
+                  >
+                    <SelectTrigger data-testid="select-course">
+                      <SelectValue placeholder="코스 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(courses as any[]).map((course: any) => (
+                        <SelectItem key={course.id} value={course.id}>
+                          {course.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="videoTitle">제목</Label>
+                  <Input
+                    id="videoTitle"
+                    value={videoData.title}
+                    onChange={(e) => setVideoData(prev => ({ ...prev, title: e.target.value }))}
+                    data-testid="input-video-title"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="videoUrl">외부 링크 (NAS 등)</Label>
+                  <Input
+                    id="videoUrl"
+                    placeholder="https://..."
+                    value={videoData.externalUrl}
+                    onChange={(e) => setVideoData(prev => ({ ...prev, externalUrl: e.target.value }))}
+                    data-testid="input-video-url"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="videoPublished">공개 여부</Label>
+                  <Select 
+                    value={videoData.isPublished} 
+                    onValueChange={(value) => setVideoData(prev => ({ ...prev, isPublished: value }))}
+                  >
+                    <SelectTrigger data-testid="select-video-published">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">공개</SelectItem>
+                      <SelectItem value="false">비공개</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="accessStart">접근 시작 (선택)</Label>
+                  <Input
+                    id="accessStart"
+                    type="datetime-local"
+                    value={videoData.accessStart}
+                    onChange={(e) => setVideoData(prev => ({ ...prev, accessStart: e.target.value }))}
+                    data-testid="input-access-start"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="accessEnd">접근 종료 (선택)</Label>
+                  <Input
+                    id="accessEnd"
+                    type="datetime-local"
+                    value={videoData.accessEnd}
+                    onChange={(e) => setVideoData(prev => ({ ...prev, accessEnd: e.target.value }))}
+                    data-testid="input-access-end"
+                  />
+                </div>
+              </div>
+              <Button
+                onClick={() => addVideoMutation.mutate(videoData)}
+                disabled={!videoData.courseId || !videoData.title || !videoData.externalUrl || addVideoMutation.isPending}
+                data-testid="button-add-video"
+              >
+                {addVideoMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                링크 추가
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                * 접근 제어는 Video의 accessStart/accessEnd 및 isPublished, 그리고 사용자 역할(VERIFIED/ADMIN)에 의해 결정됩니다.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
