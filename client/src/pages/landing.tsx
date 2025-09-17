@@ -83,8 +83,7 @@ export default function Landing() {
                 </span>
               </h1>
               <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
-                강남영단기 1타강사, 해커스 50만뷰+ 인기강사, TOEIC 990점<br />
-                <strong>캐나다국적 원장</strong>과 함께하는 입시영어 전문교육
+                '강남영단기 1타 강사, 해커스 50만뷰+, TOEIC990만점' 의 정우석 원장과 함께 하는 시대영재학원
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
@@ -94,13 +93,13 @@ export default function Landing() {
                 >
                   <a href="/api/login">
                     <Video className="mr-2 w-5 h-5" />
-                    입시 커리큘럼 보기
+                    시대영재 온라인 강의 듣기
                   </a>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="px-8 py-4 border-2 border-white text-white font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all"
+                  className="px-8 py-4 border-2 border-gray-400 text-gray-400 font-semibold text-lg hover:bg-gray-400 hover:text-white transition-all"
                   asChild
                 >
                   <a href="tel:062-462-0990">
@@ -125,8 +124,8 @@ export default function Landing() {
                       <Trophy className="text-white w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">TOEIC 990점</p>
-                      <p className="text-sm text-gray-600">만점 달성</p>
+                      <p className="font-semibold text-gray-900">강남 1타강사</p>
+                      <p className="text-sm text-gray-600">영단기 현강 대표</p>
                     </div>
                   </div>
                 </div>
@@ -137,8 +136,20 @@ export default function Landing() {
                       <University className="text-white w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Bishop's University</p>
-                      <p className="text-sm text-gray-600">캐나다 명문대 졸업</p>
+                      <p className="font-semibold text-gray-900">봉선동 시대영재 학원</p>
+                      <p className="text-sm text-gray-600">중고등부 입시영어 전문</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg transform rotate-1 -mt-2 mr-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                      <Medal className="text-white w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">TOEIC • 수능 • 고등부내신</p>
+                      <p className="text-sm text-gray-600">완벽 대응 커리큘럼</p>
                     </div>
                   </div>
                 </div>
@@ -308,6 +319,7 @@ export default function Landing() {
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
               학원 갤러리
+              <Badge variant="secondary" className="ml-3 text-xs">관리자 편집 가능</Badge>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               시대영재 학원의 교육 환경과 수업 현장을 확인해보세요.
@@ -324,6 +336,7 @@ export default function Landing() {
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
               수강생 후기
+              <Badge variant="secondary" className="ml-3 text-xs">관리자 편집 가능</Badge>
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               시대영재 학원에서 실제로 성과를 얻은 수강생들의 생생한 후기를 확인해보세요.
@@ -397,10 +410,24 @@ export default function Landing() {
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     <MapPin className="text-primary w-6 h-6" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-semibold text-foreground">학원 위치</h4>
                     <p className="text-muted-foreground">광주광역시 남구 봉선중앙로16, 2층</p>
                     <p className="text-sm text-muted-foreground mt-1">문의전화: 062-462-0990</p>
+                    
+                    {/* 구글 지도 */}
+                    <div className="mt-4">
+                      <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3263.8942749934447!2d126.91171731525267!3d35.13967588030889!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35718c4a1f6b8a8d%3A0x8c7e4c4f5e9a2a2a!2z6rSR7KO87Yq465Oc7IucIOuCqOq1rCDrsJnshKDspJzslZnroZwxNg!5e0!3m2!1sko!2skr!4v1234567890123"
+                        width="200" 
+                        height="200" 
+                        style={{border: 0, borderRadius: '8px'}} 
+                        allowFullScreen 
+                        loading="lazy" 
+                        referrerPolicy="no-referrer-when-downgrade"
+                        className="shadow-md"
+                      ></iframe>
+                    </div>
                   </div>
                 </div>
 
@@ -410,7 +437,7 @@ export default function Landing() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">전화 상담</h4>
-                    <p className="text-muted-foreground">062-123-4567</p>
+                    <p className="text-muted-foreground">062-462-0990</p>
                     <p className="text-sm text-muted-foreground mt-1">상담시간: 월-금 09:00-22:00, 토 09:00-18:00</p>
                   </div>
                 </div>
@@ -421,7 +448,7 @@ export default function Landing() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">이메일 문의</h4>
-                    <p className="text-muted-foreground">info@jwsacademy.co.kr</p>
+                    <p className="text-muted-foreground">info@sidaeyoungjae.kr</p>
                     <p className="text-sm text-muted-foreground mt-1">24시간 접수, 1일 이내 답변</p>
                   </div>
                 </div>
