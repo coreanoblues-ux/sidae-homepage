@@ -104,9 +104,6 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
-            <span className="text-foreground hover:text-primary transition-colors cursor-pointer">
-              커리<span onClick={handleSpecialClick} className="hover:bg-primary hover:text-primary-foreground px-1 rounded transition-colors">큘</span>럼
-            </span>
           </div>
 
           {/* Auth Buttons & Controls */}
@@ -242,12 +239,6 @@ export function Header() {
                   {item.label}
                 </Link>
               ))}
-              <span 
-                className="py-2 text-foreground hover:text-primary transition-colors cursor-pointer"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                커리<span onClick={handleSpecialClick} className="hover:bg-primary hover:text-primary-foreground px-1 rounded transition-colors">큘</span>럼
-              </span>
               <div className="pt-3 border-t border-border">
                 <Button
                   variant="ghost"

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const contactFormSchema = z.object({
   name: z.string().min(1, "이름을 입력해주세요"),
@@ -23,6 +24,8 @@ const contactFormSchema = z.object({
 export default function Landing() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [password, setPassword] = useState("");
 
   const form = useForm<z.infer<typeof contactFormSchema>>({
     resolver: zodResolver(contactFormSchema),
@@ -56,6 +59,21 @@ export default function Landing() {
     }
   };
 
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === "671321") {
+      window.location.href = "/admin";
+    } else {
+      alert("잘못된 비밀번호입니다.");
+    }
+    setPassword("");
+    setShowPasswordDialog(false);
+  };
+
+  const handleSpecialClick = () => {
+    setShowPasswordDialog(true);
+  };
+
   // Gallery images - 실제 시대영재 학원 이미지들
   const galleryImages = [
     "/images/IMG_6558_1758101099677.JPG",
@@ -67,6 +85,39 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen">
+      {/* Password Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>관리자 접속</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <Input
+              type="password"
+              placeholder="비밀번호를 입력하세요"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoFocus
+              data-testid="input-admin-password"
+            />
+            <div className="flex gap-2 justify-end">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setShowPasswordDialog(false);
+                  setPassword("");
+                }}
+              >
+                취소
+              </Button>
+              <Button type="submit" data-testid="button-admin-login">
+                확인
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
       {/* Hero Section */}
       <section className="hero-gradient text-white py-20 lg:py-32">
         <div className="container mx-auto px-4">
@@ -74,7 +125,10 @@ export default function Landing() {
             <div className="fade-in">
               <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-sm mb-6">
                 <Star className="text-yellow-400 mr-2 w-4 h-4" />
-                만점 강사의 검증된 커리큘럼
+                만점 강사의 검증된 커리<span 
+                  onClick={handleSpecialClick} 
+                  className="hover:bg-white/20 px-1 rounded transition-colors cursor-pointer"
+                >큘</span>럼
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
                 중고등부<br />
