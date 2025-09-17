@@ -1,0 +1,321 @@
+아래 프롬프트를 그대로 Replit(에이전트/AI 코드생성)에 넣으면, “세련된 미국 회사 느낌”의 최신 트렌드 UI로, 사진/동영상 자산을 잘 활용하고, 회원 승인‧인증 및 기간별 동영상 접근 제어까지 포함한 학원 홈페이지를 제작하도록 지시할 수 있어요.
+
+✅ Replit에게 줄 제작 프롬프트 (복사-붙여넣기)
+
+다음 요구사항으로 Next.js 14 (App Router) + TypeScript + Tailwind CSS + shadcn/ui + Prisma 기반의 학원 홈페이지를 제작해줘. 배포 타겟은 Replit 환경이며, 로컬 개발 없이 Replit에서 바로 실행 가능해야 한다.
+
+0) 브랜드/감성
+
+무드: “세련된 미국 테크 회사” 느낌. 미니멀, 여백, 또렷한 타이포, 부드러운 모션.
+
+폰트: Pretendard(한글) + Inter(영문) 조합.
+
+컬러: 다크 네이비(#0B1220), 포커스 블루(#2563EB), 따뜻한 아이보리 배경(#F8FAFC). 보조: 회색 단계는 Tailwind slate.
+
+컴포넌트: shadcn/ui 기반(Card, Button, Dialog, Table, Tabs, Dropdown, Badge, Avatar 등).
+
+애니메이션: framer-motion으로 섬세한 페이드/슬라이드.
+
+1) 핵심 페르소나 & 권한
+
+게스트(비회원): 공개 페이지 열람, 회원가입 신청 가능.
+
+대기 회원(pending): 로그인 가능하나 동영상 열람 불가. 승인 대기 상태.
+
+인증 회원(verified): 관리자 승인 완료. 관리자가 열어준 기간의 동영상만 무료 열람 가능.
+
+관리자(admin): 회원 승인/거절, 동영상 등록/수정/삭제, 공개기간 설정, 공지/배너 관리.
+
+2) 페이지/라우팅 구조
+
+/ 홈: 히어로(학원 브랜딩, CTA), 원장 정우석 사진과 슬로건, 수강 후기 섹션, 최신 강의 하이라이트(권한에 따라 잠금 표시), 공지 배너.
+
+/about 소개: 원장 프로필(정우석), 미션/커리큘럼, 시설/수업 사진 갤러리(라이트박스).
+
+/gallery 사진 갤러리: 원장 정우석 및 학원 관련 사진 활용. Masonry/Grid, 라이트박스 지원.
+
+/courses 강의 목록: 카드 형태. 게스트/대기회원은 잠금 아이콘과 “승인 후 열람 가능” 배지.
+
+/courses/[id] 강의 상세: 썸네일, 설명, 태그, 동영상 리스트(각 영상 별 공개기간 뱃지). 인증 회원이며 해당 영상이 “열림 상태”일 때만 플레이어 렌더.
+
+/login, /register: 이메일/비밀번호 기반. 회원가입 시 상태= pending.
+
+/account 내 계정: 상태 표시(대기/인증), 프로필 편집, 알림 구독.
+
+/admin 대시보드(관리자만):
+
+회원 승인: 대기 회원 테이블(승인/거절, 메모, 일괄 처리).
+
+동영상 관리: 생성/수정/삭제, 외부 링크(NAS 링크) 등록, 공개기간(시작/종료) 설정, 미리보기, 일괄 임포트(CSV/붙여넣기).
+
+강의(코스) 관리: 코스 생성/정렬/태그, 코스-영상 매핑.
+
+공지/배너 관리: 홈 상단 배너 설정(기간/우선순위).
+
+감사 로그(Audit): 주요 행위 로그(승인/거절/영상 변경).
+
+/legal/* 이용약관/개인정보처리방침.
+
+3) 데이터 모델(Prisma)
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  name          String?
+  role          Role     @default(PENDING)
+  avatarUrl     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  approvals     Approval[]
+  views         VideoView[]
+}
+
+enum Role {
+  GUEST   // 미사용(비로그인 가정)
+  PENDING // 가입 대기
+  VERIFIED
+  ADMIN
+}
+
+model Approval {
+  id        String   @id @default(cuid())
+  userId    String
+  adminId   String
+  status    ApprovalStatus
+  memo      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum ApprovalStatus {
+  APPROVED
+  REJECTED
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  thumbnail   String?
+  tags        String[] // ["수학","내신","모의고사"] 등
+  order       Int      @default(0)
+  videos      Video[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Video {
+  id            String   @id @default(cuid())
+  courseId      String
+  title         String
+  description   String?
+  externalUrl   String   // NAS에 올린 파일/스트리밍 링크
+  durationSec   Int?
+  isPublished   Boolean  @default(true)
+  accessStart   DateTime?
+  accessEnd     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  course        Course   @relation(fields: [courseId], references: [id])
+  overrides     VideoAccessOverride[]
+}
+
+model VideoAccessOverride {
+  id        String   @id @default(cuid())
+  videoId   String
+  userId    String
+  canView   Boolean  // 특정 회원 예외 허용/차단
+  createdAt DateTime @default(now())
+  video     Video    @relation(fields: [videoId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model VideoView {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  viewedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+}
+
+model Notice {
+  id        String   @id @default(cuid())
+  title     String
+  body      String   // Markdown
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+4) 인증/인가
+
+세션: NextAuth.js Credentials Provider(이메일+비밀번호). 비밀번호는 bcrypt 해시.
+
+역할 보호: 서버/클라이언트 라우팅 가드. VERIFIED 또는 ADMIN만 동영상 재생 가능.
+
+승인 흐름: 회원가입 → 상태 PENDING → 관리자가 /admin에서 승인/거절 → 승인 시 role=VERIFIED.
+
+5) 동영상 접근 제어(핵심)
+
+각 Video는 accessStart, accessEnd로 공개 기간을 갖는다.
+
+현재 시간이 기간 내이고 isPublished=true이며, 사용자 역할이 VERIFIED 이상일 때만 재생 가능.
+
+Override: 특정 사용자에 대한 예외 허용/차단(VideoAccessOverride).
+
+게스트/대기회원은 플레이어 대신 잠금 카드와 안내(“승인 후 열람 가능”) 표시.
+
+만료 전/후 배지 표시: “OPEN ~YYYY.MM.DD”, “CLOSED”.
+
+6) 외부 동영상 링크(NAS 연동)
+
+관리자가 externalUrl에 NAS에서 제공하는 스트리밍/다운로드 가능 URL을 입력.
+
+보안 권고:
+
+가능하면 NAS에서 읽기 전용, 기간 제한 또는 토큰화된 URL 사용.
+
+사이트 단에서는 URL 노출 최소화(재생 시에만 요청, 서버 경유 프록시 옵션 제공).
+
+플레이어: <video> 기본 또는 react-player(외부 HLS/mp4 모두 지원).
+
+7) 관리자 기능 상세
+
+회원 승인 테이블
+
+컬럼: 가입일, 이메일, 이름, 상태, 메모, 액션(승인/거절).
+
+검색/필터(이메일/상태), 다중 선택 일괄 승인/거절.
+
+동영상 CRUD
+
+생성/수정: 제목, 설명, 코스 선택, 외부 URL, 썸네일, 공개여부, 기간(시작/종료) 피커.
+
+일괄 임포트: CSV 붙여넣기(제목,코스,URL,시작,종료,퍼블리시).
+
+코스 관리
+
+드래그 정렬, 태그 관리, 썸네일 업로드.
+
+공지/배너
+
+기간/우선순위 설정, 홈 노출 미리보기.
+
+감사 로그
+
+누가 언제 무엇을 변경했는지 리스트.
+
+8) 갤러리(사진 자산 최대 활용)
+
+업로드한 원장 정우석 사진과 학원 사진을 Grid/Masonry로.
+
+라이트박스(키보드 네비, 확대/다운로드 옵션 토글).
+
+홈/소개 페이지에서 대표 컷을 영리하게 배치(영웅 섹션, 카드 배경, 아바타).
+
+9) UX 디테일
+
+반응형(모바일 우선): 헤더는 Sticky, 모바일 드로어 메뉴.
+
+상태 배지: PENDING(amber), VERIFIED(blue), ADMIN(violet).
+
+목록에 스켈레톤 로딩, 빈 상태(Empty state) 일관 디자인.
+
+접근성(ARIA, 대비), 다크모드 토글.
+
+10) 기술 스택 & 구조
+
+Next.js 14(App Router), TypeScript
+
+Tailwind CSS, shadcn/ui, framer-motion
+
+NextAuth.js(Credentials)
+
+Prisma + SQLite(기본) → Replit/Prod에서는 **PostgreSQL(Neon 등)**로 쉽게 전환 가능하도록 .env로 DSN 분리.
+
+구조 예시:
+
+src/
+  app/(public)/{page.tsx,...}
+  app/(auth)/login, register
+  app/(user)/account
+  app/(admin)/...
+  components/ui/*  // shadcn 확장
+  components/shared/*
+  lib/auth.ts
+  lib/prisma.ts
+  lib/acl.ts
+  server/actions/*  // Server Actions로 CRUD
+  styles/globals.css
+
+11) API/서버 액션(예시)
+
+admin/approveUser(userId, memo?) → role=VERIFIED, Approval 레코드 생성.
+
+admin/rejectUser(userId, memo?) → role=PENDING 유지 + Approval(REJECTED) 남김.
+
+videos/create|update|delete
+
+courses/create|update|reorder
+
+notices/create|update|delete
+
+videos/canView(videoId, userId) → 서버에서 권한/기간 검증 후 boolean.
+
+videos/recordView(videoId) → 인증 사용자에 한해 시청 로그 남김.
+
+12) 시드/더미 데이터
+
+관리자 계정 1개(이메일 admin@site.com / 비번 Admin!234), 초기 공지 1개, 코스 2개, 영상 4개(기간 케이스: 열림/닫힘/예정/만료) 포함.
+
+갤러리에는 더미 이미지 경로와 컴포넌트만 만들고, 실제 라이브 시 관리자가 교체 가능하게.
+
+13) 환경변수(.env)
+DATABASE_URL="file:./dev.db"            # 기본: SQLite
+# 또는 PostgreSQL 사용 시:
+# DATABASE_URL="postgresql://USER:PWD@HOST:PORT/DB?sslmode=require"
+
+NEXTAUTH_SECRET="generate-strong-secret"
+NEXTAUTH_URL="http://localhost:3000"    # Replit 배포 시 자동 주입 도우미 스크립트
+
+14) 보안 & 가드
+
+관리자 라우트는 서버 측에서 세션 검사 + role=ADMIN 강제.
+
+동영상 URL은 클라이언트에 상시 노출하지 말고, 재생 시점에 권한 체크 후 렌더.
+
+폼 유효성(zod) + 서버측 재검증.
+
+기본 Rate-limit(로그인 시도, 관리자 액션).
+
+15) 테스트/완료 기준(수용 기준)
+
+ 회원가입 후 자동 PENDING, 관리자가 승인하면 VERIFIED로 전환되고 인증 배지 표기.
+
+ 기간이 열린 영상만 인증 회원에게 재생 가능. 닫힘/예정 영상은 잠금 상태와 날짜 배지 노출.
+
+ 관리자에서 회원 승인/거절, 동영상 CRUD, 기간 설정, 코스 정렬이 정상 동작.
+
+ 갤러리 라이트박스, 홈 배너(공지 기간) 정상 동작.
+
+ 다크모드, 반응형, 접근성 경고 없음.
+
+ Replit에서 npm run dev 또는 npm run start로 빌드/실행 성공.
+
+16) 개발 편의 스크립트
+
+npm run db:push (Prisma push)
+
+npm run db:seed
+
+npm run dev / build / start
+
+이 스펙에 맞춰 프로덕션 품질의 기본 구현과 깔끔한 UI를 만들어줘. 구현 후:
+
+최초 관리자 계정/로그인 정보 안내,
+
+주요 페이지 스크린샷/동영상,
+
+관리자 패널 사용법(회원 승인, 영상 기간 설정, NAS 링크 등록) 간단 가이드까지 README에 포함해줘.
