@@ -116,6 +116,13 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
+    // 개발용 쿠키가 있으면 먼저 정리
+    if (process.env.NODE_ENV === 'development' && req.cookies?.dev_admin === '1') {
+      res.clearCookie('dev_admin');
+      return res.redirect("/");
+    }
+    
+    // 일반 Replit OAuth 로그아웃
     req.logout(() => {
       res.redirect(
         client.buildEndSessionUrl(config, {
