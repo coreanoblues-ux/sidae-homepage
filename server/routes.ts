@@ -24,7 +24,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public routes
   app.get('/api/courses', async (req, res) => {
     try {
-      const courses = await storage.getCourses();
+      const allCourses = await storage.getCourses();
+      // Filter courses to only public fields for security
+      const courses = allCourses.map(course => ({
+        id: course.id,
+        title: course.title,
+        slug: course.slug,
+        description: course.description,
+        thumbnail: course.thumbnail,
+        tags: course.tags,
+        order: course.order,
+        // Omit sensitive fields like createdAt, updatedAt if they exist
+      }));
       res.json(courses);
     } catch (error) {
       console.error("Error fetching courses:", error);
@@ -38,8 +49,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
       }
-      const videos = await storage.getVideosByCourse(course.id);
-      res.json({ ...course, videos });
+      const allVideos = await storage.getVideosByCourse(course.id);
+      
+      // For public access, only show published videos without sensitive URLs
+      const videos = allVideos
+        .filter(video => video.isPublished)
+        .map(video => ({
+          id: video.id,
+          title: video.title,
+          description: video.description,
+          durationSec: video.durationSec,
+          isPublished: video.isPublished,
+          // externalUrl omitted for security - access via protected endpoints only
+        }));
+      
+      res.json({
+        id: course.id,
+        title: course.title,
+        slug: course.slug,
+        description: course.description,
+        thumbnail: course.thumbnail,
+        tags: course.tags,
+        order: course.order,
+        videos
+      });
     } catch (error) {
       console.error("Error fetching course:", error);
       res.status(500).json({ message: "Failed to fetch course" });
@@ -80,6 +113,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error recording video view:", error);
       res.status(500).json({ message: "Failed to record video view" });
+    }
+  });
+
+  // CRITICAL: Protected video URL endpoint - prevents unauthorized access to video URLs
+  app.get('/api/videos/:id/url', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const canView = await storage.canUserViewVideo(userId, req.params.id);
+      if (!canView) {
+        return res.status(403).json({ message: "Access denied to video content" });
+      }
+      
+      const video = await storage.getVideo(req.params.id);
+      if (!video || !video.isPublished) {
+        return res.status(404).json({ message: "Video not found" });
+      }
+      
+      // Return the protected video URL only after authorization
+      res.json({ url: video.externalUrl, title: video.title });
+    } catch (error) {
+      console.error("Error getting video URL:", error);
+      res.status(500).json({ message: "Failed to get video URL" });
     }
   });
 

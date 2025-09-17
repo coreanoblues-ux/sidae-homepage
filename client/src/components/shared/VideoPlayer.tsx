@@ -11,7 +11,6 @@ interface Video {
   id: string;
   title: string;
   description?: string;
-  externalUrl: string;
   durationSec?: number;
   isPublished: boolean;
   accessStart?: string;
@@ -29,6 +28,8 @@ export function VideoPlayer({ video, className = "" }: VideoPlayerProps) {
   const [canView, setCanView] = useState(false);
   const [loading, setLoading] = useState(true);
   const [playing, setPlaying] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [loadingVideo, setLoadingVideo] = useState(false);
 
   useEffect(() => {
     checkAccess();
@@ -63,10 +64,25 @@ export function VideoPlayer({ video, className = "" }: VideoPlayerProps) {
     }
   };
 
-  const handlePlay = () => {
+  const handlePlay = async () => {
     if (canView) {
-      setPlaying(true);
-      recordView();
+      setLoadingVideo(true);
+      try {
+        const response = await apiRequest("GET", `/api/videos/${video.id}/url`);
+        const data = await response.json();
+        setVideoUrl(data.url);
+        setPlaying(true);
+        recordView();
+      } catch (error) {
+        console.error("Error fetching video URL:", error);
+        toast({
+          title: "동영상 로드 실패",
+          description: "동영상을 불러올 수 없습니다. 잠시 후 다시 시도해주세요.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingVideo(false);
+      }
     } else {
       toast({
         title: "접근 권한이 없습니다",
@@ -166,13 +182,13 @@ export function VideoPlayer({ video, className = "" }: VideoPlayerProps) {
           )}
         </div>
 
-        {canView && playing ? (
+        {canView && playing && videoUrl ? (
           <div className="aspect-video bg-black rounded-lg overflow-hidden">
             <video
               controls
               className="w-full h-full"
-              src={video.externalUrl}
-              onLoadStart={recordView}
+              src={videoUrl}
+              data-testid="video-player"
             >
               동영상을 지원하지 않는 브라우저입니다.
             </video>
@@ -181,9 +197,15 @@ export function VideoPlayer({ video, className = "" }: VideoPlayerProps) {
           <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
             <div className="text-center">
               {canView ? (
-                <Button onClick={handlePlay} size="lg" className="mb-2">
+                <Button 
+                  onClick={handlePlay} 
+                  size="lg" 
+                  className="mb-2" 
+                  disabled={loadingVideo}
+                  data-testid="button-play-video"
+                >
                   <Play className="w-5 h-5 mr-2" />
-                  동영상 재생
+                  {loadingVideo ? "로딩 중..." : "동영상 재생"}
                 </Button>
               ) : (
                 <div className="flex flex-col items-center">
@@ -194,7 +216,7 @@ export function VideoPlayer({ video, className = "" }: VideoPlayerProps) {
                       : "로그인이 필요합니다"}
                   </p>
                   {!isAuthenticated && (
-                    <Button asChild variant="outline">
+                    <Button asChild variant="outline" data-testid="button-login">
                       <a href="/api/login">로그인하기</a>
                     </Button>
                   )}

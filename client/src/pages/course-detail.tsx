@@ -12,24 +12,20 @@ interface Video {
   id: string;
   title: string;
   description?: string;
-  externalUrl: string;
   durationSec?: number;
   isPublished: boolean;
   accessStart?: string;
   accessEnd?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 interface Course {
   id: string;
   title: string;
+  slug: string;
   description?: string;
   thumbnail?: string;
   tags: string[];
   order: number;
-  createdAt: string;
-  updatedAt: string;
   videos: Video[];
 }
 
@@ -131,7 +127,7 @@ export default function CourseDetail() {
               <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <span className="flex items-center">
                   <Calendar className="w-4 h-4 mr-1" />
-                  {new Date(course.createdAt).toLocaleDateString()}
+                  최근 업데이트
                 </span>
                 <span className="flex items-center">
                   <VideoIcon className="w-4 h-4 mr-1" />
