@@ -21,17 +21,42 @@ export default function SuperAdmin() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [password, setPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  
+  // 개발용 로그인 처리
+  const handleDevLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    
+    try {
+      const response = await apiRequest<any>('/api/dev/login', {
+        method: 'POST',
+        body: { password }
+      });
+      
+      toast({ title: "로그인 성공", description: "관리자 페이지에 접속했습니다." });
+      
+      // 사용자 정보 새로고침
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      
+      setPassword("");
+    } catch (error) {
+      toast({ 
+        title: "로그인 실패", 
+        description: "비밀번호가 잘못되었습니다.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
   
   // 권한 확인 - 관리자가 아니면 404처럼 보이게
   useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        // 로그인하지 않은 경우 로그인 페이지로
-        window.location.href = `/api/login?next=${encodeURIComponent(SUPERADMIN_PATH)}`;
-      } else if ((user as any)?.role !== 'ADMIN') {
-        // 관리자가 아니면 404로 위장
-        setLocation("/404");
-      }
+    if (!authLoading && user && (user as any)?.role !== 'ADMIN') {
+      // 관리자가 아니면 404로 위장
+      setLocation("/404");
     }
   }, [user, authLoading, setLocation]);
 
@@ -174,8 +199,60 @@ export default function SuperAdmin() {
     );
   }
 
-  if (!user || (user as any)?.role !== 'ADMIN') {
-    return null; // 404나 로그인 리디렉션 처리됨
+  // 로그인하지 않은 경우 비밀번호 프롬프트 표시
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+        <Card className="w-full max-w-md mx-4">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+              🔐 Super Admin
+            </CardTitle>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              비밀 관리자 페이지 접근
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleDevLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password" data-testid="label-password">
+                  비밀번호
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="관리자 비밀번호를 입력하세요"
+                  disabled={isLoggingIn}
+                  data-testid="input-password"
+                  className="focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={!password || isLoggingIn}
+                className="w-full"
+                data-testid="button-login"
+              >
+                {isLoggingIn ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    로그인 중...
+                  </>
+                ) : (
+                  "접속하기"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if ((user as any)?.role !== 'ADMIN') {
+    return null; // 404 리디렉션 처리됨
   }
 
   return (

@@ -125,10 +125,60 @@ export async function setupAuth(app: Express) {
       );
     });
   });
+
+  // 개발용 비밀번호 로그인 (개발 환경에서만)
+  if (process.env.NODE_ENV === 'development') {
+    app.post("/api/dev/login", async (req, res) => {
+      const { password } = req.body;
+      const correctPassword = process.env.SUPERADMIN_PASSWORD || "671321";
+      
+      if (password !== correctPassword) {
+        return res.status(401).json({ message: "잘못된 비밀번호입니다." });
+      }
+
+      // 개발용 관리자 사용자 생성/업데이트
+      await storage.upsertUser({
+        id: "dev-admin",
+        email: "admin@sidaeyeongjae.kr",
+        firstName: "관리자",
+        lastName: "개발용",
+        profileImageUrl: null,
+        role: "ADMIN"
+      });
+
+      // 개발용 세션 쿠키 설정
+      res.cookie('dev_admin', '1', {
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 1주일
+      });
+
+      res.json({ success: true, message: "개발용 로그인 성공" });
+    });
+
+    app.post("/api/dev/logout", (req, res) => {
+      res.clearCookie('dev_admin');
+      res.json({ success: true, message: "로그아웃 완료" });
+    });
+  }
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
+
+  // 개발 환경에서 개발용 쿠키 확인
+  if (process.env.NODE_ENV === 'development' && req.cookies?.dev_admin === '1') {
+    // 개발용 세션 생성
+    req.user = {
+      claims: { 
+        sub: 'dev-admin',
+        email: 'admin@sidaeyeongjae.kr',
+        first_name: '관리자',
+        last_name: '개발용'
+      }
+    };
+    return next();
+  }
 
   if (!req.isAuthenticated() || !user.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
