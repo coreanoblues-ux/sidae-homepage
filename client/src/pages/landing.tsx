@@ -112,8 +112,8 @@ export default function Landing() {
 
             <div className="fade-in lg:ml-8">
               <img
-                src="/images/IMG_6558_1758101099677.JPG"
-                alt="시대영재 학원 원장 프로필 사진"
+                src="/images/magazine-cover.png"
+                alt="1타강사 잡지 커버"
                 className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover aspect-[4/5]"
               />
 
@@ -317,10 +317,18 @@ export default function Landing() {
       <section id="gallery" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              학원 갤러리
-              <Badge variant="secondary" className="ml-3 text-xs">관리자 편집 가능</Badge>
-            </h2>
+            <div className="flex items-center justify-center gap-4">
+              <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+                학원 갤러리
+              </h2>
+              {/* 관리자 로그인시에만 보이는 편집 버튼 */}
+              {/* {user?.role === 'ADMIN' && (
+                <Button variant="outline" size="sm" className="mb-4">
+                  <Edit className="w-4 h-4 mr-2" />
+                  갤러리 편집
+                </Button>
+              )} */}
+            </div>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               시대영재 학원의 교육 환경과 수업 현장을 확인해보세요.
             </p>
@@ -334,10 +342,18 @@ export default function Landing() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              수강생 후기
-              <Badge variant="secondary" className="ml-3 text-xs">관리자 편집 가능</Badge>
-            </h2>
+            <div className="flex items-center justify-center gap-4">
+              <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+                수강생 후기
+              </h2>
+              {/* 관리자 로그인시에만 보이는 편집 버튼 */}
+              {/* {user?.role === 'ADMIN' && (
+                <Button variant="outline" size="sm" className="mb-4">
+                  <Edit className="w-4 h-4 mr-2" />
+                  후기 편집
+                </Button>
+              )} */}
+            </div>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               시대영재 학원에서 실제로 성과를 얻은 수강생들의 생생한 후기를 확인해보세요.
             </p>
