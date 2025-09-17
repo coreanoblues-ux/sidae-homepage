@@ -74,7 +74,7 @@ export default function Landing() {
             <div className="fade-in">
               <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-sm mb-6">
                 <Star className="text-yellow-400 mr-2 w-4 h-4" />
-                토익 만점 강사의 검증된 커리큘럼
+                만점 강사의 검증된 커리큘럼
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
                 중고등부<br />
@@ -83,7 +83,7 @@ export default function Landing() {
                 </span>
               </h1>
               <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
-                '강남영단기 1타 강사, 해커스 50만뷰+, TOEIC990만점' 의 정우석 원장과 함께 하는 시대영재학원
+                '(전) 강남 영단기 대표강사, (전)해커스 인강' 의 정우석 원장과 함께 하는 시대영재학원
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 

@@ -11,11 +11,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [password, setPassword] = useState("");
   const { user, isAuthenticated, isLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [location] = useLocation();
@@ -26,6 +35,21 @@ export function Header() {
     { href: "/courses", label: "강의" },
     { href: "/gallery", label: "갤러리" },
   ];
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === "671321") {
+      window.location.href = "/admin";
+    } else {
+      alert("잘못된 비밀번호입니다.");
+    }
+    setPassword("");
+    setShowPasswordDialog(false);
+  };
+
+  const handleSpecialClick = () => {
+    setShowPasswordDialog(true);
+  };
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -80,6 +104,9 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            <span className="text-foreground hover:text-primary transition-colors cursor-pointer">
+              커리<span onClick={handleSpecialClick} className="hover:bg-primary hover:text-primary-foreground px-1 rounded transition-colors">큘</span>럼
+            </span>
           </div>
 
           {/* Auth Buttons & Controls */}
@@ -167,6 +194,40 @@ export function Header() {
           </div>
         </div>
 
+        {/* Password Dialog */}
+        <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>관리자 접속</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <Input
+                type="password"
+                placeholder="비밀번호를 입력하세요"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoFocus
+                data-testid="input-admin-password"
+              />
+              <div className="flex gap-2 justify-end">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowPasswordDialog(false);
+                    setPassword("");
+                  }}
+                >
+                  취소
+                </Button>
+                <Button type="submit" data-testid="button-admin-login">
+                  확인
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 py-4 border-t border-border">
@@ -181,6 +242,12 @@ export function Header() {
                   {item.label}
                 </Link>
               ))}
+              <span 
+                className="py-2 text-foreground hover:text-primary transition-colors cursor-pointer"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                커리<span onClick={handleSpecialClick} className="hover:bg-primary hover:text-primary-foreground px-1 rounded transition-colors">큘</span>럼
+              </span>
               <div className="pt-3 border-t border-border">
                 <Button
                   variant="ghost"
