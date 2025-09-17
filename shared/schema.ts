@@ -99,6 +99,14 @@ export const notices = pgTable("notices", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const galleryImages = pgTable("gallery_images", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  url: varchar("url").notNull(),
+  caption: text("caption"),
+  visible: boolean("visible").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   approvals: many(approvals, { relationName: "user_approvals" }),
@@ -179,6 +187,11 @@ export const insertNoticeSchema = createInsertSchema(notices).omit({
   createdAt: true,
 });
 
+export const insertGalleryImageSchema = createInsertSchema(galleryImages).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -191,4 +204,6 @@ export type VideoAccessOverride = typeof videoAccessOverrides.$inferSelect;
 export type VideoView = typeof videoViews.$inferSelect;
 export type Notice = typeof notices.$inferSelect;
 export type InsertNotice = z.infer<typeof insertNoticeSchema>;
+export type GalleryImage = typeof galleryImages.$inferSelect;
+export type InsertGalleryImage = z.infer<typeof insertGalleryImageSchema>;
 export type Approval = typeof approvals.$inferSelect;
