@@ -363,21 +363,15 @@ export default function Landing() {
             {[
               {
                 rating: 5,
-                text: "토익 점수가 650점에서 920점으로 올랐어요! 시대영재 학원 원장님의 체계적인 커리큘럼과 개인별 맞춤 지도 덕분입니다.",
-                author: "김○○ 님",
-                course: "직장인 토익반"
+                text: "내신 3등급에서 2등급으로 올랐어요 그리고 선생님 덕분에 영어가 재미있어 져서 좋은 학교가고 학교생활이 재미 있습니다",
+                author: "배*두",
+                course: "고등부 내신반"
               },
               {
                 rating: 5,
-                text: "온라인 강의 시스템이 정말 편리해요. 언제든지 복습할 수 있어서 실력 향상에 큰 도움이 되었습니다.",
-                author: "이○○ 님",
-                course: "대학생 회화반"
-              },
-              {
-                rating: 5,
-                text: "원장님의 해외 경험과 노하우가 정말 도움이 많이 되었습니다. 실용적인 영어를 배울 수 있어서 좋았어요.",
-                author: "박○○ 님",
-                course: "비즈니스 영어반"
+                text: "저같이 영어를 못하는 사람도 1등급이 가능 하구나 라는 생각이 들었어요 감사합니다",
+                author: "*형*",
+                course: "수능대비반"
               }
             ].map((testimonial, index) => (
               <Card key={index}>
@@ -458,16 +452,6 @@ export default function Landing() {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Mail className="text-primary w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">이메일 문의</h4>
-                    <p className="text-muted-foreground">info@sidaeyoungjae.kr</p>
-                    <p className="text-sm text-muted-foreground mt-1">24시간 접수, 1일 이내 답변</p>
-                  </div>
-                </div>
               </div>
             </div>
 

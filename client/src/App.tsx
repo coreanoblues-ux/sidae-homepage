@@ -14,6 +14,7 @@ import Courses from "@/pages/courses";
 import CourseDetail from "@/pages/course-detail";
 import Gallery from "@/pages/gallery";
 import Account from "@/pages/account";
+import Admin from "@/pages/admin";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminMembers from "@/pages/admin/members";
 import AdminVideos from "@/pages/admin/videos";
@@ -41,7 +42,8 @@ function Router() {
           <Route path="/courses/:id" component={CourseDetail} />
           <Route path="/gallery" component={Gallery} />
           <Route path="/account" component={Account} />
-          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin" component={Admin} />
+          <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/members" component={AdminMembers} />
           <Route path="/admin/videos" component={AdminVideos} />
           <Route path="/admin/courses" component={AdminCourses} />
