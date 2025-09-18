@@ -6,8 +6,14 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// CORS 설정 (오리진이 다를 경우 필요)
+// 🎯 배포 환경 설정 (가이드 적용)
+app.set('trust proxy', 1); // 프록시 신뢰 설정
+
+// 환경변수 정합 
 const frontOrigin = process.env.FRONT_ORIGIN || 'https://sidae-edu.com';
+const apiOrigin = process.env.API_ORIGIN || 'https://sidae-edu.com';
+
+// CORS/프록시 차이 제거 - 명시적 CORS 설정
 app.use(cors({ 
   origin: frontOrigin, 
   credentials: true 
