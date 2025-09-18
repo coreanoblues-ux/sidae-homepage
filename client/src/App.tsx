@@ -129,12 +129,8 @@ function Router() {
         </ProtectedRoute>
       </Route>
       
-      {/* Superadmin routes - PROTECTED with admin role */}
-      <Route path="/_superadmin">
-        <ProtectedRoute requireAuth={true} allowedRoles={["ADMIN"]}>
-          <SuperAdmin />
-        </ProtectedRoute>
-      </Route>
+      {/* Superadmin routes - 비밀번호 입력으로 바로 접근 가능 */}
+      <Route path="/_superadmin" component={SuperAdmin} />
       
       {/* Remove public aliases for security */}
       

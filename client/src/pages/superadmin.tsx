@@ -57,13 +57,7 @@ export default function SuperAdmin() {
     }
   };
   
-  // 권한 확인 - 관리자가 아니면 404처럼 보이게
-  useEffect(() => {
-    if (!authLoading && user && (user as any)?.role !== 'ADMIN') {
-      // 관리자가 아니면 404로 위장
-      setLocation("/404");
-    }
-  }, [user, authLoading, setLocation]);
+  // 권한 확인 로직 제거 - 비밀번호 입력으로 직접 접근 허용
 
   // 승인 대기 회원 목록
   const { data: pendingUsers = [], refetch: refetchPendingUsers } = useQuery({
