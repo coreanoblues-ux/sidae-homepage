@@ -45,7 +45,7 @@ export const users = pgTable("users", {
 export const approvals = pgTable("approvals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
-  adminId: varchar("admin_id").notNull().references(() => users.id),
+  adminId: varchar("admin_id").references(() => users.id),
   status: approvalStatusEnum("status").notNull(),
   memo: text("memo"),
   createdAt: timestamp("created_at").defaultNow(),

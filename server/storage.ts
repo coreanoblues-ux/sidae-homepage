@@ -61,8 +61,8 @@ export interface IStorage {
   
   // User approval operations
   getPendingUsers(): Promise<User[]>;
-  approveUser(userId: string, adminId: string, memo?: string): Promise<void>;
-  rejectUser(userId: string, adminId: string, memo?: string): Promise<void>;
+  approveUser(userId: string, adminId: string | null, memo?: string): Promise<void>;
+  rejectUser(userId: string, adminId: string | null, memo?: string): Promise<void>;
   getUserApprovals(userId: string): Promise<Approval[]>;
   
   // Gallery operations
@@ -262,7 +262,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(users.createdAt));
   }
 
-  async approveUser(userId: string, adminId: string, memo?: string): Promise<void> {
+  async approveUser(userId: string, adminId: string | null, memo?: string): Promise<void> {
     await db.transaction(async (tx) => {
       await tx
         .update(users)
@@ -278,7 +278,7 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async rejectUser(userId: string, adminId: string, memo?: string): Promise<void> {
+  async rejectUser(userId: string, adminId: string | null, memo?: string): Promise<void> {
     await db.insert(approvals).values({
       userId,
       adminId,

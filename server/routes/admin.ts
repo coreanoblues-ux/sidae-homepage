@@ -116,7 +116,7 @@ router.post('/approve-user', adminGuard, async (req, res) => {
       return res.status(400).json({ ok: false, message: 'User ID is required' });
     }
     
-    await storage.approveUser(userId, 'admin', memo || '관리자 승인');
+    await storage.approveUser(userId, null, memo || '관리자 승인');
     res.json({ ok: true, message: '회원이 승인되었습니다' });
   } catch (error) {
     console.error('Error approving user:', error);
@@ -132,7 +132,7 @@ router.post('/reject-user', adminGuard, async (req, res) => {
       return res.status(400).json({ ok: false, message: 'User ID is required' });
     }
     
-    await storage.rejectUser(userId, 'admin', memo || '관리자 거부');
+    await storage.rejectUser(userId, null, memo || '관리자 거부');
     res.json({ ok: true, message: '회원이 거부되었습니다' });
   } catch (error) {
     console.error('Error rejecting user:', error);
