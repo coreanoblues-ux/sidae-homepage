@@ -259,15 +259,12 @@ const VideoManager = () => {
     }
   };
 
+  // 🎯 간단한 제목 편집 (사용자 제안 방식)
   const handleEdit = (video: any) => {
-    setEditingVideo(video);
-    setFormData({
-      title: video.title,
-      type: video.type || 'youtube',
-      url: video.url
-    });
-    setUrlValidationError(''); // 에러 메시지 초기화
-    setDialogOpen(true);
+    const newTitle = window.prompt('새로운 제목을 입력하세요:', video.title);
+    if (newTitle && newTitle.trim() !== video.title) {
+      handleSave(video.id, newTitle.trim());
+    }
   };
   
   // URL 입력 시 실시간 검증
@@ -282,25 +279,37 @@ const VideoManager = () => {
     }
   };
 
+  // 🎯 삭제 (사용자 제안 방식)
   const handleDelete = async (videoId: string) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
+    if (!window.confirm('정말 삭제 하시겠습니까?')) return;
+    
+    const r = await fetch(`/api/admin/videos/${videoId}`, {
+      method: 'DELETE', 
+      credentials: 'include'
+    });
+    const d = await r.json();
+    
+    if (d.ok) {
+      setVideos(videos.filter(v => v.id !== videoId));
+    } else {
+      alert('삭제 실패: ' + d.code);
+    }
+  };
 
-    try {
-      const response = await fetch(`/api/admin/videos/${videoId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-
-      const data = await response.json();
-      if (data.ok) {
-        alert('동영상이 삭제되었습니다.');
-        loadVideos(); // 목록 새로고침
-      } else {
-        alert(data.message || '삭제에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('Error deleting video:', error);
-      alert('삭제 중 오류가 발생했습니다.');
+  // 🎯 제목 수정 (사용자 제안 방식)
+  const handleSave = async (videoId: string, newTitle: string) => {
+    const r = await fetch(`/api/admin/videos/${videoId}`, {
+      method: 'PUT', 
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ title: newTitle })
+    });
+    const d = await r.json();
+    
+    if (d.ok) {
+      setVideos(videos.map(v => v.id === videoId ? { ...v, title: newTitle } : v));
+    } else {
+      alert('저장 실패: ' + d.code);
     }
   };
 

@@ -275,60 +275,43 @@ router.post('/videos', adminGuard, async (req, res) => {
   }
 });
 
-// 🎯 동영상 수정 (새로운 단순 구조)
+// 🎯 동영상 수정 (사용자 제안 방식)
 router.put('/videos/:id', adminGuard, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { title, type, url } = req.body;
+    const id = req.params.id;
+    const title = String(req.body?.title ?? '').trim();
     
-    if (!title || !type || !url) {
-      return res.status(400).json({ 
+    if (!title) {
+      return res.status(422).json({ 
         ok: false, 
-        message: 'Title, type, and url are required' 
+        code: 'TITLE_REQUIRED' 
       });
     }
     
-    if (!['youtube', 'nas'].includes(type)) {
-      return res.status(400).json({ 
-        ok: false, 
-        message: 'Type must be youtube or nas' 
-      });
-    }
+    await storage.updateSimpleVideo(id, { title });
+    res.json({ ok: true });
     
-    const video = await storage.updateSimpleVideo(id, {
-      title: title.trim(),
-      type: type as 'youtube' | 'nas',
-      url: url.trim()
-    });
-    
-    res.json({ 
-      ok: true, 
-      message: '동영상이 수정되었습니다',
-      video 
-    });
   } catch (error) {
     console.error('Error updating simple video:', error);
     res.status(500).json({ 
       ok: false, 
-      message: 'Failed to update video' 
+      code: 'UPDATE_FAILED' 
     });
   }
 });
 
-// 🎯 동영상 삭제 (새로운 단순 구조)
+// 🎯 동영상 삭제 (사용자 제안 방식)
 router.delete('/videos/:id', adminGuard, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id;
     await storage.deleteSimpleVideo(id);
-    res.json({ 
-      ok: true, 
-      message: '동영상이 삭제되었습니다' 
-    });
+    res.json({ ok: true });
+    
   } catch (error) {
     console.error('Error deleting simple video:', error);
     res.status(500).json({ 
       ok: false, 
-      message: 'Failed to delete video' 
+      code: 'DELETE_FAILED' 
     });
   }
 });
