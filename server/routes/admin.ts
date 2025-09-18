@@ -3,12 +3,13 @@ import { storage } from '../storage';
 
 const router = Router();
 
-// 🎯 쿠키 도메인 동적 설정 헬퍼 (수정됨 - localhost 호환성)
+// 🎯 쿠키 도메인 동적 설정 헬퍼 (수정됨 - 모든 replit 도메인 지원)
 const getCookieOptions = (req: any) => {
   const host = req.get('Host') || '';
+  console.log('🍪 Cookie host:', host); // 디버깅용
   
   if (host.includes('localhost') || host.includes('127.0.0.1')) {
-    // localhost - sameSite: lax, secure: false, domain 없음
+    // localhost - domain 없음이 핵심
     return {
       httpOnly: true,
       secure: false,
@@ -16,13 +17,12 @@ const getCookieOptions = (req: any) => {
       path: '/',
       maxAge: 1000 * 60 * 60 * 24 // 24시간
     };
-  } else if (host.includes('replit.app') || host.includes('repl.co') || host.includes('replit.dev')) {
-    // Replit - domain과 secure 설정
+  } else if (host.includes('replit')) {
+    // 모든 Replit 도메인 (.dev, .app, .co) - domain 없이 설정
     return {
       httpOnly: true,
       secure: true,
       sameSite: 'none' as const,
-      domain: '.replit.app',
       path: '/',
       maxAge: 1000 * 60 * 60 * 24
     };
@@ -37,7 +37,7 @@ const getCookieOptions = (req: any) => {
       maxAge: 1000 * 60 * 60 * 24
     };
   } else {
-    // 기본값 (localhost와 동일)
+    // 기본값 (domain 없음)
     return {
       httpOnly: true,
       secure: false,
