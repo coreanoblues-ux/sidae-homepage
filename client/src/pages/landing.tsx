@@ -252,8 +252,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-muted/30 pattern-bg-alt">
+      {/* Features Section - 강의 버튼 클릭 시 스크롤 대상 */}
+      <section id="programs" className="py-20 bg-muted/30 pattern-bg-alt scroll-mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">

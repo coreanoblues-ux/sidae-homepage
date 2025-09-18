@@ -185,10 +185,18 @@ export function Header() {
     }
   };
 
+  // 🎯 강의 버튼용 프로그램 섹션으로 스크롤
+  const scrollToPrograms = () => {
+    const programsSection = document.getElementById('programs');
+    if (programsSection) {
+      programsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const navItems = [
     { href: "/", label: "홈" },
     { action: scrollToAbout, label: "원장 소개" },
-    { href: "/courses", label: "강의" },
+    { action: scrollToPrograms, label: "강의" },
     { href: "/videos", label: "동영상" },
     { href: "/gallery", label: "갤러리" },
   ];

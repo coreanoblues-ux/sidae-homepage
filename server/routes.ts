@@ -552,23 +552,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/videos', isAuthenticated, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'ADMIN') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      const videoData = insertVideoSchema.parse(req.body);
-      const video = await storage.createVideo(videoData);
-      res.json(video);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid video data", errors: error.errors });
-      }
-      console.error("Error creating video:", error);
-      res.status(500).json({ message: "Failed to create video" });
-    }
-  });
+  // 🚫 OLD VIDEO ENDPOINT - DISABLED (충돌 방지)
+  // 새로운 simple video 엔드포인트 (/api/admin/videos)가 routes/admin.ts에서 처리됩니다
+  // app.post('/api/admin/videos', isAuthenticated, async (req: any, res) => {
+  //   try {
+  //     const user = await storage.getUser(req.user.claims.sub);
+  //     if (user?.role !== 'ADMIN') {
+  //       return res.status(403).json({ message: "Admin access required" });
+  //     }
+  //     const videoData = insertVideoSchema.parse(req.body);
+  //     const video = await storage.createVideo(videoData);
+  //     res.json(video);
+  //   } catch (error) {
+  //     if (error instanceof z.ZodError) {
+  //       return res.status(400).json({ message: "Invalid video data", errors: error.errors });
+  //     }
+  //     console.error("Error creating video:", error);
+  //     res.status(500).json({ message: "Failed to create video" });
+  //   }
+  // });
 
   app.put('/api/admin/videos/:id', isAuthenticated, async (req: any, res) => {
     try {
