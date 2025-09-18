@@ -147,6 +147,7 @@ const VideoManager = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<any>(null);
   const [formData, setFormData] = useState({ title: '', type: 'youtube', url: '' });
+  const [urlValidationError, setUrlValidationError] = useState('');
 
   const loadVideos = async () => {
     setLoading(true);
@@ -165,9 +166,59 @@ const VideoManager = () => {
     setLoading(false);
   };
 
+  // 🔍 프론트엔드 사전 검증 함수
+  const validateUrl = (url: string, type: string): string => {
+    if (!url) return '';
+    
+    if (url.length > 2000) {
+      return 'URL이 너무 깁니다. 2000자 이하로 입력해주세요.';
+    }
+    
+    if (type === 'youtube') {
+      const youtubePatterns = [
+        /youtu\.be\/[A-Za-z0-9_-]+/,
+        /youtube\.com\/watch\?.*v=[A-Za-z0-9_-]+/,
+        /youtube\.com\/embed\/[A-Za-z0-9_-]+/,
+        /m\.youtube\.com\/watch\?.*v=[A-Za-z0-9_-]+/
+      ];
+      
+      const isValidYoutube = youtubePatterns.some(pattern => pattern.test(url));
+      if (!isValidYoutube) {
+        return 'YouTube URL 형식이 올바르지 않습니다. youtu.be, youtube.com/watch?v=, 또는 youtube.com/embed 형식을 사용하세요.';
+      }
+    }
+    
+    if (type === 'nas') {
+      if (!/^https?:\/\//i.test(url)) {
+        return 'NAS URL은 http:// 또는 https://로 시작해야 합니다.';
+      }
+      
+      const videoExtensions = /\.(mp4|webm|m4v|mov|avi|mkv|ogg|ogv)(\?.*)?$/i;
+      if (!videoExtensions.test(url)) {
+        if (!/\.[a-zA-Z0-9]+(\?.*)?$/.test(url)) {
+          return '파일 확장자가 없습니다. .mp4, .webm 등의 확장자를 포함해주세요.';
+        } else {
+          return '지원되지 않는 비디오 형식입니다. mp4, webm, m4v, mov, avi, mkv, ogg, ogv 파일만 지원됩니다.';
+        }
+      }
+    }
+    
+    return '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.url || !formData.type) return;
+
+    // 🔍 프론트엔드 사전 검증
+    const validationError = validateUrl(formData.url, formData.type);
+    if (validationError) {
+      setUrlValidationError(validationError);
+      alert(`URL 검증 실패: ${validationError}`);
+      return;
+    }
+    
+    setUrlValidationError('');
 
     try {
       console.log('🎬 새로운 동영상 폼 제출:', formData);
@@ -196,7 +247,10 @@ const VideoManager = () => {
         setFormData({ title: '', type: 'youtube', url: '' });
       } else {
         console.error('❌ 서버에서 오류 응답:', data);
-        alert(data.message || '동영상 저장에 실패했습니다.');
+        // 🎯 구체적인 에러 메시지 표시
+        const errorMessage = data.message || '동영상 저장에 실패했습니다.';
+        const errorCode = data.code || 'UNKNOWN_ERROR';
+        alert(`${errorMessage} (코드: ${errorCode})`);
       }
     } catch (error) {
       console.error('💥 동영상 저장 에러:', error);
@@ -211,7 +265,20 @@ const VideoManager = () => {
       type: video.type || 'youtube',
       url: video.url
     });
+    setUrlValidationError(''); // 에러 메시지 초기화
     setDialogOpen(true);
+  };
+  
+  // URL 입력 시 실시간 검증
+  const handleUrlChange = (newUrl: string) => {
+    setFormData(prev => ({ ...prev, url: newUrl }));
+    
+    if (newUrl) {
+      const error = validateUrl(newUrl, formData.type);
+      setUrlValidationError(error);
+    } else {
+      setUrlValidationError('');
+    }
   };
 
   const handleDelete = async (videoId: string) => {
@@ -292,11 +359,17 @@ const VideoManager = () => {
                     id="url"
                     type="url"
                     value={formData.url}
-                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                    onChange={(e) => handleUrlChange(e.target.value)}
                     required
                     placeholder={formData.type === 'youtube' ? 'https://youtu.be/...' : 'https://nas.domain.com/video.mp4'}
+                    className={urlValidationError ? 'border-red-500' : ''}
                     data-testid="input-video-url"
                   />
+                  {urlValidationError && (
+                    <p className="mt-1 text-sm text-red-600" data-testid="text-url-error">
+                      {urlValidationError}
+                    </p>
+                  )}
                 </div>
                 <div className="flex space-x-2 pt-4">
                   <Button type="submit" data-testid="button-save-video">

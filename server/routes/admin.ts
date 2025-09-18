@@ -186,15 +186,21 @@ router.get('/videos', adminGuard, async (req, res) => {
   }
 });
 
-// 🎯 동영상 추가 (새로운 단순 구조 + URL 정규화)
+// 🎯 동영상 추가 (새로운 단순 구조 + URL 정규화 + 상세 디버깅)
 router.post('/videos', adminGuard, async (req, res) => {
   try {
-    console.log('🎬 새로운 동영상 추가 요청:', req.body);
+    console.log('🎬 새로운 동영상 추가 요청 - RAW BODY:', JSON.stringify(req.body, null, 2));
     
     const { title, type, url } = req.body;
     
+    console.log('📝 파싱된 필드들:');
+    console.log('  - title:', title, '(타입:', typeof title, ')');
+    console.log('  - type:', type, '(타입:', typeof type, ')');
+    console.log('  - url:', url, '(타입:', typeof url, ')');
+    
     // 필수 필드 검증
     if (!title || !type || !url) {
+      console.log('❌ 필수 필드 누락:', { title: !!title, type: !!type, url: !!url });
       return res.status(400).json({ 
         ok: false, 
         code: 'MISSING_FIELDS',
@@ -204,18 +210,24 @@ router.post('/videos', adminGuard, async (req, res) => {
     
     try {
       // URL 정규화 및 검증
+      console.log('🔧 URL 정규화 시작...');
       const normalized = normalizeVideo({ type, url });
-      console.log('✅ URL 정규화 완료:', normalized);
+      console.log('✅ URL 정규화 완료:', JSON.stringify(normalized, null, 2));
       
-      // Zod validation 및 DB 저장
-      const validatedData = insertSimpleVideoSchema.parse({
+      // Zod validation 전 데이터 확인
+      const dataForValidation = {
         title: title.trim(),
         type: normalized.type,
         url: normalized.url
-      });
+      };
+      console.log('🔍 Zod 검증 전 데이터:', JSON.stringify(dataForValidation, null, 2));
+      
+      // Zod validation 및 DB 저장
+      const validatedData = insertSimpleVideoSchema.parse(dataForValidation);
+      console.log('✅ Zod 검증 통과:', JSON.stringify(validatedData, null, 2));
       
       const video = await storage.createSimpleVideo(validatedData);
-      console.log('✅ 동영상 생성 완료:', video);
+      console.log('✅ 동영상 DB 생성 완료:', JSON.stringify(video, null, 2));
       
       res.json({ 
         ok: true, 
@@ -223,10 +235,16 @@ router.post('/videos', adminGuard, async (req, res) => {
       });
       
     } catch (error: any) {
-      console.log('❌ 동영상 처리 오류:', error.message);
+      console.log('❌ 동영상 처리 오류 상세:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        cause: error.cause
+      });
       
       // 비디오 정규화 에러 처리
       if (VIDEO_ERROR_MESSAGES[error.message]) {
+        console.log('📍 비디오 정규화 에러:', error.message);
         return res.status(422).json({ 
           ok: false, 
           code: error.message,
@@ -236,6 +254,7 @@ router.post('/videos', adminGuard, async (req, res) => {
       
       // Zod 검증 에러
       if (error instanceof z.ZodError) {
+        console.log('📍 Zod 검증 에러:', JSON.stringify(error.errors, null, 2));
         return res.status(400).json({ 
           ok: false,
           code: 'VALIDATION_ERROR',
@@ -247,7 +266,7 @@ router.post('/videos', adminGuard, async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error('❌ Error creating simple video:', error);
+    console.error('💥 서버 에러:', error);
     res.status(500).json({ 
       ok: false,
       code: 'SERVER_ERROR',
