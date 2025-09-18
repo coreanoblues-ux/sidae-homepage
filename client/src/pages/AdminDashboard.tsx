@@ -10,17 +10,32 @@ const PendingMembers = () => {
   const loadMembers = async () => {
     setLoading(true);
     try {
+      console.log('🔍 쿠키 확인:', document.cookie);
+      console.log('🚀 API 호출 시작: /api/admin/members?status=pending');
+      
       const response = await fetch('/api/admin/members?status=pending', {
         credentials: 'include'
       });
+      
+      console.log('📡 응답 상태:', response.status, response.statusText);
+      console.log('🍪 응답 헤더:', Object.fromEntries(response.headers.entries()));
+      
       const data = await response.json();
+      console.log('📄 응답 데이터:', data);
+      
       if (data.ok) {
         setMembers(data.items || []);
+        console.log('✅ 회원 로드 성공:', data.items?.length, '명');
       } else {
-        console.error('Failed to load members:', data.message);
+        console.error('❌ Failed to load members:', data.message);
+        // 401 에러면 다시 로그인 페이지로
+        if (response.status === 401) {
+          alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+          window.location.href = '/_superadmin';
+        }
       }
     } catch (error) {
-      console.error('Error loading members:', error);
+      console.error('💥 Error loading members:', error);
     }
     setLoading(false);
   };

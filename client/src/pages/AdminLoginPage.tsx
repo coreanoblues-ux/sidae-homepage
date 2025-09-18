@@ -16,6 +16,8 @@ export default function AdminLoginPage() {
     setError('');
 
     try {
+      console.log('🔐 로그인 시도 시작');
+      
       const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: {
@@ -25,16 +27,23 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ password }),
       });
 
+      console.log('📡 로그인 응답 상태:', response.status);
+      console.log('🍪 로그인 응답 헤더:', Object.fromEntries(response.headers.entries()));
+      
       const data = await response.json();
+      console.log('📄 로그인 응답 데이터:', data);
       
       if (data.ok) {
+        console.log('✅ 로그인 성공! 쿠키 확인:', document.cookie);
         // 로그인 성공 - 관리자 대시보드로 이동
-        setLocation('/admin-dashboard');
+        setTimeout(() => {
+          setLocation('/admin-dashboard');
+        }, 100); // 쿠키 설정을 위한 짧은 지연
       } else {
         setError(data.message || '로그인에 실패했습니다.');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('💥 Login error:', error);
       setError('로그인 중 오류가 발생했습니다.');
     }
 
