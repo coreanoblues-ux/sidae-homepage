@@ -24,6 +24,7 @@ import AdminVideos from "@/pages/admin/videos";
 import AdminCourses from "@/pages/admin/courses";
 import AdminNotices from "@/pages/admin/notices";
 import SuperAdmin from "@/pages/superadmin";
+import SimpleAdmin from "@/pages/simple-admin";
 import ProgramPage from "@/pages/program";
 import NotFound from "@/pages/not-found";
 
@@ -132,6 +133,9 @@ function Router() {
       {/* Superadmin routes - 비밀번호 입력으로 바로 접근 가능 */}
       <Route path="/_superadmin" component={SuperAdmin} />
       
+      {/* Simple Admin - 새로운 단순한 관리자 페이지 */}
+      <Route path="/simple-admin" component={SimpleAdmin} />
+      
       {/* Remove public aliases for security */}
       
       {/* Explicit 404 route */}
@@ -144,12 +148,21 @@ function Router() {
 function AppContent() {
   const [location] = useLocation();
   
-  // /_superadmin 경로는 Layout 없이 렌더링 (독립적인 페이지)
+  // /_superadmin과 /simple-admin 경로는 Layout 없이 렌더링 (독립적인 페이지)
   if (location === '/_superadmin') {
     return (
       <>
         <Toaster />
         <SuperAdmin />
+      </>
+    );
+  }
+  
+  if (location === '/simple-admin') {
+    return (
+      <>
+        <Toaster />
+        <SimpleAdmin />
       </>
     );
   }

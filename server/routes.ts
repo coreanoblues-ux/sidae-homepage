@@ -812,6 +812,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🎯 단순한 관리자 API - dev_admin 쿠키만 체크하는 간단한 시스템
+  
+  // 단순 권한 체크 미들웨어
+  const simpleAdminCheck = (req: any, res: any, next: any) => {
+    if (req.cookies?.dev_admin === '1') {
+      return next();
+    }
+    return res.status(401).json({ message: "관리자 권한이 필요합니다" });
+  };
+
+  // 대기 회원 목록
+  app.get('/api/simple/pending-users', simpleAdminCheck, async (req: any, res) => {
+    try {
+      const pendingUsers = await storage.getPendingUsers();
+      res.json(pendingUsers);
+    } catch (error) {
+      console.error("대기 회원 로드 오류:", error);
+      res.status(500).json({ message: "대기 회원을 불러올 수 없습니다" });
+    }
+  });
+
+  // 회원 승인
+  app.post('/api/simple/approve-user', simpleAdminCheck, async (req: any, res) => {
+    try {
+      const { userId, memo } = req.body;
+      await storage.approveUser(userId, 'simple-admin', memo || '관리자 승인');
+      res.json({ success: true });
+    } catch (error) {
+      console.error("회원 승인 오류:", error);
+      res.status(500).json({ message: "회원 승인 중 오류가 발생했습니다" });
+    }
+  });
+
+  // 회원 거부
+  app.post('/api/simple/reject-user', simpleAdminCheck, async (req: any, res) => {
+    try {
+      const { userId, memo } = req.body;
+      await storage.rejectUser(userId, 'simple-admin', memo || '관리자 거부');
+      res.json({ success: true });
+    } catch (error) {
+      console.error("회원 거부 오류:", error);
+      res.status(500).json({ message: "회원 거부 중 오류가 발생했습니다" });
+    }
+  });
+
+  // 갤러리 이미지 목록
+  app.get('/api/simple/gallery', simpleAdminCheck, async (req: any, res) => {
+    try {
+      const images = await storage.getGalleryImages();
+      res.json(images);
+    } catch (error) {
+      console.error("갤러리 로드 오류:", error);
+      res.status(500).json({ message: "갤러리를 불러올 수 없습니다" });
+    }
+  });
+
+  // 갤러리 이미지 추가
+  app.post('/api/simple/gallery', simpleAdminCheck, async (req: any, res) => {
+    try {
+      const { title, description, imageUrl } = req.body;
+      if (!title || !imageUrl) {
+        return res.status(400).json({ message: "제목과 이미지 URL은 필수입니다" });
+      }
+      
+      const imageData = {
+        url: imageUrl,
+        caption: title,
+        visible: true
+      };
+      
+      const newImage = await storage.createGalleryImage(imageData);
+      res.json(newImage);
+    } catch (error) {
+      console.error("이미지 추가 오류:", error);
+      res.status(500).json({ message: "이미지 추가 중 오류가 발생했습니다" });
+    }
+  });
+
+  // 동영상 링크 목록 (courses에서 비디오 가져오기)
+  app.get('/api/simple/videos', simpleAdminCheck, async (req: any, res) => {
+    try {
+      const courses = await storage.getCourses();
+      const videos = [];
+      
+      for (const course of courses) {
+        const courseVideos = await storage.getVideosByCourse(course.id);
+        videos.push(...courseVideos.map((video: any) => ({
+          id: video.id,
+          title: video.title,
+          videoUrl: video.externalUrl,
+          description: video.description || ''
+        })));
+      }
+      
+      res.json(videos);
+    } catch (error) {
+      console.error("동영상 로드 오류:", error);
+      res.status(500).json({ message: "동영상을 불러올 수 없습니다" });
+    }
+  });
+
+  // 동영상 링크 추가 (새 코스에 추가)
+  app.post('/api/simple/videos', simpleAdminCheck, async (req: any, res) => {
+    try {
+      const { title, videoUrl, description } = req.body;
+      if (!title || !videoUrl) {
+        return res.status(400).json({ message: "제목과 동영상 URL은 필수입니다" });
+      }
+      
+      // 관리자용 코스가 없으면 생성 (첫 번째 코스 사용)
+      const courses = await storage.getCourses();
+      let adminCourse = courses.find(course => course.title === '관리자 동영상');
+      
+      if (!adminCourse) {
+        adminCourse = await storage.createCourse({
+          title: '관리자 동영상',
+          slug: 'admin-videos',
+          description: '관리자가 추가한 동영상들',
+          thumbnail: null,
+          order: 999
+        });
+      }
+      
+      const videoData = {
+        title,
+        description: description || '',
+        externalUrl: videoUrl,
+        courseId: adminCourse.id
+      };
+      
+      const newVideo = await storage.createVideo(videoData);
+      res.json(newVideo);
+    } catch (error) {
+      console.error("동영상 추가 오류:", error);
+      res.status(500).json({ message: "동영상 추가 중 오류가 발생했습니다" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
