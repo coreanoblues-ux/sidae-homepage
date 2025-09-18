@@ -204,7 +204,7 @@ export default function Landing() {
                       <Medal className="text-white w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">TOEIC • 수능 • 고등부내신</p>
+                      <p className="font-semibold text-gray-900">중등부 입시영어 * 고등부 내신*수능*TOEIC*TOEFL</p>
                       <p className="text-sm text-gray-600">완벽 대응 커리큘럼</p>
                     </div>
                   </div>
