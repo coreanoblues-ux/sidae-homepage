@@ -29,19 +29,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   };
 
-  // 🧹 레거시 쿠키 정리 헬퍼 (기존 domain-scoped 쿠키 삭제)
+  // 🧹 강화된 레거시 쿠키 정리 (Architect 권장사항 적용)
   const clearLegacyCookies = (res: any, req: any) => {
-    // 기존 domain-scoped 쿠키들 정리
-    const legacyOptions = [
-      { domain: '.sidae-edu.com' },
-      { domain: '.replit.app' },
-      { domain: '.replit.co' },
-      { sameSite: 'none' as const }
-    ];
+    // 기존 domain-scoped 쿠키들을 secure/non-secure 모두 시도
+    const legacyDomains = ['.sidae-edu.com', '.replit.app', '.replit.co'];
+    const legacySameSite = ['none' as const, 'lax' as const];
     
-    legacyOptions.forEach(opts => {
-      res.clearCookie('sid', { path: '/', ...opts });
-      res.clearCookie('connect.sid', { path: '/', ...opts });
+    legacyDomains.forEach(domain => {
+      legacySameSite.forEach(sameSite => {
+        // secure: true 버전 삭제
+        res.clearCookie('sid', { path: '/', domain, sameSite, secure: true });
+        res.clearCookie('connect.sid', { path: '/', domain, sameSite, secure: true });
+        // secure: false 버전 삭제
+        res.clearCookie('sid', { path: '/', domain, sameSite, secure: false });
+        res.clearCookie('connect.sid', { path: '/', domain, sameSite, secure: false });
+      });
     });
   };
 
@@ -145,13 +147,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 🧹 레거시 쿠키들 먼저 정리
       clearLegacyCookies(res, req);
       
-      // 현재 쿠키 삭제
+      // ✅ 현재 host-only 쿠키 삭제 (가장 중요)
+      res.clearCookie('connect.sid', { path: '/' });
+      res.clearCookie('sid', { path: '/' });
+      
+      // ✅ 새로운 정책 쿠키도 삭제
       res.clearCookie('connect.sid', cookieOptions);
       res.clearCookie('sid', cookieOptions);
       
-      // 즉시 만료 쿠키 설정 (브라우저 호환성)
-      res.cookie('connect.sid', '', { ...cookieOptions, maxAge: 0 });
-      res.cookie('sid', '', { ...cookieOptions, maxAge: 0 });
+      // ✅ 즉시 만료 쿠키 설정 (브라우저 호환성)
+      res.cookie('connect.sid', '', { path: '/', maxAge: 0 });
+      res.cookie('sid', '', { path: '/', maxAge: 0 });
       
       // 캐시 금지 헤더
       res.set('Cache-Control', 'no-store');

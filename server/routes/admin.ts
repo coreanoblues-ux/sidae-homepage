@@ -49,11 +49,25 @@ router.post('/login', async (req, res) => {
   res.json({ ok: true, message: '로그인 성공' });
 });
 
-// ✅ 로그아웃
+// ✅ 강화된 로그아웃 (main logout과 동일한 시퀀스)
 router.post('/logout', (req, res) => {
   const cookieOptions = getCookieOptions(req);
+  
+  // 🧹 레거시 쿠키 정리 (임시 간단 버전)
+  const legacyOptions = [
+    { domain: '.sidae-edu.com', secure: true, sameSite: 'none' as const },
+    { domain: '.replit.app', secure: true, sameSite: 'none' as const }
+  ];
+  legacyOptions.forEach(opts => {
+    res.clearCookie('sid', { path: '/', ...opts });
+  });
+  
+  // ✅ host-only 쿠키 삭제
+  res.clearCookie('sid', { path: '/' });
   res.clearCookie('sid', cookieOptions);
-  res.cookie('sid', '', { ...cookieOptions, maxAge: 0 });
+  
+  // ✅ 즉시 만료 쿠키 설정
+  res.cookie('sid', '', { path: '/', maxAge: 0 });
   
   res.json({ ok: true, message: '로그아웃 완료' });
 });
