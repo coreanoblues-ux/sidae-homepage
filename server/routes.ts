@@ -83,27 +83,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "로그아웃 중 오류가 발생했습니다" });
       }
       
-      // 쿠키 옵션은 로그인 시와 '완전히 동일'해야 함
-      const devAdminOpts = {
+      // 환경변수 기반 통일된 쿠키 옵션 (로그인시와 완전히 동일)
+      const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+      const opts = {
         httpOnly: true,
-        sameSite: 'lax' as const,
-        path: '/',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 원래 설정과 동일
-      };
-      
-      const sessionOpts = { 
-        path: '/', 
-        httpOnly: true 
+        secure: true,
+        sameSite: 'none' as const,
+        domain: cookieDomain,
+        path: '/'
       };
       
       // 일부 브라우저 호환을 위해 두 번 처리
       // 1차: clearCookie
-      res.clearCookie('connect.sid', sessionOpts);
-      res.clearCookie('dev_admin', devAdminOpts);
+      res.clearCookie('connect.sid', opts);
+      res.clearCookie('dev_admin', opts);
       
       // 2차: 즉시 만료 쿠키 설정
-      res.cookie('connect.sid', '', { ...sessionOpts, maxAge: 0 });
-      res.cookie('dev_admin', '', { ...devAdminOpts, maxAge: 0 });
+      res.cookie('connect.sid', '', { ...opts, maxAge: 0 });
+      res.cookie('dev_admin', '', { ...opts, maxAge: 0 });
       
       // 캐시 금지 헤더
       res.set('Cache-Control', 'no-store');

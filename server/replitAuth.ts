@@ -31,6 +31,10 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
+  // 환경변수 기반 쿠키 도메인 설정
+  const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
@@ -39,6 +43,9 @@ export function getSession() {
     cookie: {
       httpOnly: true,
       secure: true,
+      sameSite: 'none',
+      domain: cookieDomain,
+      path: '/',
       maxAge: sessionTtl,
     },
   });
@@ -116,15 +123,20 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
+    // 환경변수 기반 통일된 쿠키 옵션
+    const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+    const cookieOpts = { 
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'none' as const, 
+      domain: cookieDomain, 
+      path: '/' 
+    };
+    
     // 관리자 쿠키가 있으면 먼저 정리
     if (req.cookies?.dev_admin === '1') {
-      res.clearCookie('dev_admin');
-      return res.redirect("/");
-    }
-    
-    // 관리자 쿠키 먼저 확인하고 정리
-    if (req.cookies?.dev_admin === '1') {
-      res.clearCookie('dev_admin');
+      res.clearCookie('dev_admin', cookieOpts);
+      res.cookie('dev_admin', '', { ...cookieOpts, maxAge: 0 });
       return res.redirect("/");
     }
     
@@ -158,10 +170,17 @@ export async function setupAuth(app: Express) {
         role: "ADMIN"
       });
 
+      // 환경변수 기반 통일된 쿠키 옵션
+      const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+      console.log('[SET-COOKIE]', cookieDomain); // 진단 로그
+      
       // 개발용 세션 쿠키 설정
       res.cookie('dev_admin', '1', {
         httpOnly: true,
-        sameSite: 'lax',
+        secure: true,
+        sameSite: 'none',
+        domain: cookieDomain,
+        path: '/',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 1주일
       });
 
@@ -169,7 +188,19 @@ export async function setupAuth(app: Express) {
     });
 
   app.post("/api/dev/logout", (req, res) => {
-    res.clearCookie('dev_admin');
+    // 환경변수 기반 통일된 쿠키 옵션으로 정리
+    const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+    const cookieOpts = { 
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'none' as const, 
+      domain: cookieDomain, 
+      path: '/' 
+    };
+    
+    res.clearCookie('dev_admin', cookieOpts);
+    res.cookie('dev_admin', '', { ...cookieOpts, maxAge: 0 });
+    
     res.json({ success: true, message: "로그아웃 완료" });
   });
 }
