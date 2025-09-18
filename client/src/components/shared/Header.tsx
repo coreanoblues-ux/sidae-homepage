@@ -178,9 +178,16 @@ export function Header() {
     logoutMutation.mutate();
   };
 
+  const scrollToAbout = () => {
+    const aboutSection = document.getElementById('about');
+    if (aboutSection) {
+      aboutSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const navItems = [
     { href: "/", label: "홈" },
-    { href: "/about", label: "원장 소개" },
+    { action: scrollToAbout, label: "원장 소개" },
     { href: "/courses", label: "강의" },
     { href: "/gallery", label: "갤러리" },
   ];
@@ -242,16 +249,26 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`text-foreground hover:text-primary transition-colors ${
-                  location === item.href ? "text-primary" : ""
-                }`}
-              >
-                {item.label}
-              </Link>
+            {navItems.map((item, index) => (
+              item.href ? (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`text-foreground hover:text-primary transition-colors ${
+                    location === item.href ? "text-primary" : ""
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <button
+                  key={`action-${index}`}
+                  onClick={item.action}
+                  className="text-foreground hover:text-primary transition-colors cursor-pointer"
+                >
+                  {item.label}
+                </button>
+              )
             ))}
           </div>
 
@@ -603,15 +620,28 @@ export function Header() {
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 py-4 border-t border-border">
             <div className="flex flex-col space-y-3">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="py-2 text-foreground hover:text-primary transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
+              {navItems.map((item, index) => (
+                item.href ? (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="py-2 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <button
+                    key={`mobile-action-${index}`}
+                    onClick={() => {
+                      item.action?.();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="py-2 text-foreground hover:text-primary transition-colors text-left cursor-pointer"
+                  >
+                    {item.label}
+                  </button>
+                )
               ))}
               <div className="pt-3 border-t border-border">
                 <Button

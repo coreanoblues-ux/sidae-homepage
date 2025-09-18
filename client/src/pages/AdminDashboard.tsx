@@ -168,6 +168,8 @@ const VideoManager = () => {
     if (!formData.title || !formData.videoUrl) return;
 
     try {
+      console.log('🎬 동영상 폼 제출 시작:', formData);
+      
       const url = editingVideo 
         ? `/api/admin/videos/${editingVideo.id}`
         : '/api/admin/videos';
@@ -180,15 +182,23 @@ const VideoManager = () => {
         body: JSON.stringify(formData)
       });
 
+      console.log('📡 서버 응답 상태:', response.status);
       const data = await response.json();
+      console.log('📄 서버 응답 데이터:', data);
+
       if (data.ok) {
+        console.log('✅ 동영상 저장 성공!');
         loadVideos(); // 목록 새로고침
         setDialogOpen(false);
         setEditingVideo(null);
         setFormData({ title: '', description: '', videoUrl: '' });
+      } else {
+        console.error('❌ 서버에서 오류 응답:', data);
+        alert(data.message || '동영상 저장에 실패했습니다.');
       }
     } catch (error) {
-      console.error('Error saving video:', error);
+      console.error('💥 동영상 저장 에러:', error);
+      alert('동영상 저장 중 오류가 발생했습니다.');
     }
   };
 
