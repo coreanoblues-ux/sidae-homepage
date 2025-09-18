@@ -11,10 +11,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Superadmin 권한 체크 헬퍼 함수
+  // 🎯 쿠키 도메인 동적 설정 헬퍼
+  const getCookieOptions = (req: any) => {
+    const host = req.get('Host') || '';
+    let domain: string | undefined;
+    
+    if (host.includes('replit.app')) {
+      domain = '.replit.app';
+    } else if (host.includes('sidae-edu.com')) {
+      domain = '.sidae-edu.com';
+    } else {
+      domain = undefined; // localhost 등
+    }
+    
+    const baseOptions = {
+      httpOnly: true,
+      secure: host.includes('replit.app') || host.includes('sidae-edu.com'), // HTTPS 전용
+      sameSite: 'none' as const,
+      path: '/',
+      maxAge: 1000 * 60 * 60 * 24 * 7 // 7일
+    };
+    
+    return domain ? { ...baseOptions, domain } : baseOptions;
+  };
+
+  // Superadmin 권한 체크 헬퍼 함수  
   const checkSuperAdminAuth = async (req: any, res: any) => {
-    // dev_admin 쿠키가 있으면 바로 통과
-    if (req.cookies?.dev_admin === '1') {
+    // sid 쿠키가 있으면 바로 통과
+    if (req.cookies?.sid === 'admin-token') {
       return true;
     }
     
@@ -41,8 +65,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
     
-    // 2. dev_admin 쿠키 확인 (개발용 관리자) - 바로 통과
-    if (req.cookies?.dev_admin === '1') {
+    // 2. sid 쿠키 확인 (개발용 관리자) - 바로 통과
+    if (req.cookies?.sid === 'admin-token') {
       // 관리자 사용자 객체 설정
       req.user = {
         claims: { 
@@ -71,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', enhancedAuth, async (req: any, res) => {
     try {
       // 진단 로그 - req.cookies.sid 유무 확인
-      console.log('[ME][has sid]', Boolean(req.cookies?.['connect.sid'] || req.cookies?.dev_admin));
+      console.log('[ME][has sid]', Boolean(req.cookies?.['connect.sid'] || req.cookies?.sid));
       
       let user;
       
@@ -115,11 +139,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 일부 브라우저 호환을 위해 두 번 처리
       // 1차: clearCookie
       res.clearCookie('connect.sid', opts);
-      res.clearCookie('dev_admin', opts);
+      res.clearCookie('sid', opts);
       
       // 2차: 즉시 만료 쿠키 설정
       res.cookie('connect.sid', '', { ...opts, maxAge: 0 });
-      res.cookie('dev_admin', '', { ...opts, maxAge: 0 });
+      res.cookie('sid', '', { ...opts, maxAge: 0 });
       
       // 캐시 금지 헤더
       res.set('Cache-Control', 'no-store');
@@ -622,8 +646,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
       }
-      // dev_admin인 경우 임시 사용자 ID 사용
-      const adminId = req.cookies?.dev_admin === '1' ? 'dev-admin' : (await storage.getUser(req.user.claims.sub))?.id || 'unknown-admin';
+      // sid 쿠키인 경우 임시 사용자 ID 사용
+      const adminId = req.cookies?.sid === 'admin-token' ? 'dev-admin' : (await storage.getUser(req.user.claims.sub))?.id || 'unknown-admin';
       await storage.approveUser(userId, adminId, memo);
       res.json({ success: true });
     } catch (error) {
@@ -642,8 +666,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
       }
-      // dev_admin인 경우 임시 사용자 ID 사용
-      const adminId = req.cookies?.dev_admin === '1' ? 'dev-admin' : (await storage.getUser(req.user.claims.sub))?.id || 'unknown-admin';
+      // sid 쿠키인 경우 임시 사용자 ID 사용
+      const adminId = req.cookies?.sid === 'admin-token' ? 'dev-admin' : (await storage.getUser(req.user.claims.sub))?.id || 'unknown-admin';
       await storage.rejectUser(userId, adminId, memo);
       res.json({ success: true });
     } catch (error) {
@@ -816,7 +840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // 단순 권한 체크 미들웨어
   const simpleAdminCheck = (req: any, res: any, next: any) => {
-    if (req.cookies?.dev_admin === '1') {
+    if (req.cookies?.sid === 'admin-token') {
       return next();
     }
     return res.status(401).json({ message: "관리자 권한이 필요합니다" });

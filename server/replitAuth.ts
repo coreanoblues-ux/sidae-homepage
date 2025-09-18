@@ -134,9 +134,9 @@ export async function setupAuth(app: Express) {
     };
     
     // 관리자 쿠키가 있으면 먼저 정리
-    if (req.cookies?.dev_admin === '1') {
-      res.clearCookie('dev_admin', cookieOpts);
-      res.cookie('dev_admin', '', { ...cookieOpts, maxAge: 0 });
+    if (req.cookies?.sid === 'admin-token') {
+      res.clearCookie('sid', cookieOpts);
+      res.cookie('sid', '', { ...cookieOpts, maxAge: 0 });
       return res.redirect("/");
     }
     
@@ -197,7 +197,7 @@ export async function setupAuth(app: Express) {
         cookieOptions.domain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
       }
       
-      res.cookie('dev_admin', '1', cookieOptions);
+      res.cookie('sid', 'admin-token', cookieOptions);
 
       res.json({ success: true, message: "개발용 로그인 성공" });
     });
@@ -226,8 +226,8 @@ export async function setupAuth(app: Express) {
       cookieOpts.domain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
     }
     
-    res.clearCookie('dev_admin', cookieOpts);
-    res.cookie('dev_admin', '', { ...cookieOpts, maxAge: 0 });
+    res.clearCookie('sid', cookieOpts);
+    res.cookie('sid', '', { ...cookieOpts, maxAge: 0 });
     
     res.json({ success: true, message: "로그아웃 완료" });
   });
@@ -237,7 +237,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
   // 개발/배포 환경에서 관리자 쿠키 확인
-  if (req.cookies?.dev_admin === '1') {
+  if (req.cookies?.sid === 'admin-token') {
     // 개발용 세션 생성
     req.user = {
       claims: { 
