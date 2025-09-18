@@ -57,7 +57,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Logout error:", err);
         return res.status(500).json({ message: "로그아웃 중 오류가 발생했습니다" });
       }
-      res.clearCookie('connect.sid'); // Clear session cookie
+      
+      // Clear all auth-related cookies with proper options
+      res.clearCookie('connect.sid', { path: '/' }); // Session cookie
+      res.clearCookie('dev_admin', { 
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax'
+      });   // Dev admin cookie
+      
       res.json({ message: "로그아웃되었습니다" });
     });
   });

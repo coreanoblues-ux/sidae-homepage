@@ -134,7 +134,14 @@ export function Header() {
         title: "로그아웃 완료",
         description: "안전하게 로그아웃되었습니다.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      
+      // Clear query cache and force page reload to ensure complete logout
+      queryClient.clear();
+      
+      // Small delay to ensure toast is visible, then reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     },
     onError: (error) => {
       toast({
