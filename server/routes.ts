@@ -51,9 +51,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(401).json({ ok: false, code: 'UNAUTHENTICATED', message: 'Unauthorized' });
   };
 
-  // Auth routes
+  // Auth routes  
   app.get('/api/auth/user', enhancedAuth, async (req: any, res) => {
     try {
+      // 진단 로그 - req.cookies.sid 유무 확인
+      console.log('[ME][has sid]', Boolean(req.cookies?.['connect.sid'] || req.cookies?.dev_admin));
+      
       let user;
       
       // If it's a local user session
