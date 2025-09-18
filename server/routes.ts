@@ -623,7 +623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User ID is required" });
       }
       // dev_admin인 경우 임시 사용자 ID 사용
-      const adminId = req.cookies?.dev_admin === '1' ? 'dev-admin' : (await storage.getUser(req.user.claims.sub))?.id;
+      const adminId = req.cookies?.dev_admin === '1' ? 'dev-admin' : (await storage.getUser(req.user.claims.sub))?.id || 'unknown-admin';
       await storage.approveUser(userId, adminId, memo);
       res.json({ success: true });
     } catch (error) {
@@ -634,15 +634,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/superadmin/reject-user', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'ADMIN') {
+      const isAuthorized = await checkSuperAdminAuth(req, res);
+      if (!isAuthorized) {
         return res.status(403).json({ message: "Admin access required" });
       }
       const { userId, memo } = req.body;
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
       }
-      await storage.rejectUser(userId, user.id, memo);
+      // dev_admin인 경우 임시 사용자 ID 사용
+      const adminId = req.cookies?.dev_admin === '1' ? 'dev-admin' : (await storage.getUser(req.user.claims.sub))?.id || 'unknown-admin';
+      await storage.rejectUser(userId, adminId, memo);
       res.json({ success: true });
     } catch (error) {
       console.error("Error rejecting user:", error);
