@@ -279,7 +279,7 @@ const VideoManager = () => {
     }
   };
 
-  // 🎯 삭제 (사용자 제안 방식)
+  // 🎯 삭제 (사용자 제안 방식 - JSON 파싱 보장)
   const handleDelete = async (videoId: string) => {
     if (!window.confirm('정말 삭제 하시겠습니까?')) return;
     
@@ -287,7 +287,7 @@ const VideoManager = () => {
       method: 'DELETE', 
       credentials: 'include'
     });
-    const d = await r.json();
+    const d = await r.json();   // JSON 보장
     
     if (d.ok) {
       setVideos(videos.filter(v => v.id !== videoId));
@@ -296,15 +296,15 @@ const VideoManager = () => {
     }
   };
 
-  // 🎯 제목 수정 (사용자 제안 방식)
+  // 🎯 제목 수정 (사용자 제안 방식 - JSON 파싱 보장)
   const handleSave = async (videoId: string, newTitle: string) => {
     const r = await fetch(`/api/admin/videos/${videoId}`, {
-      method: 'PUT', 
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ title: newTitle })
     });
-    const d = await r.json();
+    const d = await r.json();   // 이제 항상 JSON
     
     if (d.ok) {
       setVideos(videos.map(v => v.id === videoId ? { ...v, title: newTitle } : v));

@@ -53,6 +53,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  // 🎯 새로운 관리자 API 라우터를 제일 먼저 마운트 (우선순위 확보)
+  app.use('/api/admin', adminRouter);
+
   // Enhanced auth middleware for both OAuth and local users (엄격한 인증)
   const enhancedAuth = async (req: any, res: any, next: any) => {
     // 캐시 금지 헤더 설정
@@ -572,37 +575,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   //   }
   // });
 
-  app.put('/api/admin/videos/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'ADMIN') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      const videoData = insertVideoSchema.partial().parse(req.body);
-      const video = await storage.updateVideo(req.params.id, videoData);
-      res.json(video);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid video data", errors: error.errors });
-      }
-      console.error("Error updating video:", error);
-      res.status(500).json({ message: "Failed to update video" });
-    }
-  });
+  // 🚫 OLD VIDEO PUT ENDPOINT - DISABLED (충돌 방지)
+  // 새로운 simple video PUT 엔드포인트가 routes/admin.ts에서 처리됩니다
+  // app.put('/api/admin/videos/:id', isAuthenticated, async (req: any, res) => {
+  //   try {
+  //     const user = await storage.getUser(req.user.claims.sub);
+  //     if (user?.role !== 'ADMIN') {
+  //       return res.status(403).json({ message: "Admin access required" });
+  //     }
+  //     const videoData = insertVideoSchema.partial().parse(req.body);
+  //     const video = await storage.updateVideo(req.params.id, videoData);
+  //     res.json(video);
+  //   } catch (error) {
+  //     if (error instanceof z.ZodError) {
+  //       return res.status(400).json({ message: "Invalid video data", errors: error.errors });
+  //     }
+  //     console.error("Error updating video:", error);
+  //     res.status(500).json({ message: "Failed to update video" });
+  //   }
+  // });
 
-  app.delete('/api/admin/videos/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'ADMIN') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      await storage.deleteVideo(req.params.id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting video:", error);
-      res.status(500).json({ message: "Failed to delete video" });
-    }
-  });
+  // 🚫 OLD VIDEO DELETE ENDPOINT - DISABLED (충돌 방지)  
+  // 새로운 simple video DELETE 엔드포인트가 routes/admin.ts에서 처리됩니다
+  // app.delete('/api/admin/videos/:id', isAuthenticated, async (req: any, res) => {
+  //   try {
+  //     const user = await storage.getUser(req.user.claims.sub);
+  //     if (user?.role !== 'ADMIN') {
+  //       return res.status(403).json({ message: "Admin access required" });
+  //     }
+  //     await storage.deleteVideo(req.params.id);
+  //     res.json({ success: true });
+  //   } catch (error) {
+  //     console.error("Error deleting video:", error);
+  //     res.status(500).json({ message: "Failed to delete video" });
+  //   }
+  // });
 
   app.get('/api/admin/notices', isAuthenticated, async (req: any, res) => {
     try {
@@ -994,9 +1001,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // 🎯 새로운 관리자 API 라우터 마운트
-  app.use('/api/admin', adminRouter);
-  
   // 프록시 라우터 등록 (NAS HTTP 동영상 스트리밍)
   app.use(proxyVideoRouter);
 

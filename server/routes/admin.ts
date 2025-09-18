@@ -275,7 +275,7 @@ router.post('/videos', adminGuard, async (req, res) => {
   }
 });
 
-// 🎯 동영상 수정 (사용자 제안 방식)
+// 🎯 동영상 수정 (사용자 제안 방식 - JSON 응답 보장)
 router.put('/videos/:id', adminGuard, async (req, res) => {
   try {
     const id = req.params.id;
@@ -289,27 +289,27 @@ router.put('/videos/:id', adminGuard, async (req, res) => {
     }
     
     await storage.updateSimpleVideo(id, { title });
-    res.json({ ok: true });
+    return res.json({ ok: true });
     
   } catch (error) {
     console.error('Error updating simple video:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       ok: false, 
       code: 'UPDATE_FAILED' 
     });
   }
 });
 
-// 🎯 동영상 삭제 (사용자 제안 방식)
+// 🎯 동영상 삭제 (사용자 제안 방식 - JSON 응답 보장)
 router.delete('/videos/:id', adminGuard, async (req, res) => {
   try {
     const id = req.params.id;
     await storage.deleteSimpleVideo(id);
-    res.json({ ok: true });
+    return res.json({ ok: true });
     
   } catch (error) {
     console.error('Error deleting simple video:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       ok: false, 
       code: 'DELETE_FAILED' 
     });
