@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { storage } from '../storage';
+import { insertSimpleVideoSchema } from '../../shared/schema';
+import { z } from 'zod';
 
 const router = Router();
 
@@ -190,32 +192,30 @@ router.post('/videos', adminGuard, async (req, res) => {
     
     const { title, type, url } = req.body;
     
-    // 입력 데이터 검증
-    if (!title || typeof title !== 'string' || title.trim() === '') {
-      console.log('❌ 제목 누락');
-      return res.status(400).json({ message: 'Title is required' });
+    // 🔧 Zod validation 추가
+    try {
+      const validatedData = insertSimpleVideoSchema.parse({
+        title: title?.trim(),
+        type,
+        url: url?.trim()
+      });
+      
+      console.log('✅ Zod 검증 통과:', validatedData);
+      
+      const video = await storage.createSimpleVideo(validatedData);
+      console.log('✅ 동영상 생성 완료:', video);
+      res.json(video);
+      
+    } catch (zodError: any) {
+      console.log('❌ Zod 검증 실패:', zodError);
+      if (zodError instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: 'Invalid video data',
+          errors: zodError.errors
+        });
+      }
+      throw zodError;
     }
-    
-    if (!type || !['youtube', 'nas'].includes(type)) {
-      console.log('❌ 타입 누락 또는 잘못된 값:', type);
-      return res.status(400).json({ message: 'Type must be youtube or nas' });
-    }
-    
-    if (!url || typeof url !== 'string' || url.trim() === '') {
-      console.log('❌ URL 누락');
-      return res.status(400).json({ message: 'URL is required' });
-    }
-    
-    console.log('✅ 입력 데이터 검증 통과');
-    
-    const video = await storage.createSimpleVideo({
-      title: title.trim(),
-      type: type as 'youtube' | 'nas',
-      url: url.trim()
-    });
-    
-    console.log('✅ 동영상 생성 완료:', video);
-    res.json(video);
   } catch (error) {
     console.error('❌ Error creating simple video:', error);
     res.status(500).json({ message: 'Failed to create video' });

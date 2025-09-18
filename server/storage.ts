@@ -419,7 +419,7 @@ export class DatabaseStorage implements IStorage {
       .insert(simpleVideos)
       .values({
         title: video.title,
-        type: video.type,
+        type: video.type as 'youtube' | 'nas',
         url: video.url
       })
       .returning();

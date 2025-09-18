@@ -78,7 +78,11 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/about" component={About} />
       <Route path="/courses" component={Courses} />
-      <Route path="/videos" component={Videos} />
+      <Route path="/videos">
+        <ProtectedRoute requireAuth={true} allowedRoles={["VERIFIED", "ADMIN"]}>
+          <Videos />
+        </ProtectedRoute>
+      </Route>
       <Route path="/gallery" component={Gallery} />
       <Route path="/program/:slug" component={ProgramPage} />
       <Route path="/login" component={Login} />
