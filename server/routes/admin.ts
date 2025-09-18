@@ -172,120 +172,92 @@ router.post('/gallery', adminGuard, async (req, res) => {
   }
 });
 
-// ✅ 동영상 목록
+// 🎯 동영상 목록 (새로운 단순 구조)
 router.get('/videos', adminGuard, async (req, res) => {
   try {
-    const courses = await storage.getCourses();
-    const videos = [];
-    
-    for (const course of courses) {
-      const courseVideos = await storage.getVideosByCourse(course.id);
-      videos.push(...courseVideos.map(video => ({
-        id: video.id,
-        title: video.title,
-        description: video.description,
-        videoUrl: video.externalUrl,
-        courseName: course.title
-      })));
-    }
-    
-    res.json({ ok: true, items: videos });
+    const videos = await storage.getSimpleVideos();
+    res.json(videos);
   } catch (error) {
-    console.error('Error fetching videos:', error);
-    res.status(500).json({ ok: false, message: 'Failed to fetch videos' });
+    console.error('Error fetching simple videos:', error);
+    res.status(500).json({ message: 'Failed to fetch videos' });
   }
 });
 
-// ✅ 동영상 추가
+// 🎯 동영상 추가 (새로운 단순 구조)
 router.post('/videos', adminGuard, async (req, res) => {
   try {
-    console.log('🎬 동영상 추가 요청 데이터:', req.body);
+    console.log('🎬 새로운 동영상 추가 요청:', req.body);
     
-    const { title, description, videoUrl } = req.body;
+    const { title, type, url } = req.body;
     
     // 입력 데이터 검증
     if (!title || typeof title !== 'string' || title.trim() === '') {
-      console.log('❌ 제목 누락 또는 잘못된 형식');
-      return res.status(400).json({ 
-        ok: false, 
-        message: 'Invalid video data',
-        errors: { title: '제목은 필수입니다' }
-      });
+      console.log('❌ 제목 누락');
+      return res.status(400).json({ message: 'Title is required' });
     }
     
-    if (!videoUrl || typeof videoUrl !== 'string' || videoUrl.trim() === '') {
-      console.log('❌ 동영상 URL 누락 또는 잘못된 형식');
-      return res.status(400).json({ 
-        ok: false, 
-        message: 'Invalid video data',
-        errors: { videoUrl: '동영상 URL은 필수입니다' }
-      });
+    if (!type || !['youtube', 'nas'].includes(type)) {
+      console.log('❌ 타입 누락 또는 잘못된 값:', type);
+      return res.status(400).json({ message: 'Type must be youtube or nas' });
+    }
+    
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+      console.log('❌ URL 누락');
+      return res.status(400).json({ message: 'URL is required' });
     }
     
     console.log('✅ 입력 데이터 검증 통과');
     
-    // 기본 코스 생성 또는 가져오기
-    let course;
-    const courses = await storage.getCourses();
-    const defaultCourse = courses.find(c => c.title === '관리자 업로드');
-    
-    if (!defaultCourse) {
-      course = await storage.createCourse({
-        slug: 'admin-uploads',
-        title: '관리자 업로드',
-        description: '관리자가 업로드한 동영상들',
-        order: 999
-      });
-    } else {
-      course = defaultCourse;
-    }
-    
-    const video = await storage.createVideo({
-      title,
-      description: description || null,
-      externalUrl: videoUrl,
-      courseId: course.id
+    const video = await storage.createSimpleVideo({
+      title: title.trim(),
+      type: type as 'youtube' | 'nas',
+      url: url.trim()
     });
     
-    res.json({ ok: true, item: video });
+    console.log('✅ 동영상 생성 완료:', video);
+    res.json(video);
   } catch (error) {
-    console.error('Error creating video:', error);
-    res.status(500).json({ ok: false, message: 'Failed to create video' });
+    console.error('❌ Error creating simple video:', error);
+    res.status(500).json({ message: 'Failed to create video' });
   }
 });
 
-// ✅ 동영상 수정
+// 🎯 동영상 수정 (새로운 단순 구조)
 router.put('/videos/:id', adminGuard, async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, videoUrl } = req.body;
+    const { title, type, url } = req.body;
     
-    if (!title || !videoUrl) {
-      return res.status(400).json({ ok: false, message: '제목과 동영상 URL은 필수입니다' });
+    if (!title || !type || !url) {
+      return res.status(400).json({ message: 'Title, type, and url are required' });
     }
     
-    const video = await storage.updateVideo(id, {
-      title,
-      description: description || null,
-      externalUrl: videoUrl
+    if (!['youtube', 'nas'].includes(type)) {
+      return res.status(400).json({ message: 'Type must be youtube or nas' });
+    }
+    
+    const video = await storage.updateSimpleVideo(id, {
+      title: title.trim(),
+      type: type as 'youtube' | 'nas',
+      url: url.trim()
     });
     
-    res.json({ ok: true, item: video });
+    res.json(video);
   } catch (error) {
-    console.error('Error updating video:', error);
-    res.status(500).json({ ok: false, message: 'Failed to update video' });
+    console.error('Error updating simple video:', error);
+    res.status(500).json({ message: 'Failed to update video' });
   }
 });
 
-// ✅ 동영상 삭제
+// 🎯 동영상 삭제 (새로운 단순 구조)
 router.delete('/videos/:id', adminGuard, async (req, res) => {
   try {
     const { id } = req.params;
-    await storage.deleteVideo(id);
-    res.json({ ok: true, message: '동영상이 삭제되었습니다' });
+    await storage.deleteSimpleVideo(id);
+    res.json({ message: '동영상이 삭제되었습니다' });
   } catch (error) {
-    console.error('Error deleting video:', error);
-    res.status(500).json({ ok: false, message: 'Failed to delete video' });
+    console.error('Error deleting simple video:', error);
+    res.status(500).json({ message: 'Failed to delete video' });
   }
 });
 

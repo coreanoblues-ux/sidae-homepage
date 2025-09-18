@@ -335,6 +335,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🎯 학생용 전체 동영상 목록 (사용자 가이드대로)
+  app.get('/api/videos', async (req, res) => {
+    try {
+      const videos = await storage.getSimpleVideos();
+      res.json(videos);
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+      res.status(500).json({ message: "Failed to fetch videos" });
+    }
+  });
+
   // Public program routes
   app.get('/api/programs', async (req, res) => {
     try {

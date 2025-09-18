@@ -27,6 +27,7 @@ import SuperAdmin from "@/pages/superadmin";
 import SimpleAdmin from "@/pages/simple-admin";
 import NewAdminDashboard from "@/pages/AdminDashboard";
 import AdminLoginPage from "@/pages/AdminLoginPage";
+import Videos from "@/pages/Videos";
 import ProgramPage from "@/pages/program";
 import NotFound from "@/pages/not-found";
 
@@ -77,6 +78,7 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/about" component={About} />
       <Route path="/courses" component={Courses} />
+      <Route path="/videos" component={Videos} />
       <Route path="/gallery" component={Gallery} />
       <Route path="/program/:slug" component={ProgramPage} />
       <Route path="/login" component={Login} />

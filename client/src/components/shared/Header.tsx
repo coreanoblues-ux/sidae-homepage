@@ -189,6 +189,7 @@ export function Header() {
     { href: "/", label: "홈" },
     { action: scrollToAbout, label: "원장 소개" },
     { href: "/courses", label: "강의" },
+    { href: "/videos", label: "동영상" },
     { href: "/gallery", label: "갤러리" },
   ];
 

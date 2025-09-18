@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Edit, Plus, LogOut } from 'lucide-react';
 
 // 관리자 대시보드 탭 컴포넌트들
@@ -145,7 +146,7 @@ const VideoManager = () => {
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<any>(null);
-  const [formData, setFormData] = useState({ title: '', description: '', videoUrl: '' });
+  const [formData, setFormData] = useState({ title: '', type: 'youtube', url: '' });
 
   const loadVideos = async () => {
     setLoading(true);
@@ -154,8 +155,9 @@ const VideoManager = () => {
         credentials: 'include'
       });
       const data = await response.json();
-      if (data.ok) {
-        setVideos(data.items || []);
+      console.log('🎬 동영상 목록 로드:', data);
+      if (response.ok) {
+        setVideos(data || []);
       }
     } catch (error) {
       console.error('Error loading videos:', error);
@@ -165,10 +167,10 @@ const VideoManager = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.videoUrl) return;
+    if (!formData.title || !formData.url || !formData.type) return;
 
     try {
-      console.log('🎬 동영상 폼 제출 시작:', formData);
+      console.log('🎬 새로운 동영상 폼 제출:', formData);
       
       const url = editingVideo 
         ? `/api/admin/videos/${editingVideo.id}`
@@ -186,12 +188,12 @@ const VideoManager = () => {
       const data = await response.json();
       console.log('📄 서버 응답 데이터:', data);
 
-      if (data.ok) {
+      if (response.ok) {
         console.log('✅ 동영상 저장 성공!');
         loadVideos(); // 목록 새로고침
         setDialogOpen(false);
         setEditingVideo(null);
-        setFormData({ title: '', description: '', videoUrl: '' });
+        setFormData({ title: '', type: 'youtube', url: '' });
       } else {
         console.error('❌ 서버에서 오류 응답:', data);
         alert(data.message || '동영상 저장에 실패했습니다.');
@@ -206,8 +208,8 @@ const VideoManager = () => {
     setEditingVideo(video);
     setFormData({
       title: video.title,
-      description: video.description || '',
-      videoUrl: video.videoUrl
+      type: video.type || 'youtube',
+      url: video.url
     });
     setDialogOpen(true);
   };
@@ -232,7 +234,7 @@ const VideoManager = () => {
 
   const openAddDialog = () => {
     setEditingVideo(null);
-    setFormData({ title: '', description: '', videoUrl: '' });
+    setFormData({ title: '', type: 'youtube', url: '' });
     setDialogOpen(true);
   };
 
@@ -270,23 +272,29 @@ const VideoManager = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="description">설명</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    data-testid="input-video-description"
-                  />
+                  <Label htmlFor="type">동영상 타입 *</Label>
+                  <Select 
+                    value={formData.type} 
+                    onValueChange={(value) => setFormData({ ...formData, type: value })}
+                  >
+                    <SelectTrigger data-testid="select-video-type">
+                      <SelectValue placeholder="타입 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="youtube">YouTube</SelectItem>
+                      <SelectItem value="nas">NAS 파일</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <Label htmlFor="videoUrl">동영상 URL *</Label>
+                  <Label htmlFor="url">동영상 URL *</Label>
                   <Input
-                    id="videoUrl"
+                    id="url"
                     type="url"
-                    value={formData.videoUrl}
-                    onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                    value={formData.url}
+                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                     required
-                    placeholder="https://example.com/video.mp4"
+                    placeholder={formData.type === 'youtube' ? 'https://youtu.be/...' : 'https://nas.domain.com/video.mp4'}
                     data-testid="input-video-url"
                   />
                 </div>

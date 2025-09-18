@@ -109,6 +109,16 @@ export const galleryImages = pgTable("gallery_images", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// 🎯 새로운 단순 동영상 테이블 (사용자 가이드대로)
+export const simpleVideos = pgTable("simple_videos", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  type: varchar("type").notNull().$type<'youtube' | 'nas'>(),
+  url: varchar("url").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // 프로그램 정보 테이블 (관리자가 편집 가능한 프로그램 소개 페이지)
 export const programs = pgTable("programs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -234,3 +244,12 @@ export type InsertGalleryImage = z.infer<typeof insertGalleryImageSchema>;
 export type Program = typeof programs.$inferSelect;
 export type InsertProgram = z.infer<typeof insertProgramSchema>;
 export type Approval = typeof approvals.$inferSelect;
+
+// 🎯 SimpleVideo 스키마와 타입 (사용자 가이드대로)
+export const insertSimpleVideoSchema = createInsertSchema(simpleVideos).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type SimpleVideo = typeof simpleVideos.$inferSelect;
+export type InsertSimpleVideo = z.infer<typeof insertSimpleVideoSchema>;

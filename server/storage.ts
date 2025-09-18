@@ -8,6 +8,7 @@ import {
   approvals,
   galleryImages,
   programs,
+  simpleVideos,
   type User,
   type UpsertUser,
   type Course,
@@ -23,6 +24,8 @@ import {
   type InsertGalleryImage,
   type Program,
   type InsertProgram,
+  type SimpleVideo,
+  type InsertSimpleVideo,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, sql, isNull } from "drizzle-orm";
@@ -72,6 +75,13 @@ export interface IStorage {
   updateGalleryImage(id: string, image: Partial<InsertGalleryImage>): Promise<GalleryImage>;
   deleteGalleryImage(id: string): Promise<void>;
   toggleGalleryImageVisibility(id: string): Promise<GalleryImage>;
+  
+  // 🎯 Simple Video operations (사용자 가이드대로)
+  getSimpleVideos(): Promise<SimpleVideo[]>;
+  getSimpleVideo(id: string): Promise<SimpleVideo | undefined>;
+  createSimpleVideo(video: InsertSimpleVideo): Promise<SimpleVideo>;
+  updateSimpleVideo(id: string, video: Partial<InsertSimpleVideo>): Promise<SimpleVideo>;
+  deleteSimpleVideo(id: string): Promise<void>;
   
   // Program operations
   getPrograms(): Promise<Program[]>;
@@ -386,6 +396,53 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProgram(id: string): Promise<void> {
     await db.delete(programs).where(eq(programs.id, id));
+  }
+
+  // 🎯 Simple Video operations 구현 (사용자 가이드대로)
+  async getSimpleVideos(): Promise<SimpleVideo[]> {
+    return await db
+      .select()
+      .from(simpleVideos)
+      .orderBy(desc(simpleVideos.createdAt));
+  }
+
+  async getSimpleVideo(id: string): Promise<SimpleVideo | undefined> {
+    const [video] = await db
+      .select()
+      .from(simpleVideos)
+      .where(eq(simpleVideos.id, id));
+    return video;
+  }
+
+  async createSimpleVideo(video: InsertSimpleVideo): Promise<SimpleVideo> {
+    const [newVideo] = await db
+      .insert(simpleVideos)
+      .values({
+        title: video.title,
+        type: video.type,
+        url: video.url
+      })
+      .returning();
+    return newVideo;
+  }
+
+  async updateSimpleVideo(id: string, video: Partial<InsertSimpleVideo>): Promise<SimpleVideo> {
+    const updateData: any = { updatedAt: new Date() };
+    
+    if (video.title) updateData.title = video.title;
+    if (video.type) updateData.type = video.type;
+    if (video.url) updateData.url = video.url;
+    
+    const [updatedVideo] = await db
+      .update(simpleVideos)
+      .set(updateData)
+      .where(eq(simpleVideos.id, id))
+      .returning();
+    return updatedVideo;
+  }
+
+  async deleteSimpleVideo(id: string): Promise<void> {
+    await db.delete(simpleVideos).where(eq(simpleVideos.id, id));
   }
 }
 
