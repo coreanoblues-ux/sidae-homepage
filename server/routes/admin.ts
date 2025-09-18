@@ -14,7 +14,7 @@ const getCookieOptions = (req: any) => {
   const cookieOpts = {
     httpOnly: true,
     secure: true, // 배포용 고정
-    sameSite: 'None' as const, // 배포용 고정
+    sameSite: 'none' as const, // 배포용 고정 (소문자)
     path: '/',
     maxAge: 1000 * 60 * 60 * 24 * 7 // 7일
   };
