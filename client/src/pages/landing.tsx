@@ -168,9 +168,9 @@ export default function Landing() {
 
             <div className="fade-in lg:ml-8">
               <img
-                src="/images/magazine-cover.PNG"
-                alt="1타강사 잡지 커버"
-                className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover aspect-[4/5] float-slow"
+                src="/images/new-team-photo.PNG"
+                alt="시대영재 학원 전문 강사진"
+                className="rounded-2xl shadow-2xl w-full max-w-lg mx-auto object-cover float-slow"
               />
 
               <div className="relative -mt-16 mx-4">
