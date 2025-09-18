@@ -172,17 +172,25 @@ export async function setupAuth(app: Express) {
 
       // 환경변수 기반 통일된 쿠키 옵션
       const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
-      console.log('[SET-COOKIE]', cookieDomain); // 진단 로그
+      const isLocalhost = req.get('host')?.includes('localhost') || req.get('host')?.includes('127.0.0.1');
       
-      // 개발용 세션 쿠키 설정
-      res.cookie('dev_admin', '1', {
+      console.log('[SET-COOKIE] Domain:', cookieDomain, 'IsLocalhost:', isLocalhost); // 진단 로그
+      
+      // 개발용 세션 쿠키 설정 - localhost일 때는 도메인 설정 없음
+      const cookieOptions: any = {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        domain: cookieDomain,
         path: '/',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 1주일
-      });
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 1주일
+      };
+      
+      if (!isLocalhost) {
+        // 배포환경에서만 보안 옵션 적용
+        cookieOptions.secure = true;
+        cookieOptions.sameSite = 'none';
+        cookieOptions.domain = cookieDomain;
+      }
+      
+      res.cookie('dev_admin', '1', cookieOptions);
 
       res.json({ success: true, message: "개발용 로그인 성공" });
     });

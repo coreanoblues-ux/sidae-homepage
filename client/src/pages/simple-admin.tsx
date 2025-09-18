@@ -43,17 +43,72 @@ interface VideoLink {
 }
 
 export default function SimpleAdmin() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [videoLinks, setVideoLinks] = useState<VideoLink[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [newImage, setNewImage] = useState({ title: "", description: "", imageUrl: "" });
   const [newVideo, setNewVideo] = useState({ title: "", videoUrl: "", description: "" });
   const { toast } = useToast();
 
   useEffect(() => {
-    loadData();
+    // 페이지 로드시 자동 로그인 시도하지 않음 - 항상 비밀번호 요구
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    // dev_admin 쿠키가 있는지 확인만 함
+    try {
+      const res = await fetch('/api/simple/ping', { credentials: 'include' });
+      if (res.ok) {
+        setIsAuthenticated(true);
+        loadData();
+      }
+    } catch (error) {
+      // 인증 안됨 - 비밀번호 입력 필요
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('/api/dev/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setIsAuthenticated(true);
+        setPassword("");
+        toast({
+          title: "로그인 성공",
+          description: "관리자 페이지에 접속했습니다.",
+        });
+        await loadData();
+      } else {
+        toast({
+          title: "로그인 실패",
+          description: "잘못된 비밀번호입니다.",
+          variant: "destructive",
+        });
+        setPassword("");
+      }
+    } catch (error) {
+      toast({
+        title: "오류",
+        description: "로그인 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+      setPassword("");
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -209,11 +264,50 @@ export default function SimpleAdmin() {
   const logout = async () => {
     try {
       await fetch('/api/dev/logout', { method: 'POST', credentials: 'include' });
-      window.location.href = '/';
+      setIsAuthenticated(false);
+      setPassword("");
+      toast({
+        title: "로그아웃 완료",
+        description: "관리자 세션이 종료되었습니다.",
+      });
     } catch (error) {
-      window.location.href = '/';
+      setIsAuthenticated(false);
+      setPassword("");
     }
   };
+
+  // 인증되지 않은 경우 비밀번호 입력 화면
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">시대영재 학원</h1>
+            <p className="text-gray-600">관리자 로그인</p>
+          </div>
+          
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <Label htmlFor="password">관리자 비밀번호</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="비밀번호를 입력하세요"
+                autoFocus
+                required
+                data-testid="input-admin-password"
+              />
+            </div>
+            <Button type="submit" className="w-full" data-testid="button-admin-login">
+              로그인
+            </Button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

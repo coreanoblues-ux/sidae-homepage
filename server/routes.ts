@@ -822,6 +822,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(401).json({ message: "관리자 권한이 필요합니다" });
   };
 
+  // 인증 상태 확인용 ping API
+  app.get('/api/simple/ping', simpleAdminCheck, async (req: any, res) => {
+    res.json({ success: true, message: "인증됨" });
+  });
+
   // 대기 회원 목록
   app.get('/api/simple/pending-users', simpleAdminCheck, async (req: any, res) => {
     try {
