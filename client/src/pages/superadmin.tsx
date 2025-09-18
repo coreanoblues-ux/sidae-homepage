@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/api";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -18,11 +17,32 @@ import { useLocation } from "wouter";
 const SUPERADMIN_PATH = "/_superadmin";
 
 export default function SuperAdmin() {
-  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  
+  // 현재 인증 상태 확인 (401 에러를 throw하지 않도록 직접 fetch)
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/user', { credentials: 'include' });
+        if (res.ok) {
+          const userData = await res.json();
+          if (userData.role === 'ADMIN') {
+            setIsAuthed(true);
+          }
+        }
+      } catch (error) {
+        // 에러 무시
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+  }, []);
   
   // 개발용 로그인 처리
   const handleDevLogin = async (e: React.FormEvent) => {
@@ -37,15 +57,11 @@ export default function SuperAdmin() {
       
       toast({ title: "로그인 성공", description: "관리자 페이지에 접속했습니다." });
       
+      setPassword("");
+      setIsAuthed(true);
+      
       // 사용자 정보 새로고침
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      
-      setPassword("");
-      
-      // 페이지 강제 새로고침으로 상태 동기화
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
     } catch (error) {
       toast({ 
         title: "로그인 실패", 
@@ -62,25 +78,25 @@ export default function SuperAdmin() {
   // 승인 대기 회원 목록
   const { data: pendingUsers = [], refetch: refetchPendingUsers } = useQuery({
     queryKey: ['/api/superadmin/pending-users'],
-    enabled: (user as any)?.role === 'ADMIN',
+    enabled: isAuthed,
   });
 
   // 갤러리 이미지 목록 (관리자용 - 모든 이미지)
   const { data: galleryImages = [], refetch: refetchGallery } = useQuery({
     queryKey: ['/api/superadmin/gallery'],
-    enabled: (user as any)?.role === 'ADMIN',
+    enabled: isAuthed,
   });
 
   // 프로그램 목록 (관리자용 - 모든 프로그램)
   const { data: programs = [], refetch: refetchPrograms } = useQuery({
     queryKey: ['/api/superadmin/programs'],
-    enabled: (user as any)?.role === 'ADMIN',
+    enabled: isAuthed,
   });
 
   // 코스 목록 (동영상 추가용)
   const { data: courses = [] } = useQuery({
     queryKey: ['/api/courses'],
-    enabled: (user as any)?.role === 'ADMIN',
+    enabled: isAuthed,
   });
 
   // 회원 승인
@@ -327,7 +343,7 @@ export default function SuperAdmin() {
     }));
   };
 
-  if (authLoading) {
+  if (isCheckingAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -336,7 +352,7 @@ export default function SuperAdmin() {
   }
 
   // 로그인하지 않은 경우 비밀번호 프롬프트 표시
-  if (!user) {
+  if (!isAuthed) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
         <Card className="w-full max-w-md mx-4">
@@ -387,9 +403,6 @@ export default function SuperAdmin() {
     );
   }
 
-  if ((user as any)?.role !== 'ADMIN') {
-    return null; // 404 리디렉션 처리됨
-  }
 
   return (
     <div className="container mx-auto p-6 space-y-8">
