@@ -32,22 +32,20 @@ export function getSession() {
     tableName: "sessions",
   });
   
-  // 동적 쿠키 도메인 설정 (개발/운영 환경 지원)
-  const isDev = process.env.NODE_ENV === 'development';
-  const isReplit = !!process.env.REPL_ID;
+  // 🎯 배포용 세션 쿠키 설정 (admin 쿠키와 완전 동일)
+  const cookieDomain = process.env.COOKIE_DOMAIN; // .sidae-edu.com
   
-  // 쿠키 설정을 환경에 따라 동적으로 구성
   const cookieConfig: any = {
     httpOnly: true,
-    secure: !isDev, // 개발환경에서는 false, 운영환경에서는 true
-    sameSite: isDev ? 'lax' : 'none', // 개발환경에서는 lax, 운영환경에서는 none
+    secure: true, // 배포용 고정
+    sameSite: 'none', // 배포용 고정
     path: '/',
     maxAge: sessionTtl,
   };
 
-  // 운영환경에서만 domain 설정
-  if (!isDev && !isReplit) {
-    cookieConfig.domain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+  // 도메인이 설정된 경우만 추가 (admin 쿠키와 동일 로직)
+  if (cookieDomain) {
+    cookieConfig.domain = cookieDomain;
   }
   
   return session({
