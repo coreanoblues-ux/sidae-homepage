@@ -282,11 +282,17 @@ router.put('/videos/:id', adminGuard, async (req, res) => {
     const { title, type, url } = req.body;
     
     if (!title || !type || !url) {
-      return res.status(400).json({ message: 'Title, type, and url are required' });
+      return res.status(400).json({ 
+        ok: false, 
+        message: 'Title, type, and url are required' 
+      });
     }
     
     if (!['youtube', 'nas'].includes(type)) {
-      return res.status(400).json({ message: 'Type must be youtube or nas' });
+      return res.status(400).json({ 
+        ok: false, 
+        message: 'Type must be youtube or nas' 
+      });
     }
     
     const video = await storage.updateSimpleVideo(id, {
@@ -295,10 +301,17 @@ router.put('/videos/:id', adminGuard, async (req, res) => {
       url: url.trim()
     });
     
-    res.json(video);
+    res.json({ 
+      ok: true, 
+      message: '동영상이 수정되었습니다',
+      video 
+    });
   } catch (error) {
     console.error('Error updating simple video:', error);
-    res.status(500).json({ message: 'Failed to update video' });
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Failed to update video' 
+    });
   }
 });
 
@@ -307,10 +320,16 @@ router.delete('/videos/:id', adminGuard, async (req, res) => {
   try {
     const { id } = req.params;
     await storage.deleteSimpleVideo(id);
-    res.json({ message: '동영상이 삭제되었습니다' });
+    res.json({ 
+      ok: true, 
+      message: '동영상이 삭제되었습니다' 
+    });
   } catch (error) {
     console.error('Error deleting simple video:', error);
-    res.status(500).json({ message: 'Failed to delete video' });
+    res.status(500).json({ 
+      ok: false, 
+      message: 'Failed to delete video' 
+    });
   }
 });
 

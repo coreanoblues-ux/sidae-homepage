@@ -239,8 +239,9 @@ const VideoManager = () => {
       const data = await response.json();
       console.log('📄 서버 응답 데이터:', data);
 
-      if (response.ok && data.ok !== false) {
+      if (data.ok) {
         console.log('✅ 동영상 저장 성공!');
+        alert(editingVideo ? '동영상이 수정되었습니다.' : '동영상이 추가되었습니다.');
         loadVideos(); // 목록 새로고침
         setDialogOpen(false);
         setEditingVideo(null);
@@ -292,10 +293,14 @@ const VideoManager = () => {
 
       const data = await response.json();
       if (data.ok) {
+        alert('동영상이 삭제되었습니다.');
         loadVideos(); // 목록 새로고침
+      } else {
+        alert(data.message || '삭제에 실패했습니다.');
       }
     } catch (error) {
       console.error('Error deleting video:', error);
+      alert('삭제 중 오류가 발생했습니다.');
     }
   };
 
