@@ -117,13 +117,13 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/logout", (req, res) => {
     // 관리자 쿠키가 있으면 먼저 정리
-    if (process.env.SUPERADMIN_PASSWORD && req.cookies?.dev_admin === '1') {
+    if (req.cookies?.dev_admin === '1') {
       res.clearCookie('dev_admin');
       return res.redirect("/");
     }
     
     // 관리자 쿠키 먼저 확인하고 정리
-    if (process.env.SUPERADMIN_PASSWORD && req.cookies?.dev_admin === '1') {
+    if (req.cookies?.dev_admin === '1') {
       res.clearCookie('dev_admin');
       return res.redirect("/");
     }
@@ -141,12 +141,8 @@ export async function setupAuth(app: Express) {
 
   // 관리자 비밀번호 로그인 (개발 및 배포 환경 모두 지원)
   app.post("/api/dev/login", async (req, res) => {
-    // SUPERADMIN_PASSWORD 환경변수가 설정된 경우에만 활성화
-    if (!process.env.SUPERADMIN_PASSWORD) {
-      return res.status(404).json({ message: "Not Found" });
-    }
-      const { password } = req.body;
-      const correctPassword = process.env.SUPERADMIN_PASSWORD || "671321";
+    const { password } = req.body;
+    const correctPassword = process.env.SUPERADMIN_PASSWORD || "671321";
       
       if (password !== correctPassword) {
         return res.status(401).json({ message: "잘못된 비밀번호입니다." });
@@ -181,8 +177,8 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  // 개발/배포 환경에서 관리자 쿠키 확인 (SUPERADMIN_PASSWORD가 설정된 경우)
-  if (process.env.SUPERADMIN_PASSWORD && req.cookies?.dev_admin === '1') {
+  // 개발/배포 환경에서 관리자 쿠키 확인
+  if (req.cookies?.dev_admin === '1') {
     // 개발용 세션 생성
     req.user = {
       claims: { 
