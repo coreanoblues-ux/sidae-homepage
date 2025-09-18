@@ -350,7 +350,7 @@ export default function Landing() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Bishop's University (캐나다)</h4>
-                    <p className="text-muted-foreground">영어영문학과 졸업, 현지 문화와 언어에 대한 깊은 이해</p>
+                    <p className="text-muted-foreground">우등졸업 (with honors), 현지 문화와 언어에 대한 깊은 이해</p>
                   </div>
                 </div>
 

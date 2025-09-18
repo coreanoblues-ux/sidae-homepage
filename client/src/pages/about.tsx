@@ -67,7 +67,7 @@ export default function About() {
                   Bishop's University
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  캐나다 퀘벡주 명문 대학교 영어영문학과 졸업
+                  캐나다 퀘벡주 명문 대학교 우등졸업 (with honors)
                 </p>
                 <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                   캐나다 유학

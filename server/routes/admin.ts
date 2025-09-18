@@ -199,10 +199,30 @@ router.get('/videos', adminGuard, async (req, res) => {
 // ✅ 동영상 추가
 router.post('/videos', adminGuard, async (req, res) => {
   try {
+    console.log('🎬 동영상 추가 요청 데이터:', req.body);
+    
     const { title, description, videoUrl } = req.body;
-    if (!title || !videoUrl) {
-      return res.status(400).json({ ok: false, message: '제목과 동영상 URL은 필수입니다' });
+    
+    // 입력 데이터 검증
+    if (!title || typeof title !== 'string' || title.trim() === '') {
+      console.log('❌ 제목 누락 또는 잘못된 형식');
+      return res.status(400).json({ 
+        ok: false, 
+        message: 'Invalid video data',
+        errors: { title: '제목은 필수입니다' }
+      });
     }
+    
+    if (!videoUrl || typeof videoUrl !== 'string' || videoUrl.trim() === '') {
+      console.log('❌ 동영상 URL 누락 또는 잘못된 형식');
+      return res.status(400).json({ 
+        ok: false, 
+        message: 'Invalid video data',
+        errors: { videoUrl: '동영상 URL은 필수입니다' }
+      });
+    }
+    
+    console.log('✅ 입력 데이터 검증 통과');
     
     // 기본 코스 생성 또는 가져오기
     let course;
