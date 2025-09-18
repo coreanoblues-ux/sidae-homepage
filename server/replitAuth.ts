@@ -32,19 +32,20 @@ export function getSession() {
     tableName: "sessions",
   });
   
-  // 🎯 배포용 세션 쿠키 설정 (admin 쿠키와 완전 동일)
-  const cookieDomain = process.env.COOKIE_DOMAIN; // .sidae-edu.com
+  // 🎯 개발/배포 환경 대응 세션 쿠키 설정
+  const isDev = process.env.NODE_ENV === 'development';
+  const cookieDomain = process.env.COOKIE_DOMAIN;
   
   const cookieConfig: any = {
     httpOnly: true,
-    secure: true, // 배포용 고정
-    sameSite: 'none', // 배포용 고정
+    secure: !isDev, // 개발환경은 false, 배포환경은 true
+    sameSite: isDev ? 'lax' : 'none', // 개발환경은 lax, 배포환경은 none
     path: '/',
     maxAge: sessionTtl,
   };
 
-  // 도메인이 설정된 경우만 추가 (admin 쿠키와 동일 로직)
-  if (cookieDomain) {
+  // 배포환경에서만 도메인 설정
+  if (!isDev && cookieDomain) {
     cookieConfig.domain = cookieDomain;
   }
   

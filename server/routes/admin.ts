@@ -6,21 +6,22 @@ import { normalizeVideo, VIDEO_ERROR_MESSAGES } from '../utils/videos';
 
 const router = Router();
 
-// 🎯 배포용 쿠키 설정 (routes.ts와 동일, 가이드 적용)
+// 🎯 개발/배포 환경 대응 쿠키 설정 (routes.ts와 동일)
 const getCookieOptions = (req: any) => {
-  const cookieDomain = process.env.COOKIE_DOMAIN; // .sidae-edu.com
-  console.log('🍪 Cookie domain:', cookieDomain);
+  const isDev = process.env.NODE_ENV === 'development';
+  const cookieDomain = process.env.COOKIE_DOMAIN;
+  console.log('🍪 Environment:', isDev ? 'dev' : 'prod', 'Domain:', cookieDomain);
   
   const cookieOpts = {
     httpOnly: true,
-    secure: true, // 배포용 고정
-    sameSite: 'none' as const, // 배포용 고정 (소문자)
+    secure: !isDev, // 개발환경은 false, 배포환경은 true
+    sameSite: isDev ? 'lax' as const : 'none' as const,
     path: '/',
     maxAge: 1000 * 60 * 60 * 24 * 7 // 7일
   };
   
-  // 도메인이 설정된 경우만 추가
-  return cookieDomain ? { ...cookieOpts, domain: cookieDomain } : cookieOpts;
+  // 배포환경에서만 도메인 설정
+  return (!isDev && cookieDomain) ? { ...cookieOpts, domain: cookieDomain } : cookieOpts;
 };
 
 // 🔒 관리자 권한 체크 미들웨어
