@@ -234,4 +234,73 @@ router.post('/videos', adminGuard, async (req, res) => {
   }
 });
 
+// ✅ 동영상 수정
+router.put('/videos/:id', adminGuard, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, videoUrl } = req.body;
+    
+    if (!title || !videoUrl) {
+      return res.status(400).json({ ok: false, message: '제목과 동영상 URL은 필수입니다' });
+    }
+    
+    const video = await storage.updateVideo(id, {
+      title,
+      description: description || null,
+      externalUrl: videoUrl
+    });
+    
+    res.json({ ok: true, item: video });
+  } catch (error) {
+    console.error('Error updating video:', error);
+    res.status(500).json({ ok: false, message: 'Failed to update video' });
+  }
+});
+
+// ✅ 동영상 삭제
+router.delete('/videos/:id', adminGuard, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await storage.deleteVideo(id);
+    res.json({ ok: true, message: '동영상이 삭제되었습니다' });
+  } catch (error) {
+    console.error('Error deleting video:', error);
+    res.status(500).json({ ok: false, message: 'Failed to delete video' });
+  }
+});
+
+// ✅ 갤러리 이미지 수정
+router.put('/gallery/:id', adminGuard, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { caption, imageUrl } = req.body;
+    
+    if (!imageUrl) {
+      return res.status(400).json({ ok: false, message: '이미지 URL은 필수입니다' });
+    }
+    
+    const image = await storage.updateGalleryImage(id, {
+      url: imageUrl,
+      caption: caption || null
+    });
+    
+    res.json({ ok: true, item: image });
+  } catch (error) {
+    console.error('Error updating gallery image:', error);
+    res.status(500).json({ ok: false, message: 'Failed to update gallery image' });
+  }
+});
+
+// ✅ 갤러리 이미지 삭제
+router.delete('/gallery/:id', adminGuard, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await storage.deleteGalleryImage(id);
+    res.json({ ok: true, message: '갤러리 이미지가 삭제되었습니다' });
+  } catch (error) {
+    console.error('Error deleting gallery image:', error);
+    res.status(500).json({ ok: false, message: 'Failed to delete gallery image' });
+  }
+});
+
 export default router;

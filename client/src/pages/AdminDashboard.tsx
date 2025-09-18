@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Trash2, Edit, Plus, LogOut } from 'lucide-react';
 
 // 관리자 대시보드 탭 컴포넌트들
 const PendingMembers = () => {
@@ -138,6 +143,9 @@ const PendingMembers = () => {
 const VideoManager = () => {
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingVideo, setEditingVideo] = useState<any>(null);
+  const [formData, setFormData] = useState({ title: '', description: '', videoUrl: '' });
 
   const loadVideos = async () => {
     setLoading(true);
@@ -155,6 +163,69 @@ const VideoManager = () => {
     setLoading(false);
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title || !formData.videoUrl) return;
+
+    try {
+      const url = editingVideo 
+        ? `/api/admin/videos/${editingVideo.id}`
+        : '/api/admin/videos';
+      const method = editingVideo ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+      if (data.ok) {
+        loadVideos(); // 목록 새로고침
+        setDialogOpen(false);
+        setEditingVideo(null);
+        setFormData({ title: '', description: '', videoUrl: '' });
+      }
+    } catch (error) {
+      console.error('Error saving video:', error);
+    }
+  };
+
+  const handleEdit = (video: any) => {
+    setEditingVideo(video);
+    setFormData({
+      title: video.title,
+      description: video.description || '',
+      videoUrl: video.videoUrl
+    });
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (videoId: string) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    try {
+      const response = await fetch(`/api/admin/videos/${videoId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      if (data.ok) {
+        loadVideos(); // 목록 새로고침
+      }
+    } catch (error) {
+      console.error('Error deleting video:', error);
+    }
+  };
+
+  const openAddDialog = () => {
+    setEditingVideo(null);
+    setFormData({ title: '', description: '', videoUrl: '' });
+    setDialogOpen(true);
+  };
+
   React.useEffect(() => {
     loadVideos();
   }, []);
@@ -163,9 +234,73 @@ const VideoManager = () => {
     <div data-testid="video-manager" className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">동영상 관리</h2>
-        <Button onClick={loadVideos} disabled={loading} data-testid="button-refresh-videos">
-          {loading ? '로딩중...' : '새로고침'}
-        </Button>
+        <div className="space-x-2">
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openAddDialog} data-testid="button-add-video">
+                <Plus className="w-4 h-4 mr-2" />
+                동영상 추가
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingVideo ? '동영상 수정' : '동영상 추가'}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="title">제목 *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    required
+                    data-testid="input-video-title"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description">설명</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    data-testid="input-video-description"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="videoUrl">동영상 URL *</Label>
+                  <Input
+                    id="videoUrl"
+                    type="url"
+                    value={formData.videoUrl}
+                    onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                    required
+                    placeholder="https://example.com/video.mp4"
+                    data-testid="input-video-url"
+                  />
+                </div>
+                <div className="flex space-x-2 pt-4">
+                  <Button type="submit" data-testid="button-save-video">
+                    {editingVideo ? '수정' : '추가'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setDialogOpen(false)}
+                    data-testid="button-cancel-video"
+                  >
+                    취소
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+          
+          <Button onClick={loadVideos} disabled={loading} data-testid="button-refresh-videos">
+            {loading ? '로딩중...' : '새로고침'}
+          </Button>
+        </div>
       </div>
       
       {loading ? (
@@ -178,16 +313,39 @@ const VideoManager = () => {
             <Card key={video.id} data-testid={`card-video-${video.id}`}>
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium" data-testid={`text-video-title-${video.id}`}>
                       {video.title}
                     </p>
+                    {video.description && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {video.description}
+                      </p>
+                    )}
                     <p className="text-sm text-muted-foreground">
                       코스: {video.courseName}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       URL: {video.videoUrl}
                     </p>
+                  </div>
+                  <div className="space-x-2 ml-4">
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(video)}
+                      data-testid={`button-edit-video-${video.id}`}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(video.id)}
+                      data-testid={`button-delete-video-${video.id}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -202,6 +360,9 @@ const VideoManager = () => {
 const GalleryManager = () => {
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingImage, setEditingImage] = useState<any>(null);
+  const [formData, setFormData] = useState({ caption: '', imageUrl: '' });
 
   const loadImages = async () => {
     setLoading(true);
@@ -219,6 +380,68 @@ const GalleryManager = () => {
     setLoading(false);
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.imageUrl) return;
+
+    try {
+      const url = editingImage 
+        ? `/api/admin/gallery/${editingImage.id}`
+        : '/api/admin/gallery';
+      const method = editingImage ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+      if (data.ok) {
+        loadImages(); // 목록 새로고침
+        setDialogOpen(false);
+        setEditingImage(null);
+        setFormData({ caption: '', imageUrl: '' });
+      }
+    } catch (error) {
+      console.error('Error saving image:', error);
+    }
+  };
+
+  const handleEdit = (image: any) => {
+    setEditingImage(image);
+    setFormData({
+      caption: image.caption || '',
+      imageUrl: image.url
+    });
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (imageId: string) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    try {
+      const response = await fetch(`/api/admin/gallery/${imageId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      if (data.ok) {
+        loadImages(); // 목록 새로고침
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+    }
+  };
+
+  const openAddDialog = () => {
+    setEditingImage(null);
+    setFormData({ caption: '', imageUrl: '' });
+    setDialogOpen(true);
+  };
+
   React.useEffect(() => {
     loadImages();
   }, []);
@@ -227,9 +450,64 @@ const GalleryManager = () => {
     <div data-testid="gallery-manager" className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">갤러리 관리</h2>
-        <Button onClick={loadImages} disabled={loading} data-testid="button-refresh-gallery">
-          {loading ? '로딩중...' : '새로고침'}
-        </Button>
+        <div className="space-x-2">
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openAddDialog} data-testid="button-add-image">
+                <Plus className="w-4 h-4 mr-2" />
+                이미지 추가
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingImage ? '이미지 수정' : '이미지 추가'}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="imageUrl">이미지 URL *</Label>
+                  <Input
+                    id="imageUrl"
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    required
+                    placeholder="https://example.com/image.jpg"
+                    data-testid="input-image-url"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="caption">캡션</Label>
+                  <Input
+                    id="caption"
+                    value={formData.caption}
+                    onChange={(e) => setFormData({ ...formData, caption: e.target.value })}
+                    placeholder="이미지 설명"
+                    data-testid="input-image-caption"
+                  />
+                </div>
+                <div className="flex space-x-2 pt-4">
+                  <Button type="submit" data-testid="button-save-image">
+                    {editingImage ? '수정' : '추가'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setDialogOpen(false)}
+                    data-testid="button-cancel-image"
+                  >
+                    취소
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+          
+          <Button onClick={loadImages} disabled={loading} data-testid="button-refresh-gallery">
+            {loading ? '로딩중...' : '새로고침'}
+          </Button>
+        </div>
       </div>
       
       {loading ? (
@@ -241,12 +519,32 @@ const GalleryManager = () => {
           {images.map((image) => (
             <Card key={image.id} data-testid={`card-image-${image.id}`}>
               <CardContent className="pt-6">
-                <img 
-                  src={image.url} 
-                  alt={image.caption || 'Gallery image'} 
-                  className="w-full h-48 object-cover rounded"
-                  data-testid={`img-gallery-${image.id}`}
-                />
+                <div className="relative">
+                  <img 
+                    src={image.url} 
+                    alt={image.caption || 'Gallery image'} 
+                    className="w-full h-48 object-cover rounded"
+                    data-testid={`img-gallery-${image.id}`}
+                  />
+                  <div className="absolute top-2 right-2 space-x-1">
+                    <Button 
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleEdit(image)}
+                      data-testid={`button-edit-image-${image.id}`}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(image.id)}
+                      data-testid={`button-delete-image-${image.id}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
                 {image.caption && (
                   <p className="text-sm text-muted-foreground mt-2" data-testid={`text-caption-${image.id}`}>
                     {image.caption}
@@ -264,13 +562,48 @@ const GalleryManager = () => {
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('pending');
 
+  const handleLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까?')) return;
+    
+    try {
+      console.log('🚪 로그아웃 시도 시작');
+      
+      const response = await fetch('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      console.log('📡 로그아웃 응답 상태:', response.status);
+      const data = await response.json();
+      console.log('📄 로그아웃 응답 데이터:', data);
+      
+      if (response.ok) {
+        console.log('✅ 로그아웃 성공! 쿠키 확인:', document.cookie);
+        // 로그아웃 성공 시 로그인 페이지로 이동
+        window.location.href = '/_superadmin';
+      }
+    } catch (error) {
+      console.error('💥 Logout error:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background" data-testid="admin-dashboard">
       <div className="container mx-auto p-6">
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">관리자 대시보드</h1>
-            <p className="text-muted-foreground">시대영재 학원 관리자 페이지</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">관리자 대시보드</h1>
+              <p className="text-muted-foreground">시대영재 학원 관리자 페이지</p>
+            </div>
+            <Button 
+              variant="outline"
+              onClick={handleLogout}
+              data-testid="button-logout"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              로그아웃
+            </Button>
           </div>
           
           <div className="border-b">
