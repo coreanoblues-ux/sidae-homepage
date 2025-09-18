@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "./ThemeProvider";
-import { GraduationCap, Menu, X, Moon, Sun, User, LogOut } from "lucide-react";
+import { GraduationCap, Menu, X, Moon, Sun, User, LogOut, UserPlus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,14 +20,142 @@ import {
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
+
+// Auth form schemas
+const loginSchema = z.object({
+  email: z.string().email("올바른 이메일 주소를 입력해주세요"),
+  password: z.string().min(1, "비밀번호를 입력해주세요"),
+});
+
+const signupSchema = z.object({
+  email: z.string().email("올바른 이메일 주소를 입력해주세요"),
+  firstName: z.string().min(1, "이름을 입력해주세요"),
+  lastName: z.string().min(1, "성을 입력해주세요"),
+  password: z.string().min(6, "비밀번호는 최소 6자 이상이어야 합니다"),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "비밀번호가 일치하지 않습니다",
+  path: ["confirmPassword"],
+});
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [password, setPassword] = useState("");
   const { user, isAuthenticated, isLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [location] = useLocation();
+  const { toast } = useToast();
+
+  // Form handlers
+  const loginForm = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const signupForm = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      firstName: "",
+      lastName: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  // Login mutation
+  const loginMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof loginSchema>) => {
+      const response = await apiRequest("POST", "/api/auth/login", values);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "로그인 성공",
+        description: `환영합니다, ${data.user.firstName}님!`,
+      });
+      setShowLoginDialog(false);
+      loginForm.reset();
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "로그인 실패",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Signup mutation
+  const signupMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof signupSchema>) => {
+      const response = await apiRequest("POST", "/api/auth/signup", values);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "회원가입 성공",
+        description: data.message,
+      });
+      setShowSignupDialog(false);
+      signupForm.reset();
+    },
+    onError: (error) => {
+      toast({
+        title: "회원가입 실패",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/logout");
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "로그아웃 완료",
+        description: "안전하게 로그아웃되었습니다.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "로그아웃 실패",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleLogin = (values: z.infer<typeof loginSchema>) => {
+    loginMutation.mutate(values);
+  };
+
+  const handleSignup = (values: z.infer<typeof signupSchema>) => {
+    signupMutation.mutate(values);
+  };
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   const navItems = [
     { href: "/", label: "홈" },
@@ -158,21 +286,30 @@ export function Header() {
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <a href="/api/logout" className="flex items-center">
-                          <LogOut className="mr-2 h-4 w-4" />
-                          로그아웃
-                        </a>
+                      <DropdownMenuItem 
+                        onClick={handleLogout}
+                        className="flex items-center cursor-pointer"
+                        data-testid="button-logout"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        로그아웃
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
                   <>
-                    <Button variant="ghost" asChild>
-                      <a href="/api/login">로그인</a>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => setShowLoginDialog(true)}
+                      data-testid="button-login"
+                    >
+                      로그인
                     </Button>
-                    <Button asChild>
-                      <a href="/api/login">회원가입</a>
+                    <Button 
+                      onClick={() => setShowSignupDialog(true)}
+                      data-testid="button-signup"
+                    >
+                      회원가입
                     </Button>
                   </>
                 )}
@@ -222,6 +359,222 @@ export function Header() {
                 </Button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Login Dialog */}
+        <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>로그인</DialogTitle>
+            </DialogHeader>
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+                <FormField
+                  control={loginForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>이메일</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="email" 
+                          placeholder="이메일을 입력하세요" 
+                          {...field} 
+                          data-testid="input-login-email"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>비밀번호</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="비밀번호를 입력하세요" 
+                          {...field} 
+                          data-testid="input-login-password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowLoginDialog(false);
+                      loginForm.reset();
+                    }}
+                  >
+                    취소
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={loginMutation.isPending}
+                    data-testid="button-submit-login"
+                  >
+                    {loginMutation.isPending ? "로그인 중..." : "로그인"}
+                  </Button>
+                </div>
+                <div className="text-center">
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => {
+                      setShowLoginDialog(false);
+                      setShowSignupDialog(true);
+                    }}
+                    className="text-sm"
+                  >
+                    계정이 없으신가요? 회원가입
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Signup Dialog */}
+        <Dialog open={showSignupDialog} onOpenChange={setShowSignupDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>회원가입</DialogTitle>
+            </DialogHeader>
+            <Form {...signupForm}>
+              <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
+                <FormField
+                  control={signupForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>이메일</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="email" 
+                          placeholder="이메일을 입력하세요" 
+                          {...field} 
+                          data-testid="input-signup-email"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={signupForm.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>성</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="성" 
+                            {...field} 
+                            data-testid="input-signup-lastname"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signupForm.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>이름</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="이름" 
+                            {...field} 
+                            data-testid="input-signup-firstname"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={signupForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>비밀번호</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="비밀번호 (최소 6자)" 
+                          {...field} 
+                          data-testid="input-signup-password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={signupForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>비밀번호 확인</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="비밀번호를 다시 입력하세요" 
+                          {...field} 
+                          data-testid="input-signup-confirm-password"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowSignupDialog(false);
+                      signupForm.reset();
+                    }}
+                  >
+                    취소
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={signupMutation.isPending}
+                    data-testid="button-submit-signup"
+                  >
+                    {signupMutation.isPending ? "가입 중..." : "회원가입"}
+                  </Button>
+                </div>
+                <div className="text-center">
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => {
+                      setShowSignupDialog(false);
+                      setShowLoginDialog(true);
+                    }}
+                    className="text-sm"
+                  >
+                    이미 계정이 있으신가요? 로그인
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
 

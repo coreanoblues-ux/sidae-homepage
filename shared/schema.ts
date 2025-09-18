@@ -28,13 +28,15 @@ export const sessions = pgTable(
 export const roleEnum = pgEnum('role', ['PENDING', 'VERIFIED', 'ADMIN']);
 export const approvalStatusEnum = pgEnum('approval_status', ['APPROVED', 'REJECTED']);
 
-// Users table (required for Replit Auth)
+// Users table (supports both Replit Auth and local registration)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  password: varchar("password"), // For local registration
+  isLocalUser: boolean("is_local_user").default(false), // Distinguish local vs Replit users
   role: roleEnum("role").default('PENDING').notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

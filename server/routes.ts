@@ -5,20 +5,164 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertCourseSchema, insertVideoSchema, insertNoticeSchema, insertGalleryImageSchema, insertProgramSchema } from "@shared/schema";
 import { z } from "zod";
 import sanitizeHtml from "sanitize-html";
+import { hashPassword, verifyPassword, signupSchema, loginSchema } from "./auth-utils";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
+  // Enhanced auth middleware for both OAuth and local users
+  const enhancedAuth = async (req: any, res: any, next: any) => {
+    // Check for local user session first
+    const localUserId = (req.session as any)?.localUserId;
+    if (localUserId) {
+      req.localUser = await storage.getUser(localUserId);
+      if (req.localUser) {
+        return next();
+      }
+    }
+    
+    // Fall back to OAuth authentication
+    return isAuthenticated(req, res, next);
+  };
+
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', enhancedAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      let user;
+      
+      // If it's a local user session
+      if (req.localUser) {
+        user = req.localUser;
+      } else {
+        // OAuth user
+        const userId = req.user.claims.sub;
+        user = await storage.getUser(userId);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Logout error:", err);
+        return res.status(500).json({ message: "로그아웃 중 오류가 발생했습니다" });
+      }
+      res.clearCookie('connect.sid'); // Clear session cookie
+      res.json({ message: "로그아웃되었습니다" });
+    });
+  });
+
+  // Local registration routes
+  app.post('/api/auth/signup', async (req, res) => {
+    try {
+      const result = signupSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ 
+          message: "입력 정보가 올바르지 않습니다", 
+          errors: result.error.errors 
+        });
+      }
+
+      const { email, firstName, lastName, password } = result.data;
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: "이미 가입된 이메일 주소입니다" });
+      }
+
+      // Hash password and create user
+      const hashedPassword = await hashPassword(password);
+      
+      const newUser = await storage.upsertUser({
+        email,
+        firstName,
+        lastName,
+        password: hashedPassword,
+        isLocalUser: true,
+        role: 'PENDING', // Default role, admin needs to approve
+        profileImageUrl: null,
+      });
+
+      res.status(201).json({ 
+        message: "회원가입이 완료되었습니다. 관리자 승인 후 이용 가능합니다.",
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          role: newUser.role
+        }
+      });
+    } catch (error) {
+      console.error("Signup error:", error);
+      res.status(500).json({ message: "회원가입 중 오류가 발생했습니다" });
+    }
+  });
+
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const result = loginSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ 
+          message: "이메일과 비밀번호를 확인해주세요", 
+          errors: result.error.errors 
+        });
+      }
+
+      const { email, password } = result.data;
+
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user || !user.isLocalUser || !user.password) {
+        return res.status(401).json({ message: "이메일 또는 비밀번호가 잘못되었습니다" });
+      }
+
+      // Verify password
+      const isValidPassword = await verifyPassword(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "이메일 또는 비밀번호가 잘못되었습니다" });
+      }
+
+      // Check user status
+      if (user.role === 'PENDING') {
+        return res.status(403).json({ 
+          message: "계정이 아직 승인되지 않았습니다. 관리자 승인을 기다려주세요." 
+        });
+      }
+
+      // Create session for local user
+      (req.session as any).localUserId = user.id;
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ message: "로그인 중 오류가 발생했습니다" });
+        }
+        
+        res.json({ 
+          message: "로그인 성공",
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role
+          }
+        });
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "로그인 중 오류가 발생했습니다" });
     }
   });
 
@@ -148,9 +292,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Protected routes
-  app.get('/api/videos/:id/can-view', isAuthenticated, async (req: any, res) => {
+  app.get('/api/videos/:id/can-view', enhancedAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.localUser ? req.localUser.id : req.user.claims.sub;
       const canView = await storage.canUserViewVideo(userId, req.params.id);
       res.json({ canView });
     } catch (error) {
@@ -159,9 +303,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/videos/:id/view', isAuthenticated, async (req: any, res) => {
+  app.post('/api/videos/:id/view', enhancedAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.localUser ? req.localUser.id : req.user.claims.sub;
       const canView = await storage.canUserViewVideo(userId, req.params.id);
       if (!canView) {
         return res.status(403).json({ message: "Access denied" });
@@ -175,9 +319,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // CRITICAL: Protected video URL endpoint - prevents unauthorized access to video URLs
-  app.get('/api/videos/:id/url', isAuthenticated, async (req: any, res) => {
+  app.get('/api/videos/:id/url', enhancedAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.localUser ? req.localUser.id : req.user.claims.sub;
       const canView = await storage.canUserViewVideo(userId, req.params.id);
       if (!canView) {
         return res.status(403).json({ message: "Access denied to video content" });
