@@ -139,7 +139,7 @@ export default function Landing() {
                 </span>
               </h1>
               <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
-                '(전) 영단기 현강 대표강사, (전)해커스 인강' 의 정우석 원장과 함께 하는 시대영재학원
+                '(전) 영단기 현강 대표강사, (전) 해커스 인강' 의 정우석 원장과 함께 하는 시대영재학원
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
@@ -292,7 +292,7 @@ export default function Landing() {
                 실력있는 원장과 탄탄한 강사진
               </h2>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                강남영단기 1타강사 출신 캐나다국적 원장과 서울대, 경희대, 광주교대 출신 
+                (전)강남영단기 1타강사 출신 캐나다국적 원장과 서울대, 경희대, 광주교대 출신 
                 교육학 석사 자격을 갖춘 최고의 강사진이 함께합니다.
               </p>
 
@@ -337,7 +337,7 @@ export default function Landing() {
                     <Presentation className="text-green-600 dark:text-green-400 w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground">강남영단기 1타강사 & 해커스 50만뷰+</h4>
+                    <h4 className="font-semibold text-foreground">(전)강남영단기 1타강사 & (전) 해커스 50만뷰+</h4>
                     <p className="text-muted-foreground">현강 1타강사와 인터넷 50만뷰 돌파 인기강사의 검증된 강의력</p>
                     <img 
                       src="/images/IMG_6559_1758101109393.JPG"
@@ -574,7 +574,7 @@ export default function Landing() {
                   <div>
                     <h4 className="font-semibold text-foreground">전화 상담</h4>
                     <p className="text-muted-foreground">062-462-0990</p>
-                    <p className="text-sm text-muted-foreground mt-1">상담시간: 월-금 09:00-22:00, 토 09:00-18:00</p>
+                    <p className="text-sm text-muted-foreground mt-1">상담시간: 월-금 14:00-22:00, 토-일 09:30-18:00</p>
                   </div>
                 </div>
 
@@ -691,7 +691,7 @@ export default function Landing() {
                 </div>
               </div>
               <p className="text-secondary-foreground/80 mb-4 leading-relaxed">
-강남영단기 1타강사, 해커스 50만뷰+ 인기강사, TOEIC 990점
+(전)강남영단기 1타강사, (전) 해커스 50만뷰+ 인기강사, TOEIC 990점
                 캐나다국적 원장과 함께하는 중고등부 입시영어 전문교육
               </p>
             </div>
