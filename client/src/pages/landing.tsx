@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+// Images are now in public/images folder
 
 const contactFormSchema = z.object({
   name: z.string().min(1, "이름을 입력해주세요"),
@@ -120,7 +121,7 @@ export default function Landing() {
         </DialogContent>
       </Dialog>
       {/* Hero Section */}
-      <section className="hero-gradient text-white py-20 lg:py-32">
+      <section className="hero-gradient pattern-bg text-white py-20 lg:py-32 relative z-0">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="fade-in">
@@ -167,13 +168,13 @@ export default function Landing() {
 
             <div className="fade-in lg:ml-8">
               <img
-                src="/images/magazine-cover.png"
+                src="/images/magazine-cover.PNG"
                 alt="1타강사 잡지 커버"
-                className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover aspect-[4/5]"
+                className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover aspect-[4/5] float-slow"
               />
 
               <div className="relative -mt-16 mx-4">
-                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg transform rotate-2">
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg float-rotate-2">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
                       <Trophy className="text-white w-6 h-6" />
@@ -185,7 +186,7 @@ export default function Landing() {
                   </div>
                 </div>
 
-                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg transform -rotate-1 -mt-2 ml-8">
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg -mt-2 ml-8 float-rotate-neg1">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
                       <University className="text-white w-6 h-6" />
@@ -197,7 +198,7 @@ export default function Landing() {
                   </div>
                 </div>
 
-                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg transform rotate-1 -mt-2 mr-4">
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg -mt-2 mr-4 float-rotate-1">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
                       <Medal className="text-white w-6 h-6" />
@@ -215,7 +216,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-muted/30 pattern-bg-alt">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
@@ -279,7 +280,7 @@ export default function Landing() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20">
+      <section id="about" className="py-20 geometric-shapes">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -353,25 +354,36 @@ export default function Landing() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=800"
-                alt="시대영재 학원 원장 프로필"
-                className="rounded-xl shadow-lg object-cover aspect-[3/4] w-full"
-              />
-
-              <div className="space-y-4">
-                <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400"
-                  alt="강의 중인 시대영재 학원 원장"
-                  className="rounded-xl shadow-lg object-cover aspect-[3/2] w-full"
-                />
-
-                <img
-                  src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400"
-                  alt="학위증서 및 자격증"
-                  className="rounded-xl shadow-lg object-cover aspect-[3/2] w-full"
-                />
+            <div className="relative">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Main team photo */}
+                <div className="col-span-1">
+                  <img
+                    src="/images/team-photo.PNG"
+                    alt="시대영재 학원 강사진"
+                    className="rounded-xl shadow-2xl object-cover w-full h-[400px] transform hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute -bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-lg">
+                    <p className="text-sm font-semibold text-gray-900">시대영재 학원 전문 강사진</p>
+                    <p className="text-xs text-gray-600">검증된 실력과 경험을 바탕으로 최고의 교육을 제공합니다</p>
+                  </div>
+                </div>
+                
+                {/* Magazine cover as secondary highlight */}
+                <div className="col-span-1 flex flex-col justify-center">
+                  <div className="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-xl p-6 transform rotate-2 hover:rotate-0 transition-transform duration-300">
+                    <img
+                      src="/images/magazine-cover.PNG"
+                      alt="1타강사 인증"
+                      className="rounded-lg shadow-lg object-cover w-full max-w-xs mx-auto"
+                    />
+                    <div className="text-center mt-4">
+                      <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
+                        인증받은 1타강사
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -379,7 +391,7 @@ export default function Landing() {
       </section>
 
       {/* Gallery Section */}
-      <section id="gallery" className="py-20 bg-muted/30">
+      <section id="gallery" className="py-20 bg-muted/30 pattern-bg">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <div className="flex items-center justify-center gap-4">
@@ -404,7 +416,7 @@ export default function Landing() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20">
+      <section className="py-20 pattern-bg-alt">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <div className="flex items-center justify-center gap-4">
@@ -469,7 +481,7 @@ export default function Landing() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-muted/30">
+      <section id="contact" className="py-20 bg-muted/30 geometric-shapes">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16">
             <div>
