@@ -41,6 +41,11 @@ export default function SuperAdmin() {
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       
       setPassword("");
+      
+      // 페이지 강제 새로고침으로 상태 동기화
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       toast({ 
         title: "로그인 실패", 
