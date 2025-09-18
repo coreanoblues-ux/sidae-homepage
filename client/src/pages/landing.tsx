@@ -103,12 +103,10 @@ export default function Landing() {
     setShowPasswordDialog(true);
   };
 
-  // CTA 버튼 클릭 핸들러 (핵심 로직)
+  // CTA 버튼 클릭 핸들러 (핵심 로직) - 상단 '동영상' 버튼과 동일한 페이지로 연결
   const onClickCTA = () => {
-    if (isAuthenticated && (user as any)?.role === 'VERIFIED') {
-      setLocation('/members'); // 인증회원만 /members로
-    } else if (isAuthenticated && (user as any)?.role === 'ADMIN') {
-      setLocation('/admin'); // 관리자는 /admin으로
+    if (isAuthenticated && ((user as any)?.role === 'VERIFIED' || (user as any)?.role === 'ADMIN')) {
+      setLocation('/videos'); // 모든 인증된 사용자는 동영상 페이지로
     } else {
       setLocation('/login'); // 비로그인/PENDING은 로그인으로
     }
