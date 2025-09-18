@@ -11,9 +11,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Enhanced auth middleware for both OAuth and local users
+  // Enhanced auth middleware for both OAuth and local users (엄격한 인증)
   const enhancedAuth = async (req: any, res: any, next: any) => {
-    // Check for local user session first
+    // 캐시 금지 헤더 설정
+    res.set('Cache-Control', 'no-store');
+    
+    // 1. Check for local user session first
     const localUserId = (req.session as any)?.localUserId;
     if (localUserId) {
       req.localUser = await storage.getUser(localUserId);
@@ -22,8 +25,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
     
-    // Fall back to OAuth authentication
-    return isAuthenticated(req, res, next);
+    // 2. dev_admin 쿠키 확인 (개발용 관리자) - 바로 통과
+    if (req.cookies?.dev_admin === '1') {
+      // 관리자 사용자 객체 설정
+      req.user = {
+        claims: { 
+          sub: 'dev-admin',
+          email: 'admin@sidaeyeongjae.kr',
+          first_name: '관리자',
+          last_name: '개발용'
+        }
+      };
+      return next();
+    }
+    
+    // 3. OAuth 인증 확인
+    if (req.isAuthenticated() && req.user && req.user.expires_at) {
+      const now = Math.floor(Date.now() / 1000);
+      if (now <= req.user.expires_at) {
+        return next();
+      }
+    }
+    
+    // 인증 실패 시 무조건 401 (HTML 리다이렉트 금지)
+    return res.status(401).json({ ok: false, code: 'UNAUTHENTICATED', message: 'Unauthorized' });
   };
 
   // Auth routes
@@ -58,15 +83,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "로그아웃 중 오류가 발생했습니다" });
       }
       
-      // Clear all auth-related cookies with proper options
-      res.clearCookie('connect.sid', { path: '/' }); // Session cookie
-      res.clearCookie('dev_admin', { 
-        path: '/',
+      // 쿠키 옵션은 로그인 시와 '완전히 동일'해야 함
+      const devAdminOpts = {
         httpOnly: true,
-        sameSite: 'lax'
-      });   // Dev admin cookie
+        sameSite: 'lax' as const,
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 원래 설정과 동일
+      };
       
-      res.json({ message: "로그아웃되었습니다" });
+      const sessionOpts = { 
+        path: '/', 
+        httpOnly: true 
+      };
+      
+      // 일부 브라우저 호환을 위해 두 번 처리
+      // 1차: clearCookie
+      res.clearCookie('connect.sid', sessionOpts);
+      res.clearCookie('dev_admin', devAdminOpts);
+      
+      // 2차: 즉시 만료 쿠키 설정
+      res.cookie('connect.sid', '', { ...sessionOpts, maxAge: 0 });
+      res.cookie('dev_admin', '', { ...devAdminOpts, maxAge: 0 });
+      
+      // 캐시 금지 헤더
+      res.set('Cache-Control', 'no-store');
+      
+      res.json({ ok: true, loggedOut: true, message: "로그아웃되었습니다" });
     });
   });
 

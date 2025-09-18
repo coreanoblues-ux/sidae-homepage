@@ -123,10 +123,13 @@ export function Header() {
     },
   });
 
-  // Logout mutation
+  // Logout mutation (표준화)
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/auth/logout");
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include"
+      });
       return response.json();
     },
     onSuccess: () => {
@@ -135,13 +138,15 @@ export function Header() {
         description: "안전하게 로그아웃되었습니다.",
       });
       
-      // Clear query cache and force page reload to ensure complete logout
-      queryClient.clear();
+      /** 상태/캐시 완전 초기화 **/
+      localStorage.removeItem('auth');           // 쓰는 키 모두 제거
+      sessionStorage.clear?.();
+      queryClient.clear(); // React Query 캐시 완전 삭제
       
-      // Small delay to ensure toast is visible, then reload
+      // 잠깐 대기 후 새로고침으로 남은 캐시 차단
       setTimeout(() => {
         window.location.reload();
-      }, 1000);
+      }, 500);
     },
     onError: (error) => {
       toast({
