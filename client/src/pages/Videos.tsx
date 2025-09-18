@@ -47,6 +47,11 @@ const VideoPlayer = ({ video, onClose }: { video: Video; onClose: () => void }) 
         </div>
       );
     } else if (video.type === 'nas') {
+      // NAS 동영상: HTTP는 프록시를 통해, HTTPS는 직접 로드
+      const videoUrl = video.url.startsWith('http://') 
+        ? `/proxy/video?u=${encodeURIComponent(video.url)}`
+        : video.url;
+      
       return (
         <div className="relative w-full">
           <video
@@ -58,9 +63,9 @@ const VideoPlayer = ({ video, onClose }: { video: Video; onClose: () => void }) 
               alert('동영상을 재생할 수 없습니다. URL을 확인해주세요.');
             }}
           >
-            <source src={video.url} type="video/mp4" />
-            <source src={video.url} type="video/webm" />
-            <source src={video.url} type="video/ogg" />
+            <source src={videoUrl} type="video/mp4" />
+            <source src={videoUrl} type="video/webm" />
+            <source src={videoUrl} type="video/ogg" />
             죄송합니다. 브라우저가 동영상을 지원하지 않습니다.
           </video>
         </div>

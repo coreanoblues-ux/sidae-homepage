@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { storage } from '../storage';
 import { insertSimpleVideoSchema } from '../../shared/schema';
 import { z } from 'zod';
+import { normalizeVideo, VIDEO_ERROR_MESSAGES } from '../utils/videos';
 
 const router = Router();
 
@@ -185,40 +186,73 @@ router.get('/videos', adminGuard, async (req, res) => {
   }
 });
 
-// 🎯 동영상 추가 (새로운 단순 구조)
+// 🎯 동영상 추가 (새로운 단순 구조 + URL 정규화)
 router.post('/videos', adminGuard, async (req, res) => {
   try {
     console.log('🎬 새로운 동영상 추가 요청:', req.body);
     
     const { title, type, url } = req.body;
     
-    // 🔧 Zod validation 추가
-    try {
-      const validatedData = insertSimpleVideoSchema.parse({
-        title: title?.trim(),
-        type,
-        url: url?.trim()
+    // 필수 필드 검증
+    if (!title || !type || !url) {
+      return res.status(400).json({ 
+        ok: false, 
+        code: 'MISSING_FIELDS',
+        message: '제목, 타입, URL은 필수입니다.'
       });
+    }
+    
+    try {
+      // URL 정규화 및 검증
+      const normalized = normalizeVideo({ type, url });
+      console.log('✅ URL 정규화 완료:', normalized);
       
-      console.log('✅ Zod 검증 통과:', validatedData);
+      // Zod validation 및 DB 저장
+      const validatedData = insertSimpleVideoSchema.parse({
+        title: title.trim(),
+        type: normalized.type,
+        url: normalized.url
+      });
       
       const video = await storage.createSimpleVideo(validatedData);
       console.log('✅ 동영상 생성 완료:', video);
-      res.json(video);
       
-    } catch (zodError: any) {
-      console.log('❌ Zod 검증 실패:', zodError);
-      if (zodError instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: 'Invalid video data',
-          errors: zodError.errors
+      res.json({ 
+        ok: true, 
+        video 
+      });
+      
+    } catch (error: any) {
+      console.log('❌ 동영상 처리 오류:', error.message);
+      
+      // 비디오 정규화 에러 처리
+      if (VIDEO_ERROR_MESSAGES[error.message]) {
+        return res.status(422).json({ 
+          ok: false, 
+          code: error.message,
+          message: VIDEO_ERROR_MESSAGES[error.message]
         });
       }
-      throw zodError;
+      
+      // Zod 검증 에러
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          ok: false,
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid video data',
+          errors: error.errors
+        });
+      }
+      
+      throw error;
     }
   } catch (error) {
     console.error('❌ Error creating simple video:', error);
-    res.status(500).json({ message: 'Failed to create video' });
+    res.status(500).json({ 
+      ok: false,
+      code: 'SERVER_ERROR',
+      message: 'Failed to create video' 
+    });
   }
 });
 

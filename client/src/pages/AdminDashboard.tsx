@@ -188,7 +188,7 @@ const VideoManager = () => {
       const data = await response.json();
       console.log('📄 서버 응답 데이터:', data);
 
-      if (response.ok) {
+      if (response.ok && data.ok !== false) {
         console.log('✅ 동영상 저장 성공!');
         loadVideos(); // 목록 새로고침
         setDialogOpen(false);

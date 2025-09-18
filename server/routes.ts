@@ -7,6 +7,7 @@ import { z } from "zod";
 import sanitizeHtml from "sanitize-html";
 import { hashPassword, verifyPassword, signupSchema, loginSchema } from "./auth-utils";
 import adminRouter from "./routes/admin";
+import proxyVideoRouter from "./routes/proxy.video";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -993,6 +994,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // 🎯 새로운 관리자 API 라우터 마운트
   app.use('/api/admin', adminRouter);
+  
+  // 프록시 라우터 등록 (NAS HTTP 동영상 스트리밍)
+  app.use(proxyVideoRouter);
 
   const httpServer = createServer(app);
   return httpServer;
