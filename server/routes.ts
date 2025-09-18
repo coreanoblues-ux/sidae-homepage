@@ -6,6 +6,7 @@ import { insertCourseSchema, insertVideoSchema, insertNoticeSchema, insertGaller
 import { z } from "zod";
 import sanitizeHtml from "sanitize-html";
 import { hashPassword, verifyPassword, signupSchema, loginSchema } from "./auth-utils";
+import adminRouter from "./routes/admin";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -978,6 +979,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "동영상 추가 중 오류가 발생했습니다" });
     }
   });
+
+  // 🎯 새로운 관리자 API 라우터 마운트
+  app.use('/api/admin', adminRouter);
 
   const httpServer = createServer(app);
   return httpServer;

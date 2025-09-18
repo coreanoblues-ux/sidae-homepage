@@ -25,6 +25,8 @@ import AdminCourses from "@/pages/admin/courses";
 import AdminNotices from "@/pages/admin/notices";
 import SuperAdmin from "@/pages/superadmin";
 import SimpleAdmin from "@/pages/simple-admin";
+import NewAdminDashboard from "@/pages/AdminDashboard";
+import AdminLoginPage from "@/pages/AdminLoginPage";
 import ProgramPage from "@/pages/program";
 import NotFound from "@/pages/not-found";
 
@@ -136,6 +138,10 @@ function Router() {
       {/* Simple Admin - 새로운 단순한 관리자 페이지 */}
       <Route path="/simple-admin" component={SimpleAdmin} />
       
+      {/* New Admin System */}
+      <Route path="/_superadmin" component={AdminLoginPage} />
+      <Route path="/admin-dashboard" component={NewAdminDashboard} />
+      
       {/* Remove public aliases for security */}
       
       {/* Explicit 404 route */}
@@ -148,12 +154,21 @@ function Router() {
 function AppContent() {
   const [location] = useLocation();
   
-  // /_superadmin과 /simple-admin 경로는 Layout 없이 렌더링 (독립적인 페이지)
+  // 독립적인 관리자 페이지들 - Layout 없이 렌더링
   if (location === '/_superadmin') {
     return (
       <>
         <Toaster />
-        <SuperAdmin />
+        <AdminLoginPage />
+      </>
+    );
+  }
+  
+  if (location === '/admin-dashboard') {
+    return (
+      <>
+        <Toaster />
+        <NewAdminDashboard />
       </>
     );
   }
