@@ -11,6 +11,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
+  // Superadmin 권한 체크 헬퍼 함수
+  const checkSuperAdminAuth = async (req: any, res: any) => {
+    // dev_admin 쿠키가 있으면 바로 통과
+    if (req.cookies?.dev_admin === '1') {
+      return true;
+    }
+    
+    // 일반적인 ADMIN 역할 체크
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      return user?.role === 'ADMIN';
+    } catch (error) {
+      return false;
+    }
+  };
+
   // Enhanced auth middleware for both OAuth and local users (엄격한 인증)
   const enhancedAuth = async (req: any, res: any, next: any) => {
     // 캐시 금지 헤더 설정
@@ -584,8 +600,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Superadmin routes
   app.get('/api/superadmin/pending-users', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'ADMIN') {
+      const isAuthorized = await checkSuperAdminAuth(req, res);
+      if (!isAuthorized) {
         return res.status(403).json({ message: "Admin access required" });
       }
       const pendingUsers = await storage.getPendingUsers();
@@ -598,15 +614,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/superadmin/approve-user', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'ADMIN') {
+      const isAuthorized = await checkSuperAdminAuth(req, res);
+      if (!isAuthorized) {
         return res.status(403).json({ message: "Admin access required" });
       }
       const { userId, memo } = req.body;
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
       }
-      await storage.approveUser(userId, user.id, memo);
+      // dev_admin인 경우 임시 사용자 ID 사용
+      const adminId = req.cookies?.dev_admin === '1' ? 'dev-admin' : (await storage.getUser(req.user.claims.sub))?.id;
+      await storage.approveUser(userId, adminId, memo);
       res.json({ success: true });
     } catch (error) {
       console.error("Error approving user:", error);
@@ -634,8 +652,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/superadmin/gallery', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'ADMIN') {
+      const isAuthorized = await checkSuperAdminAuth(req, res);
+      if (!isAuthorized) {
         return res.status(403).json({ message: "Admin access required" });
       }
       const images = await storage.getGalleryImages();
