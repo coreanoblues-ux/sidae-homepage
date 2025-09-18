@@ -1,9 +1,18 @@
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// CORS 설정 (오리진이 다를 경우 필요)
+const frontOrigin = process.env.FRONT_ORIGIN || 'https://sidae-edu.com';
+app.use(cors({ 
+  origin: frontOrigin, 
+  credentials: true 
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
