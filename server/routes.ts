@@ -13,28 +13,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // 🎯 쿠키 도메인 동적 설정 헬퍼
+  // 🎯 통일된 쿠키 설정 (퍼블리시 대응, admin.ts와 동일)
   const getCookieOptions = (req: any) => {
     const host = req.get('Host') || '';
-    let domain: string | undefined;
+    const isLocalDev = host.includes('localhost') || host.includes('127.0.0.1');
+    const isProduction = !isLocalDev;
     
-    if (host.includes('replit.app')) {
-      domain = '.replit.app';
-    } else if (host.includes('sidae-edu.com')) {
-      domain = '.sidae-edu.com';
-    } else {
-      domain = undefined; // localhost 등
-    }
-    
-    const baseOptions = {
+    return {
       httpOnly: true,
-      secure: host.includes('replit.app') || host.includes('sidae-edu.com'), // HTTPS 전용
-      sameSite: 'none' as const,
+      secure: isProduction, // 퍼블리시 후 HTTPS에서만 전송
+      sameSite: 'lax' as const, // 같은 도메인 전용
       path: '/',
       maxAge: 1000 * 60 * 60 * 24 * 7 // 7일
+      // domain 설정 안함 - 퍼블리시 후 더 안전함
     };
+  };
+
+  // 🧹 레거시 쿠키 정리 헬퍼 (기존 domain-scoped 쿠키 삭제)
+  const clearLegacyCookies = (res: any, req: any) => {
+    // 기존 domain-scoped 쿠키들 정리
+    const legacyOptions = [
+      { domain: '.sidae-edu.com' },
+      { domain: '.replit.app' },
+      { domain: '.replit.co' },
+      { sameSite: 'none' as const }
+    ];
     
-    return domain ? { ...baseOptions, domain } : baseOptions;
+    legacyOptions.forEach(opts => {
+      res.clearCookie('sid', { path: '/', ...opts });
+      res.clearCookie('connect.sid', { path: '/', ...opts });
+    });
   };
 
   // Superadmin 권한 체크 헬퍼 함수  
@@ -131,24 +139,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "로그아웃 중 오류가 발생했습니다" });
       }
       
-      // 환경변수 기반 통일된 쿠키 옵션 (로그인시와 완전히 동일)
-      const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
-      const opts = {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none' as const,
-        domain: cookieDomain,
-        path: '/'
-      };
+      // 🎯 새로운 통일된 쿠키 옵션 사용
+      const cookieOptions = getCookieOptions(req);
       
-      // 일부 브라우저 호환을 위해 두 번 처리
-      // 1차: clearCookie
-      res.clearCookie('connect.sid', opts);
-      res.clearCookie('sid', opts);
+      // 🧹 레거시 쿠키들 먼저 정리
+      clearLegacyCookies(res, req);
       
-      // 2차: 즉시 만료 쿠키 설정
-      res.cookie('connect.sid', '', { ...opts, maxAge: 0 });
-      res.cookie('sid', '', { ...opts, maxAge: 0 });
+      // 현재 쿠키 삭제
+      res.clearCookie('connect.sid', cookieOptions);
+      res.clearCookie('sid', cookieOptions);
+      
+      // 즉시 만료 쿠키 설정 (브라우저 호환성)
+      res.cookie('connect.sid', '', { ...cookieOptions, maxAge: 0 });
+      res.cookie('sid', '', { ...cookieOptions, maxAge: 0 });
       
       // 캐시 금지 헤더
       res.set('Cache-Control', 'no-store');

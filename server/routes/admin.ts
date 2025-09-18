@@ -6,49 +6,23 @@ import { normalizeVideo, VIDEO_ERROR_MESSAGES } from '../utils/videos';
 
 const router = Router();
 
-// 🎯 쿠키 도메인 동적 설정 헬퍼 (수정됨 - 모든 replit 도메인 지원)
+// 🎯 퍼블리시 대응 간소화 쿠키 설정 (Replit 권장사항 적용)
 const getCookieOptions = (req: any) => {
   const host = req.get('Host') || '';
-  console.log('🍪 Cookie host:', host); // 디버깅용
+  console.log('🍪 Cookie host:', host);
   
-  if (host.includes('localhost') || host.includes('127.0.0.1')) {
-    // localhost - domain 없음이 핵심
-    return {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax' as const,
-      path: '/',
-      maxAge: 1000 * 60 * 60 * 24 // 24시간
-    };
-  } else if (host.includes('replit')) {
-    // 모든 Replit 도메인 (.dev, .app, .co) - domain 없이 설정
-    return {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none' as const,
-      path: '/',
-      maxAge: 1000 * 60 * 60 * 24
-    };
-  } else if (host.includes('sidae-edu.com')) {
-    // 커스텀 도메인
-    return {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none' as const,
-      domain: '.sidae-edu.com',
-      path: '/',
-      maxAge: 1000 * 60 * 60 * 24
-    };
-  } else {
-    // 기본값 (domain 없음)
-    return {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax' as const,
-      path: '/',
-      maxAge: 1000 * 60 * 60 * 24
-    };
-  }
+  // 개발환경 vs 퍼블리시 환경 구분
+  const isLocalDev = host.includes('localhost') || host.includes('127.0.0.1');
+  const isProduction = !isLocalDev;
+  
+  return {
+    httpOnly: true,
+    secure: isProduction, // 퍼블리시 후 HTTPS에서만 전송
+    sameSite: isProduction ? 'lax' as const : 'lax' as const, // 같은 도메인 전용
+    path: '/',
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 7일
+    // domain 설정 안함 - 퍼블리시 후 더 안전함
+  };
 };
 
 // 🔒 관리자 권한 체크 미들웨어
