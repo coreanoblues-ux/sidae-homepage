@@ -32,22 +32,30 @@ export function getSession() {
     tableName: "sessions",
   });
   
-  // 환경변수 기반 쿠키 도메인 설정
-  const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+  // 동적 쿠키 도메인 설정 (개발/운영 환경 지원)
+  const isDev = process.env.NODE_ENV === 'development';
+  const isReplit = !!process.env.REPL_ID;
+  
+  // 쿠키 설정을 환경에 따라 동적으로 구성
+  const cookieConfig: any = {
+    httpOnly: true,
+    secure: !isDev, // 개발환경에서는 false, 운영환경에서는 true
+    sameSite: isDev ? 'lax' : 'none', // 개발환경에서는 lax, 운영환경에서는 none
+    path: '/',
+    maxAge: sessionTtl,
+  };
+
+  // 운영환경에서만 domain 설정
+  if (!isDev && !isReplit) {
+    cookieConfig.domain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+  }
   
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      domain: cookieDomain,
-      path: '/',
-      maxAge: sessionTtl,
-    },
+    cookie: cookieConfig,
   });
 }
 

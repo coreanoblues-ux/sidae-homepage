@@ -49,22 +49,39 @@ function ProtectedRoute({ children, requireAuth = true, allowedRoles }: {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
+  // 리다이렉트 로직을 useEffect로 이동 (React 경고 해결)
+  useEffect(() => {
+    if (isLoading) return;
+    
+    if (requireAuth && !isAuthenticated) {
+      setLocation('/login');
+      return;
+    }
+
+    if (allowedRoles && allowedRoles.length > 0) {
+      const userRole = (user as any)?.role;
+      if (!userRole || !allowedRoles.includes(userRole)) {
+        setLocation('/');
+        return;
+      }
+    }
+  }, [isLoading, isAuthenticated, user, requireAuth, allowedRoles, setLocation]);
+
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
     </div>;
   }
 
+  // 인증 확인 중이거나 리다이렉트가 필요한 경우
   if (requireAuth && !isAuthenticated) {
-    setLocation('/login');
-    return null;
+    return null; // useEffect에서 리다이렉트 처리
   }
 
   if (allowedRoles && allowedRoles.length > 0) {
     const userRole = (user as any)?.role;
     if (!userRole || !allowedRoles.includes(userRole)) {
-      setLocation('/');
-      return null;
+      return null; // useEffect에서 리다이렉트 처리
     }
   }
 
