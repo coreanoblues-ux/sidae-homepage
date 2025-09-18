@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Star, Trophy, University, Presentation, Video, Phone, Calendar, Medal, Laptop, ChartLine, MapPin, Mail, NotebookPen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/useAuth";
 // Images are now in public/images folder
 
 const contactFormSchema = z.object({
@@ -28,6 +29,8 @@ export default function Landing() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [password, setPassword] = useState("");
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
   const form = useForm<z.infer<typeof contactFormSchema>>({
     resolver: zodResolver(contactFormSchema),
@@ -74,6 +77,17 @@ export default function Landing() {
 
   const handleSpecialClick = () => {
     setShowPasswordDialog(true);
+  };
+
+  // CTA 버튼 클릭 핸들러 (핵심 로직)
+  const onClickCTA = () => {
+    if (isAuthenticated && (user as any)?.role === 'VERIFIED') {
+      setLocation('/members'); // 인증회원만 /members로
+    } else if (isAuthenticated && (user as any)?.role === 'ADMIN') {
+      setLocation('/admin'); // 관리자는 /admin으로
+    } else {
+      setLocation('/login'); // 비로그인/PENDING은 로그인으로
+    }
   };
 
   // Gallery images - 실제 시대영재 학원 이미지들
@@ -145,12 +159,11 @@ export default function Landing() {
                 <Button 
                   size="lg" 
                   className="px-8 py-4 bg-primary text-primary-foreground font-semibold text-lg hover:bg-primary/90 transition-all transform hover:scale-105"
-                  asChild
+                  onClick={onClickCTA}
+                  data-testid="button-cta-online-lecture"
                 >
-                  <a href="/api/login">
-                    <Video className="mr-2 w-5 h-5" />
-                    시대영재 온라인 강의 듣기
-                  </a>
+                  <Video className="mr-2 w-5 h-5" />
+                  시대영재 온라인 강의 듣기
                 </Button>
                 <Button
                   size="lg"

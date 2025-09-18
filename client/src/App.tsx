@@ -11,10 +11,12 @@ import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import About from "@/pages/about";
+import Login from "@/pages/login";
 import Courses from "@/pages/courses";
 import CourseDetail from "@/pages/course-detail";
 import Gallery from "@/pages/gallery";
 import Account from "@/pages/account";
+import Members from "@/pages/members";
 import Admin from "@/pages/admin";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminMembers from "@/pages/admin/members";
@@ -34,44 +36,107 @@ function Redirect({ to }: { to: string }) {
   return null;
 }
 
-function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+// Protected Route Component - Enhanced with role-based access
+function ProtectedRoute({ children, requireAuth = true, allowedRoles }: { 
+  children: React.ReactNode; 
+  requireAuth?: boolean;
+  allowedRoles?: string[];
+}) {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
+  if (isLoading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>;
+  }
+
+  if (requireAuth && !isAuthenticated) {
+    setLocation('/login');
+    return null;
+  }
+
+  if (allowedRoles && allowedRoles.length > 0) {
+    const userRole = (user as any)?.role;
+    if (!userRole || !allowedRoles.includes(userRole)) {
+      setLocation('/');
+      return null;
+    }
+  }
+
+  return <>{children}</>;
+}
+
+function Router() {
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/about" component={About} />
-          <Route path="/courses" component={Courses} />
-          <Route path="/gallery" component={Gallery} />
-          <Route path="/program/:slug" component={ProgramPage} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/about" component={About} />
-          <Route path="/courses" component={Courses} />
-          <Route path="/courses/:id" component={CourseDetail} />
-          <Route path="/gallery" component={Gallery} />
-          <Route path="/program/:slug" component={ProgramPage} />
-          <Route path="/account" component={Account} />
-          <Route path="/admin" component={Admin} />
-          <Route path="/admin/dashboard" component={AdminDashboard} />
-          <Route path="/admin/members" component={AdminMembers} />
-          <Route path="/admin/videos" component={AdminVideos} />
-          <Route path="/admin/courses" component={AdminCourses} />
-          <Route path="/admin/notices" component={AdminNotices} />
-        </>
-      )}
+      {/* Public Routes - 모든 사용자가 접근 가능 */}
+      <Route path="/" component={Landing} />
+      <Route path="/about" component={About} />
+      <Route path="/courses" component={Courses} />
+      <Route path="/gallery" component={Gallery} />
+      <Route path="/program/:slug" component={ProgramPage} />
+      <Route path="/login" component={Login} />
       
-      {/* Superadmin routes - secret paths (outside auth check to prevent 404) */}
-      <Route path="/_superadmin" component={SuperAdmin} />
+      {/* Protected Routes - 인증 필요 */}
+      <Route path="/courses/:id">
+        <ProtectedRoute requireAuth={true}>
+          <CourseDetail />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/account">
+        <ProtectedRoute requireAuth={true}>
+          <Account />
+        </ProtectedRoute>
+      </Route>
       
-      {/* Route aliases to prevent 404 - redirect to secret path */}
-      <Route path="/superadmin" component={() => <Redirect to="/_superadmin" />} />
-      <Route path="/super-admin" component={() => <Redirect to="/_superadmin" />} />
-      <Route path="/admin/super" component={() => <Redirect to="/_superadmin" />} />
+      {/* Members Only Routes - VERIFIED 회원만 */}
+      <Route path="/members">
+        <ProtectedRoute requireAuth={true} allowedRoles={["VERIFIED"]}>
+          <Members />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Admin Only Routes - 관리자만 */}
+      <Route path="/admin">
+        <ProtectedRoute requireAuth={true} allowedRoles={["ADMIN"]}>
+          <Admin />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/dashboard">
+        <ProtectedRoute requireAuth={true} allowedRoles={["ADMIN"]}>
+          <AdminDashboard />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/members">
+        <ProtectedRoute requireAuth={true} allowedRoles={["ADMIN"]}>
+          <AdminMembers />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/videos">
+        <ProtectedRoute requireAuth={true} allowedRoles={["ADMIN"]}>
+          <AdminVideos />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/courses">
+        <ProtectedRoute requireAuth={true} allowedRoles={["ADMIN"]}>
+          <AdminCourses />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/notices">
+        <ProtectedRoute requireAuth={true} allowedRoles={["ADMIN"]}>
+          <AdminNotices />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Superadmin routes - PROTECTED with admin role */}
+      <Route path="/_superadmin">
+        <ProtectedRoute requireAuth={true} allowedRoles={["ADMIN"]}>
+          <SuperAdmin />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Remove public aliases for security */}
       
       {/* Explicit 404 route */}
       <Route path="/404" component={NotFound} />

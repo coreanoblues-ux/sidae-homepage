@@ -53,7 +53,7 @@ export function Header() {
   const [password, setPassword] = useState("");
   const { user, isAuthenticated, isLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
 
   // Form handlers
@@ -76,7 +76,7 @@ export function Header() {
     },
   });
 
-  // Login mutation
+  // Login mutation with role-based redirect
   const loginMutation = useMutation({
     mutationFn: async (values: z.infer<typeof loginSchema>) => {
       const response = await apiRequest("POST", "/api/auth/login", values);
@@ -90,6 +90,15 @@ export function Header() {
       setShowLoginDialog(false);
       loginForm.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      
+      // 역할별 리다이렉트 (지침 1번)
+      setTimeout(() => {
+        if (data.user.role === 'ADMIN') {
+          setLocation('/admin'); // 관리자는 /admin으로
+        } else {
+          setLocation('/'); // 일반회원은 항상 랜딩으로
+        }
+      }, 500);
     },
     onError: (error) => {
       toast({
