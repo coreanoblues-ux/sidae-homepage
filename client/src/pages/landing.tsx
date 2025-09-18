@@ -64,15 +64,39 @@ export default function Landing() {
     }
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "671321") {
-      window.location.href = "/admin";
-    } else {
-      alert("잘못된 비밀번호입니다.");
+    
+    try {
+      // /api/dev/login으로 실제 로그인 처리
+      const response = await fetch('/api/dev/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ password }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        // 로그인 성공 - 관리자 쿠키 설정됨
+        setPassword("");
+        setShowPasswordDialog(false);
+        
+        // 잠시 대기 후 관리자 페이지로 이동
+        setTimeout(() => {
+          window.location.href = "/admin";
+        }, 500);
+      } else {
+        alert("잘못된 비밀번호입니다.");
+        setPassword("");
+      }
+    } catch (error) {
+      alert("오류가 발생했습니다. 다시 시도해주세요.");
+      setPassword("");
     }
-    setPassword("");
-    setShowPasswordDialog(false);
   };
 
   const handleSpecialClick = () => {

@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation, Router as WouterRouter } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -141,35 +141,29 @@ function Router() {
   );
 }
 
-function AppWrapper() {
+function App() {
   const [location] = useLocation();
   
   // /_superadmin 경로는 Layout 없이 렌더링 (독립적인 페이지)
   if (location === '/_superadmin') {
     return (
-      <>
-        <Toaster />
-        <SuperAdmin />
-      </>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <SuperAdmin />
+        </TooltipProvider>
+      </QueryClientProvider>
     );
   }
   
   // 나머지 페이지는 기존대로 Layout 사용
   return (
-    <Layout>
-      <Toaster />
-      <Router />
-    </Layout>
-  );
-}
-
-function App() {
-  return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter>
-          <AppWrapper />
-        </WouterRouter>
+        <Layout>
+          <Toaster />
+          <Router />
+        </Layout>
       </TooltipProvider>
     </QueryClientProvider>
   );
