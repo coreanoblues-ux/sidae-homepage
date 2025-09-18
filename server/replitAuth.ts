@@ -170,24 +170,31 @@ export async function setupAuth(app: Express) {
         role: "ADMIN"
       });
 
-      // 환경변수 기반 통일된 쿠키 옵션
-      const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
-      const isLocalhost = req.get('host')?.includes('localhost') || req.get('host')?.includes('127.0.0.1');
+      // 쿠키 설정 - 도메인 체크 개선
+      const host = req.get('host') || '';
+      const isReplitApp = host.includes('replit.app');
+      const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
       
-      console.log('[SET-COOKIE] Domain:', cookieDomain, 'IsLocalhost:', isLocalhost); // 진단 로그
+      console.log('[SET-COOKIE] Host:', host); // 진단 로그
       
-      // 개발용 세션 쿠키 설정 - localhost일 때는 도메인 설정 없음
+      // 개발용 세션 쿠키 설정 - 도메인별로 다르게 처리
       const cookieOptions: any = {
         httpOnly: true,
         path: '/',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 1주일
       };
       
-      if (!isLocalhost) {
-        // 배포환경에서만 보안 옵션 적용
+      if (isReplitApp || isLocalhost) {
+        // Replit 또는 로컬 환경 - 도메인 설정하지 않음
+        if (isReplitApp) {
+          cookieOptions.secure = true;
+          cookieOptions.sameSite = 'none';
+        }
+      } else {
+        // 커스텀 도메인 환경
         cookieOptions.secure = true;
         cookieOptions.sameSite = 'none';
-        cookieOptions.domain = cookieDomain;
+        cookieOptions.domain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
       }
       
       res.cookie('dev_admin', '1', cookieOptions);
@@ -196,15 +203,28 @@ export async function setupAuth(app: Express) {
     });
 
   app.post("/api/dev/logout", (req, res) => {
-    // 환경변수 기반 통일된 쿠키 옵션으로 정리
-    const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
-    const cookieOpts = { 
+    // 쿠키 정리 - 도메인별로 처리
+    const host = req.get('host') || '';
+    const isReplitApp = host.includes('replit.app');
+    const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+    
+    const cookieOpts: any = { 
       httpOnly: true, 
-      secure: true, 
-      sameSite: 'none' as const, 
-      domain: cookieDomain, 
       path: '/' 
     };
+    
+    if (isReplitApp || isLocalhost) {
+      // Replit 또는 로컬 환경
+      if (isReplitApp) {
+        cookieOpts.secure = true;
+        cookieOpts.sameSite = 'none';
+      }
+    } else {
+      // 커스텀 도메인 환경
+      cookieOpts.secure = true;
+      cookieOpts.sameSite = 'none';
+      cookieOpts.domain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+    }
     
     res.clearCookie('dev_admin', cookieOpts);
     res.cookie('dev_admin', '', { ...cookieOpts, maxAge: 0 });
