@@ -102,6 +102,15 @@ function Router() {
       </Route>
       <Route path="/gallery" component={Gallery} />
       <Route path="/program/:slug" component={ProgramPage} />
+      
+      {/* Curriculum routes - redirect to program pages */}
+      <Route path="/curriculum/middle">
+        <Redirect to="/program/middle-school" />
+      </Route>
+      <Route path="/curriculum/high">
+        <Redirect to="/program/high-school" />
+      </Route>
+      
       <Route path="/login" component={Login} />
       
       {/* Protected Routes - 인증 필요 */}

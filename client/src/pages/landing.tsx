@@ -272,7 +272,7 @@ export default function Landing() {
                 <p className="text-muted-foreground mb-4">
                   탄탄한 문법 만들기와 정확하고 빠른 독해 습관 만들기로 고등학교 진학 완벽 준비
                 </p>
-                <Link href="/program/middle-school" className="flex items-center text-sm text-primary font-medium hover:underline" data-testid="link-program-middle">
+                <Link href="/curriculum/middle" className="flex items-center text-sm text-primary font-medium hover:underline" data-testid="link-program-middle">
                   <span>중등부 커리큘럼 보기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
                 </Link>
@@ -288,7 +288,7 @@ export default function Landing() {
                 <p className="text-muted-foreground mb-4">
                   (일반고/특목고) 서술형 문제 정복과 SYNTAX구문독해로 대학입시 완벽 대비
                 </p>
-                <Link href="/program/high-school" className="flex items-center text-sm text-primary font-medium hover:underline" data-testid="link-program-high">
+                <Link href="/curriculum/high" className="flex items-center text-sm text-primary font-medium hover:underline" data-testid="link-program-high">
                   <span>고등부 커리큘럼 보기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
                 </Link>
