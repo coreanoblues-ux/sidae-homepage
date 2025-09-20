@@ -193,12 +193,20 @@ export function Header() {
     }
   };
 
+  // 🎯 갤러리 버튼용 갤러리 섹션으로 스크롤  
+  const scrollToGallery = () => {
+    const gallerySection = document.getElementById('gallery');
+    if (gallerySection) {
+      gallerySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const navItems = [
     { href: "/", label: "홈" },
     { action: scrollToAbout, label: "원장 소개" },
     { action: scrollToPrograms, label: "강의" },
     { href: "/videos", label: "동영상" },
-    { href: "/gallery", label: "갤러리" },
+    { action: scrollToGallery, label: "갤러리" },
   ];
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
