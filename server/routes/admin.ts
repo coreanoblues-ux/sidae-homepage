@@ -6,13 +6,31 @@ import { normalizeVideo, VIDEO_ERROR_MESSAGES } from '../utils/videos';
 
 const router = Router();
 
-// 🎯 크롬 전용 이슈 방어를 포함한 Replit 쿠키 설정 (가이드 적용)
-const cookieBase = {
-  httpOnly: true,
-  secure: true,             // 크롬은 SameSite=none일 때 필수
-  sameSite: 'none' as const,
-  domain: '.replit.app',    // 하위 도메인 모두 커버
-  path: '/',
+// 🎯 환경별 자동 감지 쿠키 설정 (개발/배포 모두 대응)
+const getCookieBase = (req: any) => {
+  const isDev = process.env.NODE_ENV === 'development';
+  const hostname = req.hostname || req.headers.host || '';
+  
+  console.log('🍪 Cookie 환경 감지:', { isDev, hostname });
+  
+  // 개발환경: 도메인 설정 없음 (host-only)
+  if (isDev || hostname.includes('localhost') || hostname.includes('.replit.dev')) {
+    return {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax' as const,
+      path: '/',
+    };
+  }
+  
+  // 배포환경 (.replit.app): 크롬 대응 설정
+  return {
+    httpOnly: true,
+    secure: true,             // 크롬은 SameSite=none일 때 필수
+    sameSite: 'none' as const,
+    domain: '.replit.app',    // 하위 도메인 모두 커버
+    path: '/',
+  };
 };
 
 // 🔒 관리자 권한 체크 미들웨어
@@ -32,25 +50,30 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ ok: false, message: '잘못된 비밀번호입니다.' });
   }
   
-  // sid 쿠키 설정 (가이드: 로그인 시)
+  // sid 쿠키 설정 (환경 자동 감지)
+  const cookieBase = getCookieBase(req);
   res.cookie('sid', 'admin-token', { ...cookieBase, maxAge: 1000 * 60 * 60 });
   
   res.json({ ok: true, message: '로그인 성공' });
 });
 
-// ✅ 가이드에 따른 완전한 로그아웃 (Replit 환경 전용)
+// ✅ 환경별 완전 로그아웃 (개발/배포 모두 대응)
 router.post('/logout', (req, res) => {
-  console.log('🚪 로그아웃 시도 - Replit 환경');
+  const cookieBase = getCookieBase(req);
+  const hostname = req.hostname || req.headers.host || '';
   
-  // 🔑 가이드 2) 크롬을 위한 모든 변종 쿠키 제거
-  res.clearCookie('sid', { domain: '.replit.app', path: '/' });
+  console.log('🚪 로그아웃 시도:', { hostname, cookieBase });
+  
+  // 🔑 모든 가능한 변종 쿠키 제거 (환경 무관)
+  res.clearCookie('sid', { path: '/' }); // Host-only
+  res.clearCookie('sid', { domain: '.replit.app', path: '/' }); // 배포환경
+  res.clearCookie('sid', { domain: '.replit.dev', path: '/' }); // 개발환경
   res.clearCookie('sid', { domain: 'edu-stream-1-coreanoblues.replit.app', path: '/' });
-  res.clearCookie('sid', { path: '/' }); // 혹시 기본 도메인 쿠키 대비
   
-  // 🔑 가이드 1) 로그아웃 시 (로그인과 100% 동일한 설정) - 크롬 완전 대응
+  // 🔑 현재 환경 설정과 동일한 옵션으로 삭제 (가장 중요)
   res.clearCookie('sid', cookieBase);
   
-  console.log('✅ 로그아웃 완료 - 모든 쿠키 변종 삭제됨');
+  console.log('✅ 로그아웃 완료 - 모든 환경 쿠키 삭제됨');
   res.json({ ok: true, message: '로그아웃 완료' });
 });
 
