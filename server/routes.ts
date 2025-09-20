@@ -1,4 +1,6 @@
 import type { Express } from "express";
+import express from "express";
+import path from "path";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
@@ -12,6 +14,16 @@ import proxyVideoRouter from "./routes/proxy.video";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // 🎯 정적 이미지 서빙을 API보다 먼저 등록 (가이드 적용)
+  const IMAGES_DIR = path.join(import.meta.dirname, '..', 'public', 'images');
+  
+  app.use('/images', express.static(IMAGES_DIR, {
+    fallthrough: false,
+    setHeaders(res: any) { 
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+    }
+  }));
 
   // 🎯 개발/배포 환경 대응 쿠키 설정 
   const getCookieOptions = (req: any) => {
