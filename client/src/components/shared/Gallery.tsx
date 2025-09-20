@@ -39,6 +39,12 @@ export function Gallery({ images, className = "" }: GalleryProps) {
             <img
               src={image}
               alt={`갤러리 이미지 ${index + 1}`}
+              loading="lazy"
+              onError={(e) => {
+                const target = e.currentTarget;
+                target.src = '/api/placeholder/400/400';
+                target.alt = '이미지를 불러올 수 없습니다';
+              }}
               className="rounded-lg object-cover w-full aspect-square"
             />
           </div>

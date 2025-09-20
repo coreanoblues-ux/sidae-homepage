@@ -114,13 +114,13 @@ export default function Landing() {
 
   // Gallery images - 실제 시대영재 학원 이미지들
   const galleryImages = [
-    "/images/IMG_6558_1758101099677.JPG",
-    "/images/IMG_6544_1758101075476.JPG",
-    "/images/academy-hallway-1.png",
-    "/images/academy-banner-1.jpg",
-    "/images/academy-interior-1.JPG",
-    "/images/IMG_6556_1758101093935.JPG",
-    "/images/IMG_6559_1758101109393.JPG",
+    "/uploads/IMG_6558_1758101099677.JPG",
+    "/uploads/IMG_6544_1758101075476.JPG",
+    "/uploads/academy-hallway-1.png",
+    "/uploads/academy-banner-1.jpg",
+    "/uploads/academy-interior-1.JPG",
+    "/uploads/IMG_6556_1758101093935.JPG",
+    "/uploads/IMG_6559_1758101109393.JPG",
   ];
 
   return (

@@ -1,0 +1,102 @@
+🎯 목표
+1) /uploads/* 정적 서빙을 항상 보장
+2) DB의 기존 갤러리 URL을 절대경로로 통일
+3) 레거시 폴더의 JPG/PNG를 uploads/로 이동(또는 복사)
+4) 프론트는 절대 URL만 사용 + 오류시 플레이스홀더
+
+────────────────────────────────
+1) 서버: /uploads 정적 경로를 최상단에 등록 (중요: API/SPA보다 위)
+import path from 'node:path';
+import express from 'express';
+
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+
+app.use('/uploads', express.static(UPLOAD_DIR, {
+  fallthrough: false,
+  setHeaders(res){ res.setHeader('Cache-Control','public, max-age=3600'); }
+}));
+
+// 그 다음 API
+app.use('/api/admin', adminRouter);
+app.use('/api', apiRouter);
+
+// 정적 번들 & SPA fallback
+app.use(express.static(path.join(__dirname,'dist')));
+app.get('*',(req,res,next)=>{
+  if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) return next();
+  res.sendFile(path.join(__dirname,'dist/index.html'));
+});
+
+────────────────────────────────
+2) 업로드 응답은 절대 URL로 저장 (프리뷰/배포 공통)
+router.post('/api/admin/gallery', upload.single('image'), async (req,res)=>{
+  const origin = process.env.FRONT_ORIGIN || `https://${req.get('host')}`;
+  const url = `${origin}/uploads/${req.file.filename}`;     // ★ 절대 URL
+  const item = await galleryRepo.create({ title:req.body.title ?? '', url });
+  res.json({ ok:true, item });
+});
+
+────────────────────────────────
+3) 기존 데이터/파일 일괄 마이그레이션 스크립트
+// server/scripts/migrateGallery.ts (또는 .js)
+import fs from 'fs';
+import path from 'path';
+import { galleryRepo } from '../repo/gallery';
+
+const ORIGIN = process.env.FRONT_ORIGIN || 'https://sidae-edu.com';
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+const legacyDirs = [
+  path.join(__dirname, '..', 'public', 'gallery'),
+  path.join(__dirname, '..', 'static', 'images'),
+  path.join(__dirname, '..', 'dist', 'assets')
+];
+
+(async ()=>{
+  const items = await galleryRepo.findAll(); // {id, url}[]
+  for (const it of items) {
+    const url = String(it.url || '');
+    // 이미 절대 URL이면 스킵
+    if (url.startsWith('http://') || url.startsWith('https://')) continue;
+
+    // 파일명 추출
+    const base = path.basename(url).replace(/\\/g,'/');
+    // 레거시 위치에서 찾아 uploads로 복사
+    let found = '';
+    for (const d of legacyDirs) {
+      const p = path.join(d, base);
+      if (fs.existsSync(p)) { found = p; break; }
+    }
+    if (found) {
+      const dest = path.join(uploadsDir, base);
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive:true });
+      if (!fs.existsSync(dest)) fs.copyFileSync(found, dest);
+      await galleryRepo.update(it.id, { url: `${ORIGIN}/uploads/${base}` }); // ★ 절대 URL로 통일
+      console.log('migrated:', it.id, '→', `${ORIGIN}/uploads/${base}`);
+    } else {
+      console.warn('missing file for:', it.id, url);
+    }
+  }
+  process.exit(0);
+})();
+
+# 실행
+NODE_ENV=production ts-node server/scripts/migrateGallery.ts
+# (JS라면 node server/scripts/migrateGallery.js)
+
+────────────────────────────────
+4) 프론트(랜딩 갤러리) – 절대 URL 사용 + 에러시 대체 이미지
+<img
+  src={item.url}
+  alt={item.title || '갤러리 이미지'}
+  loading="lazy"
+  onError={(e)=>{ e.currentTarget.src='/fallbacks/gallery-placeholder.jpg'; }}
+  className="aspect-[4/3] object-cover w-full rounded-xl"
+/>
+
+────────────────────────────────
+5) 검증 체크리스트
+- Network 탭에서 깨졌던 이미지 요청 상태코드 확인 → 200이고 Content-Type: image/*
+- 셸에서 직접 확인:
+  curl -I https://sidae-edu.com/uploads/파일명.jpg
+- 목록 API가 절대 URL을 주는지 확인:
+  curl -s https://sidae-edu.com/api/gallery | jq '.[].url'

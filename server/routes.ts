@@ -15,9 +15,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // 🎯 정적 이미지 서빙을 API보다 먼저 등록 (가이드 적용)
+  // 🎯 /uploads 정적 서빙을 API보다 먼저 등록 (가이드 적용)
+  const UPLOAD_DIR = path.join(import.meta.dirname, '..', 'uploads');
   const IMAGES_DIR = path.join(import.meta.dirname, '..', 'public', 'images');
   
+  app.use('/uploads', express.static(UPLOAD_DIR, {
+    fallthrough: false,
+    setHeaders(res: any) { 
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+    }
+  }));
+
   app.use('/images', express.static(IMAGES_DIR, {
     fallthrough: false,
     setHeaders(res: any) { 
