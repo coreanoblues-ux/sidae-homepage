@@ -1,0 +1,117 @@
+1) 보호 경로 화이트리스트 + 서버 인증 가드
+
+정적 서빙·SPA Fallback보다 위에 두세요.
+
+// server/index.ts (또는 app.ts)
+import path from "node:path";
+import express from "express";
+import { verifyAdminFromRequest } from "./middleware/adminAuth"; // 아래 2) 참고
+
+const app = express();
+const INDEX_HTML = path.join(__dirname, "dist/index.html");
+
+// ① API 라우트
+app.use("/api/admin", adminRouter);
+app.use("/api", apiRouter);
+
+// ② 보호 페이지 서버 가드 (배포 안정성 핵심)
+const PROTECTED_PATHS = ["/admin", "/admin-dashboard", "/_superadmin"];
+
+app.get(PROTECTED_PATHS, (req, res) => {
+  const admin = verifyAdminFromRequest(req); // 토큰 검증 + role === 'admin'
+  if (!admin) {
+    const nextUrl = encodeURIComponent(req.originalUrl);
+    return res.redirect(302, `/login?next=${nextUrl}`);
+  }
+  // 인증 통과한 경우에만 SPA index.html 전달
+  return res.sendFile(INDEX_HTML);
+});
+
+// ③ 일반 정적 파일
+app.use(express.static(path.join(__dirname, "dist")));
+
+// ④ SPA fallback (API/보호경로는 위에서 이미 처리됨)
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api")) return next();
+  return res.sendFile(INDEX_HTML);
+});
+
+2) 관리자 인증 검사(서버측)
+// server/middleware/adminAuth.ts
+import jwt from "jsonwebtoken";
+
+export function verifyAdminFromRequest(req: any) {
+  const raw = req.cookies?.sid || parseCookie(req.headers.cookie || "").sid;
+  if (!raw) return null;
+  try {
+    const payload: any = jwt.verify(raw, process.env.JWT_SECRET!);
+    if (payload?.role === "admin") return payload;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function parseCookie(str: string) {
+  return Object.fromEntries(
+    (str || "").split(/; */).filter(Boolean).map(kv => {
+      const idx = kv.indexOf("="); 
+      return [decodeURIComponent(kv.slice(0, idx)), decodeURIComponent(kv.slice(idx + 1))];
+    })
+  );
+}
+
+3) 로그아웃도 서버에서 확실히 정리
+
+로그인 때 쓰던 옵션과 완전히 동일하게.
+
+// server/routes/auth.ts (발췌)
+const cookieBase = (req: express.Request) => ({
+  httpOnly: true,
+  secure: true,
+  sameSite: "None" as const,
+  domain: req.hostname.endsWith(".replit.app")
+            ? ".replit.app"
+            : req.hostname.endsWith("sidae-edu.com")
+            ? ".sidae-edu.com"
+            : undefined,
+  path: "/",
+});
+
+app.post("/api/auth/logout", (req, res) => {
+  const opts = cookieBase(req);
+  res.clearCookie("sid", opts);
+  res.cookie("sid", "", { ...opts, maxAge: 0 });
+
+  // 과거 변종 쿠키도 같이 정리
+  [".replit.app", ".sidae-edu.com", undefined].forEach(d =>
+    res.clearCookie("sid", { ...opts, domain: d })
+  );
+  res.json({ ok: true });
+});
+
+4) 퍼블릭 접근 검사 자동화(배포 점검용)
+# (로그아웃 상태에서 실행)
+curl -I https://sidae-edu.com/admin           # → 302 Location: /login?... 가 나와야 정상이에요
+curl -I https://sidae-edu.com/admin-dashboard  # → 302 /login
+curl -I https://sidae-edu.com/_superadmin      # → 302 /login
+
+5) 리다이렉트 일관성(선택)
+
+www·replit.app로 접근해도 항상 sidae-edu.com으로 강제하면 쿠키 혼선이 줄어듭니다.
+
+const CANONICAL = "sidae-edu.com";
+app.use((req, res, next) => {
+  const host = req.headers.host || "";
+  const proto = (req.headers["x-forwarded-proto"] as string) || "http";
+  if (host !== CANONICAL || proto !== "https") {
+    return res.redirect(301, `https://${CANONICAL}${req.originalUrl}`);
+  }
+  next();
+});
+
+왜 이 방식이 배포에서만 터지는 걸 잡나?
+
+개발에서는 클라이언트 라우터/가드가 항상 돌아가지만, 배포에서는 SPA fallback/캐시/초기 렌더 타이밍 때문에 가드가 스킵되어 /admin이 먼저 그려질 수 있어요.
+
+위처럼 서버에서 보호 페이지 자체를 인증 후에만 index.html로 내려주면 클라이언트 가드가 실패하더라도 관리자 화면이 절대 공개되지 않습니다.

@@ -24,13 +24,12 @@ const getCookieBase = (req: any) => {
     };
   }
   
-  // 🔑 .replit.dev는 HTTPS 필수 (개발환경이지만 secure: true)
+  // 🔑 .replit.dev 개발환경: 단순한 설정으로 변경
   if (hostname.includes('.replit.dev')) {
     return {
       httpOnly: true,
-      secure: true,           // .replit.dev는 HTTPS
-      sameSite: 'none' as const, // Cross-origin 대응
-      domain: '.replit.dev',   // 개발 도메인
+      secure: false,          // 🎯 개발환경에서는 secure: false로 테스트
+      sameSite: 'lax' as const, 
       path: '/',
     };
   }
@@ -57,9 +56,19 @@ const getCookieBase = (req: any) => {
 
 // 🔒 관리자 권한 체크 미들웨어
 const adminGuard = (req: any, res: any, next: any) => {
+  console.log('🔒 AdminGuard 체크:', {
+    cookies: req.cookies,
+    sid: req.cookies?.sid,
+    headers_cookie: req.headers.cookie,
+    path: req.path,
+    method: req.method
+  });
+  
   if (req.cookies?.sid === 'admin-token') {
+    console.log('✅ AdminGuard 통과');
     return next();
   }
+  console.log('❌ AdminGuard 실패 - Unauthorized');
   return res.status(401).json({ ok: false, message: 'Unauthorized' });
 };
 
@@ -74,8 +83,11 @@ router.post('/login', async (req, res) => {
   
   // sid 쿠키 설정 (환경 자동 감지)
   const cookieBase = getCookieBase(req);
+  console.log('🍪 쿠키 설정:', { cookieBase, value: 'admin-token' });
+  
   res.cookie('sid', 'admin-token', { ...cookieBase, maxAge: 1000 * 60 * 60 });
   
+  console.log('✅ 로그인 성공 - 쿠키 설정 완료');
   res.json({ ok: true, message: '로그인 성공' });
 });
 
