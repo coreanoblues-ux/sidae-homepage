@@ -566,39 +566,24 @@ export default function Landing() {
       {/* Contact Section */}
       <section id="contact" className="py-20 bg-muted/30 geometric-shapes">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-16">
-            <div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-6">
-                상담 및 문의
-              </h2>
-              <p className="text-xl text-muted-foreground mb-8">
-                궁금한 것이 있으시거나 상담을 원하신다면 언제든지 연락주세요.
-              </p>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-6 text-center">
+              상담 및 문의
+            </h2>
+            <p className="text-xl text-muted-foreground mb-12 text-center">
+              궁금한 것이 있으시거나 상담을 원하신다면 언제든지 연락주세요.
+            </p>
 
-              <div className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-12 items-start">
+              <div className="space-y-8">
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     <MapPin className="text-primary w-6 h-6" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-foreground">학원 위치</h4>
+                    <h4 className="font-semibold text-foreground text-lg">학원 위치</h4>
                     <p className="text-muted-foreground">광주광역시 남구 봉선중앙로16, 2층</p>
                     <p className="text-sm text-muted-foreground mt-1">문의전화: 062-462-0990</p>
-                    
-                    {/* 구글 지도 */}
-                    <div className="mt-4">
-                      <iframe 
-                        src={`https://maps.google.com/maps?width=200&height=200&hl=ko&q=${encodeURIComponent('광주광역시 남구 봉선중앙로16 시대영재학원')}&ie=UTF8&t=&z=17&iwloc=B&output=embed`}
-                        width="200" 
-                        height="200" 
-                        style={{border: 0, borderRadius: '8px'}} 
-                        allowFullScreen 
-                        loading="lazy" 
-                        referrerPolicy="no-referrer-when-downgrade"
-                        className="shadow-md"
-                        title="시대영재학원 위치"
-                      ></iframe>
-                    </div>
                   </div>
                 </div>
 
@@ -607,106 +592,28 @@ export default function Landing() {
                     <Phone className="text-primary w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground">전화 상담</h4>
+                    <h4 className="font-semibold text-foreground text-lg">전화 상담</h4>
                     <p className="text-muted-foreground">062-462-0990</p>
                     <p className="text-sm text-muted-foreground mt-1">상담시간: 월-금 14:00-22:00, 토-일 09:30-18:00</p>
                   </div>
                 </div>
+              </div>
 
+              {/* 구글 지도 - 키운 버전 */}
+              <div className="w-full">
+                <iframe 
+                  src={`https://maps.google.com/maps?width=600&height=400&hl=ko&q=${encodeURIComponent('광주광역시 남구 봉선중앙로16 시대영재학원')}&ie=UTF8&t=&z=17&iwloc=B&output=embed`}
+                  width="100%" 
+                  height="400" 
+                  style={{border: 0, borderRadius: '12px'}} 
+                  allowFullScreen 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="shadow-lg"
+                  title="시대영재학원 위치"
+                ></iframe>
               </div>
             </div>
-
-            <Card>
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-semibold text-card-foreground mb-6">
-                  온라인 상담 신청
-                </h3>
-
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>이름 *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="성함을 입력해주세요" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>연락처 *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="휴대폰 번호를 입력해주세요" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="course"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>관심 과정</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="선택해주세요" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="toeic">토익 완전정복</SelectItem>
-                              <SelectItem value="business">비즈니스 영어</SelectItem>
-                              <SelectItem value="conversation">영어 회화 마스터</SelectItem>
-                              <SelectItem value="other">기타</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="message"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>문의 내용</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="궁금한 점이나 상담받고 싶은 내용을 자유롭게 작성해주세요"
-                              className="resize-none"
-                              rows={4}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                      <NotebookPen className="mr-2 w-5 h-5" />
-                      {isSubmitting ? "전송 중..." : "상담 신청하기"}
-                    </Button>
-
-                    <p className="text-xs text-muted-foreground text-center">
-                      개인정보는 상담 목적으로만 사용되며, 상담 완료 후 즉시 삭제됩니다.
-                    </p>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </section>
