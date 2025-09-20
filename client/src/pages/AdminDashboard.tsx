@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -462,6 +462,109 @@ const VideoManager = () => {
   );
 };
 
+const ApprovedMembersTab = () => {
+  const [q, setQ] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [rows, setRows] = useState<any[]>([]);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/admin/members?status=verified&q=${encodeURIComponent(q)}`, {
+        credentials: 'include'
+      });
+      const d = await r.json();
+      setRows(d.items || []);
+    } catch (error) {
+      console.error('회원 목록 로드 에러:', error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('정말 탈퇴 처리하시겠습니까?')) return;
+    try {
+      const r = await fetch(`/api/admin/members/${id}`, {
+        method: 'DELETE', 
+        credentials: 'include'
+      });
+      const d = await r.json();
+      if (d.ok) {
+        setRows(prev => prev.filter(m => m.id !== id));
+      } else {
+        alert('탈퇴 실패: ' + (d.code || 'UNKNOWN'));
+      }
+    } catch (error) {
+      console.error('회원 삭제 에러:', error);
+      alert('탈퇴 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  return (
+    <div className="space-y-4" data-testid="approved-members-tab">
+      <div className="flex gap-2">
+        <input
+          value={q}
+          onChange={e => setQ(e.target.value)}
+          placeholder="이름/이메일 검색"
+          className="border rounded px-3 py-2 w-full"
+          data-testid="input-search-members"
+        />
+        <button 
+          onClick={load} 
+          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+          data-testid="button-search-members"
+        >
+          검색
+        </button>
+      </div>
+
+      {loading ? (
+        <div data-testid="loading-members">불러오는 중...</div>
+      ) : rows.length === 0 ? (
+        <div data-testid="no-members">승인된 회원이 없습니다.</div>
+      ) : (
+        <table className="w-full text-sm border-collapse border border-gray-300">
+          <thead>
+            <tr className="text-left border-b bg-gray-50">
+              <th className="py-2 px-3 border">이름</th>
+              <th className="py-2 px-3 border">이메일</th>
+              <th className="py-2 px-3 border">상태</th>
+              <th className="py-2 px-3 border w-28">작업</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(m => (
+              <tr key={m.id} className="border-b hover:bg-gray-50" data-testid={`member-row-${m.id}`}>
+                <td className="py-2 px-3 border">
+                  {[m.firstName, m.lastName].filter(Boolean).join(' ') || m.email}
+                </td>
+                <td className="py-2 px-3 border">{m.email}</td>
+                <td className="py-2 px-3 border">
+                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                    승인됨
+                  </span>
+                </td>
+                <td className="py-2 px-3 border">
+                  <button 
+                    onClick={() => handleDelete(m.id)} 
+                    className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 text-xs"
+                    data-testid={`button-delete-${m.id}`}
+                  >
+                    탈퇴
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+};
+
 const GalleryManager = () => {
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -746,6 +849,17 @@ export default function AdminDashboard() {
               >
                 갤러리 관리
               </button>
+              <button
+                onClick={() => setActiveTab('members')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'members'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+                data-testid="button-tab-members"
+              >
+                회원관리
+              </button>
             </nav>
           </div>
           
@@ -753,6 +867,7 @@ export default function AdminDashboard() {
             {activeTab === 'pending' && <PendingMembers />}
             {activeTab === 'videos' && <VideoManager />}
             {activeTab === 'gallery' && <GalleryManager />}
+            {activeTab === 'members' && <ApprovedMembersTab />}
           </div>
         </div>
       </div>

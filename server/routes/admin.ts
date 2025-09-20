@@ -159,6 +159,23 @@ router.post('/revoke-user', adminGuard, async (req, res) => {
   }
 });
 
+// ✅ 회원 탈퇴 처리 (DELETE)
+router.delete('/members/:id', adminGuard, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ ok: false, message: 'User ID is required' });
+    }
+    
+    // 사용자를 PENDING 상태로 변경 (실제 삭제 대신)
+    await storage.revokeUserApproval(id, null, '관리자에 의한 탈퇴 처리');
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error deleting member:', error);
+    res.status(500).json({ ok: false, message: 'Member deletion failed' });
+  }
+});
+
 // ✅ 갤러리 이미지 목록
 router.get('/gallery', adminGuard, async (req, res) => {
   try {
