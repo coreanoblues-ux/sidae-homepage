@@ -1,0 +1,143 @@
+“/_superadmin로 로그인 후 /admin-dashboard에서 세션 만료” 종결 가이드
+🎯 목표
+- 로그인 경로는 계속 "/_superadmin" (페이지/폼 유지)
+- 성공 후 "/admin-dashboard" 이동
+- 쿠키는 모든 경로에서 유효(path:'/'), 환경별로 옵션 자동 분기
+- 서버 보호가드가 쿠키를 정확히 인식
+
+────────────────────────────────
+1) 쿠키 옵션 헬퍼 (환경별 자동 분기)
+// server/auth/cookie.ts
+import type { Request } from "express";
+
+const isHttps = (req: Request) =>
+  (req.headers["x-forwarded-proto"] as string) === "https";
+
+const domainFor = (host?: string) => {
+  if (!host) return undefined;                      // dev(host-only)
+  if (host.endsWith(".replit.app"))  return ".replit.app";
+  if (host.endsWith(".replit.dev"))  return ".replit.dev";
+  if (host.endsWith("sidae-edu.com"))return ".sidae-edu.com";
+  return undefined;
+};
+
+export function cookieOpts(req: Request) {
+  if (isHttps(req)) {
+    return { httpOnly: true, secure: true, sameSite: "None" as const,
+             domain: domainFor(req.hostname), path: "/" };
+  }
+  return { httpOnly: true, secure: false, sameSite: "Lax" as const,
+           domain: undefined, path: "/" };          // dev/HTTP
+}
+
+2) 관리자 로그인/로그아웃 API 고정
+// server/routes/auth.admin.ts
+import { cookieOpts } from "../auth/cookie";
+
+app.post("/api/auth/admin-login", async (req,res)=>{
+  // ...비번 검증 후 JWT(payload.role='admin') 발급
+  const token = makeAdminJWT(...);
+  const opts = cookieOpts(req);
+  res.cookie("sid", token, { ...opts, maxAge: 1000*60*60*8 }); // 8h
+  return res.json({ ok:true });
+});
+
+app.post("/api/auth/logout", (req,res)=>{
+  const opts = cookieOpts(req);
+  res.clearCookie("sid", opts);
+  res.cookie("sid","",{...opts,maxAge:0});
+  // 과거 변종 쿠키도 같이 제거
+  [undefined,".replit.app",".replit.dev",".sidae-edu.com"].forEach(d=>{
+    res.clearCookie("sid",{...opts,domain:d});
+  });
+  return res.json({ ok:true });
+});
+
+3) 서버 보호가드(/admin, /admin-dashboard, /_superadmin 이외) 
+// server/index.ts
+import path from "node:path";
+import jwt from "jsonwebtoken";
+
+const INDEX = path.join(__dirname, "dist/index.html");
+const isAdmin = (req:any) => {
+  const raw = req.cookies?.sid || (req.headers.cookie||"").split(/; */)
+    .map(s=>s.split("=")).reduce((a,[k,v])=> (a[k]=decodeURIComponent(v||""),a),{} as any).sid;
+  if (!raw) return false;
+  try { const p:any = jwt.verify(raw, process.env.JWT_SECRET!); return p?.role==="admin"; }
+  catch { return false; }
+};
+
+// API 먼저
+app.use("/api/admin", adminRouter);
+app.use("/api", apiRouter);
+
+// 보호 페이지 서버 가드 (로그인 필요)
+const PROTECTED = ["/admin", "/admin-dashboard"];
+app.get(PROTECTED, (req,res) => {
+  if (!isAdmin(req)) return res.redirect(302, "/_superadmin");
+  res.sendFile(INDEX);
+});
+
+// 정적 & SPA fallback
+app.use(express.static(path.join(__dirname,"dist")));
+app.get("*",(req,res,next)=>{
+  if (req.path.startsWith("/api")) return next();
+  return res.sendFile(INDEX);
+});
+
+4) 프런트: 라우팅/리다이렉트 일관화
+// src/router.tsx
+<Route path="/_superadmin" element={<AdminLoginPage/>} />
+<Route path="/admin-dashboard" element={<RequireAdmin><AdminDashboard/></RequireAdmin>} />
+
+// src/components/RequireAdmin.tsx
+const RequireAdmin = ({children})=>{
+  const [ok,setOk]=useState<boolean|null>(null);
+  useEffect(()=>{(async()=>{
+    const r = await fetch("/api/auth/me",{credentials:"include",cache:"no-store"});
+    setOk(r.ok);
+  })()},[]);
+  if (ok===null) return null;
+  if (!ok) { location.replace("/_superadmin?next=/admin-dashboard"); return null; }
+  return children;
+};
+
+// 로그인 성공 시 이동
+// AdminLoginPage.tsx
+await fetch("/api/auth/admin-login", { method:"POST", body:..., headers:{'Content-Type':'application/json'}, credentials:"include" });
+const next = new URLSearchParams(location.search).get("next") || "/admin-dashboard";
+location.assign(next);
+
+5) 헤더/캐시 방지(세션 착시 제거)
+// server/index.ts (전역 미들웨어로)
+app.set("trust proxy", 1);
+app.use((_,res,next)=>{
+  res.setHeader("Cache-Control","no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma","no-cache");
+  res.setHeader("Expires","0");
+  next();
+});
+
+6) 빠른 점검
+# 로그인 전:
+curl -I https://sidae-edu.com/admin-dashboard   → 302 /_superadmin
+
+# 로그인 후(쿠키 포함):
+curl -I -c c.txt -b c.txt https://sidae-edu.com/admin-dashboard → 200
+
+# 쿠키 범위 확인 (Set-Cookie):
+- Path=/, SameSite=None; Secure (배포)
+- Domain=.sidae-edu.com 또는 .replit.app (환경에 맞게)
+
+
+중요 포인트
+
+로그인 페이지 경로는 계속 /_superadmin으로 사용.
+
+쿠키 path:'/' 아니면 /admin-dashboard에서 안 보인다 → 반드시 '/'.
+
+개발/배포에서 쿠키 옵션을 “동일하게” 쓰되, HTTPS 여부에 따라 동적으로 분기.
+
+서버 보호가드가 최종 보루: 쿠키가 없으면 /admin-dashboard는 무조건 /_superadmin로 보낸다.
+
+이걸 적용하면 /_superadmin → 로그인 성공 → /admin-dashboard에서 세션 만료가 더 이상 안 떠.

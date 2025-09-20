@@ -3,28 +3,44 @@ import { storage } from '../storage';
 import { insertSimpleVideoSchema } from '../../shared/schema';
 import { z } from 'zod';
 import { normalizeVideo, VIDEO_ERROR_MESSAGES } from '../utils/videos';
-import { cookieOptions } from '../auth/cookie';
+import { cookieOpts } from '../auth/cookie';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 
 // 🎯 제거됨 - cookieOptions 모듈 사용
 
-// 🔒 관리자 권한 체크 미들웨어
+// 🔒 JWT 기반 관리자 권한 체크 미들웨어
 const adminGuard = (req: any, res: any, next: any) => {
+  const raw = req.cookies?.sid || (req.headers.cookie||"")
+    .split(/; */).map((s: string) => s.split("="))
+    .reduce((a: any, [k, v]: any) => (a[k] = decodeURIComponent(v||""), a), {} as any).sid;
+
   console.log('🔒 AdminGuard 체크:', {
     cookies: req.cookies,
-    sid: req.cookies?.sid,
+    sid: raw ? '토큰 존재' : '토큰 없음',
     headers_cookie: req.headers.cookie,
     path: req.path,
     method: req.method
   });
   
-  if (req.cookies?.sid === 'admin-token') {
-    console.log('✅ AdminGuard 통과');
-    return next();
+  if (!raw) {
+    console.log('❌ AdminGuard 실패 - 토큰 없음');
+    return res.status(401).json({ ok: false, message: 'Unauthorized' });
   }
-  console.log('❌ AdminGuard 실패 - Unauthorized');
-  return res.status(401).json({ ok: false, message: 'Unauthorized' });
+
+  try {
+    const payload: any = jwt.verify(raw, process.env.JWT_SECRET!);
+    if (payload?.role === 'admin') {
+      console.log('✅ AdminGuard 통과 - JWT 검증 성공');
+      return next();
+    }
+    console.log('❌ AdminGuard 실패 - 관리자 권한 없음');
+    return res.status(401).json({ ok: false, message: 'Unauthorized' });
+  } catch (error) {
+    console.log('❌ AdminGuard 실패 - JWT 검증 실패:', error);
+    return res.status(401).json({ ok: false, message: 'Unauthorized' });
+  }
 };
 
 // ✅ 로그인
@@ -36,19 +52,25 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ ok: false, message: '잘못된 비밀번호입니다.' });
   }
   
-  // 🎯 새로운 쿠키 처리 모듈 사용
-  const opts = cookieOptions(req);
-  console.log('🍪 쿠키 설정:', { opts, value: 'admin-token' });
+  // 🎯 JWT 토큰 생성
+  const token = jwt.sign(
+    { role: 'admin', iat: Math.floor(Date.now() / 1000) },
+    process.env.JWT_SECRET!,
+    { expiresIn: '8h' }
+  );
   
-  res.cookie('sid', 'admin-token', { ...opts, maxAge: 1000 * 60 * 60 });
+  const opts = cookieOpts(req);
+  console.log('🍪 JWT 쿠키 설정:', { opts, tokenLength: token.length });
   
-  console.log('✅ 로그인 성공 - 쿠키 설정 완료');
+  res.cookie('sid', token, { ...opts, maxAge: 1000 * 60 * 60 * 8 }); // 8시간
+  
+  console.log('✅ 로그인 성공 - JWT 토큰 발급 완료');
   res.json({ ok: true, message: '로그인 성공' });
 });
 
 // ✅ 새로운 로그아웃 처리
 router.post('/logout', (req, res) => {
-  const opts = cookieOptions(req);
+  const opts = cookieOpts(req);
   console.log('🚪 로그아웃 시도:', { opts });
   
   res.clearCookie('sid', opts);

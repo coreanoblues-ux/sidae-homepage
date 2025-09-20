@@ -1,9 +1,15 @@
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import jwt from "jsonwebtoken";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedProgramsIfEmpty } from "./seedData";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -62,11 +68,36 @@ app.use((req, res, next) => {
   next();
 });
 
+// 🔒 JWT 기반 관리자 인증 체크 헬퍼
+const isAdmin = (req: any) => {
+  const raw = req.cookies?.sid || (req.headers.cookie||"").split(/; */)
+    .map((s: string) => s.split("=")).reduce((a: any, [k, v]: any) => (a[k] = decodeURIComponent(v||""), a), {} as any).sid;
+  if (!raw) return false;
+  try { 
+    const p: any = jwt.verify(raw, process.env.JWT_SECRET!); 
+    return p?.role==="admin"; 
+  }
+  catch { return false; }
+};
+
+const INDEX = path.join(__dirname, "dist/index.html");
+
 (async () => {
   const server = await registerRoutes(app);
 
   // 🌱 시드 데이터 초기화 (배포 환경에서 프로그램 데이터 없을 때 자동 생성)
   await seedProgramsIfEmpty();
+
+  // 🔒 보호 페이지 서버 가드 (관리자 로그인 필요)
+  const PROTECTED = ["/admin", "/admin-dashboard"];
+  app.get(PROTECTED, (req, res) => {
+    console.log('🚨 보호된 페이지 접근:', req.path, '- 관리자 인증:', isAdmin(req) ? '✅' : '❌');
+    if (!isAdmin(req)) {
+      console.log('🔄 /_superadmin으로 리다이렉트');
+      return res.redirect(302, "/_superadmin");
+    }
+    res.sendFile(INDEX);
+  });
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
