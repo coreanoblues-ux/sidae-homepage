@@ -1,0 +1,339 @@
+다음 변경을 수행해서 비밀 슈퍼관리자 페이지를 만들고, 404가 절대 나오지 않게 라우트 별칭/리디렉션까지 포함해 완성해줘.
+
+0) 환경설정
+
+.env에 추가
+
+SUPERADMIN_PATH="/_superadmin"      # 비밀 경로(원하면 바꿔도 됨)
+
+
+next.config.js 보완 (있으면 merge)
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'standalone',
+  experimental: { serverActions: { allowedOrigins: ['*'] } },
+  images: { unoptimized: true }, // 외부 링크 이미지 썸네일용 임시 안전장치
+};
+module.exports = nextConfig;
+
+
+주의: scripts에 next export 절대 쓰지 말고 next build && next start 또는 next dev만 사용.
+
+1) Prisma 스키마(갤러리 이미지 저장)
+
+prisma/schema.prisma에 모델 추가(이미 있으면 건너뜀/merge):
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  url       String
+  caption   String?
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+
+그리고 DB 반영:
+
+npx prisma db push
+
+2) 슈퍼관리자 서버 액션
+
+src/app/_superadmin/actions.ts 파일을 새로 만들어줘:
+
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { authOptions } from '@/lib/auth';
+
+async function requireAdmin() {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any)?.role !== 'ADMIN') {
+    redirect('/login?next=' + encodeURIComponent(process.env.SUPERADMIN_PATH || '/_superadmin'));
+  }
+  return session;
+}
+
+// 가입자 승인/거절
+export async function approveUser(formData: FormData) {
+  await requireAdmin();
+  const userId = String(formData.get('userId') || '');
+  if (!userId) return;
+  await prisma.user.update({ where: { id: userId }, data: { role: 'VERIFIED' as any } });
+  await prisma.approval.create({ data: { userId, adminId: 'admin', status: 'APPROVED' as any } });
+  revalidatePath(process.env.SUPERADMIN_PATH || '/_superadmin');
+}
+
+export async function rejectUser(formData: FormData) {
+  await requireAdmin();
+  const userId = String(formData.get('userId') || '');
+  const memo = String(formData.get('memo') || '');
+  if (!userId) return;
+  await prisma.approval.create({ data: { userId, adminId: 'admin', status: 'REJECTED' as any, memo } });
+  // role은 그대로(PENDING 유지)
+  revalidatePath(process.env.SUPERADMIN_PATH || '/_superadmin');
+}
+
+// 갤러리 이미지 추가/삭제/토글
+export async function addGalleryImage(formData: FormData) {
+  await requireAdmin();
+  const url = String(formData.get('url') || '');
+  const caption = String(formData.get('caption') || '');
+  if (!url) return;
+  await prisma.galleryImage.create({ data: { url, caption } });
+  revalidatePath(process.env.SUPERADMIN_PATH || '/_superadmin');
+}
+
+export async function deleteGalleryImage(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get('id') || '');
+  if (!id) return;
+  await prisma.galleryImage.delete({ where: { id } });
+  revalidatePath(process.env.SUPERADMIN_PATH || '/_superadmin');
+}
+
+export async function toggleGalleryVisibility(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get('id') || '');
+  const visible = String(formData.get('visible') || 'true') === 'true';
+  if (!id) return;
+  await prisma.galleryImage.update({ where: { id }, data: { visible } });
+  revalidatePath(process.env.SUPERADMIN_PATH || '/_superadmin');
+}
+
+// 동영상 링크 추가(코스에 귀속)
+export async function addVideoLink(formData: FormData) {
+  await requireAdmin();
+  const courseId = String(formData.get('courseId') || '');
+  const title = String(formData.get('title') || '');
+  const externalUrl = String(formData.get('externalUrl') || '');
+  const isPublished = String(formData.get('isPublished') || 'true') === 'true';
+  const accessStart = String(formData.get('accessStart') || '');
+  const accessEnd = String(formData.get('accessEnd') || '');
+
+  if (!courseId || !title || !externalUrl) return;
+
+  await prisma.video.create({
+    data: {
+      courseId,
+      title,
+      externalUrl,
+      isPublished,
+      accessStart: accessStart ? new Date(accessStart) : null,
+      accessEnd: accessEnd ? new Date(accessEnd) : null,
+    },
+  });
+  revalidatePath(process.env.SUPERADMIN_PATH || '/_superadmin');
+}
+
+3) 슈퍼관리자 페이지(비밀 경로)
+
+src/app/_superadmin/page.tsx 생성:
+
+import { getServerSession } from 'next-auth';
+import { redirect, notFound } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { authOptions } from '@/lib/auth';
+import {
+  approveUser, rejectUser,
+  addGalleryImage, deleteGalleryImage, toggleGalleryVisibility,
+  addVideoLink
+} from './actions';
+
+export const dynamic = 'force-dynamic';
+
+export default async function SuperAdminPage() {
+  const session = await getServerSession(authOptions);
+  const superPath = process.env.SUPERADMIN_PATH || '/_superadmin';
+
+  if (!session) redirect('/login?next=' + encodeURIComponent(superPath));
+  // 비밀 페이지: 관리자만 접근 가능(아닌 경우 404로 위장)
+  if ((session.user as any)?.role !== 'ADMIN') notFound();
+
+  const [pendingUsers, gallery, courses] = await Promise.all([
+    prisma.user.findMany({ where: { role: 'PENDING' }, orderBy: { createdAt: 'desc' } }),
+    prisma.galleryImage.findMany({ orderBy: { createdAt: 'desc' } }),
+    prisma.course.findMany({ orderBy: { title: 'asc' } }),
+  ]);
+
+  return (
+    <div className="mx-auto max-w-6xl p-6 space-y-12">
+      <h1 className="text-3xl font-bold">Super Admin · Secret</h1>
+
+      {/* 1) 가입 승인/거절 */}
+      <section id="approvals" className="space-y-4">
+        <h2 className="text-xl font-semibold">가입 승인 대기</h2>
+        <div className="overflow-x-auto border rounded-lg">
+          <table className="min-w-full text-sm">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="p-3 text-left">이메일</th>
+                <th className="p-3 text-left">이름</th>
+                <th className="p-3 text-left">가입일</th>
+                <th className="p-3 text-left">액션</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendingUsers.length === 0 && (
+                <tr><td className="p-3" colSpan={4}>대기 회원이 없습니다.</td></tr>
+              )}
+              {pendingUsers.map(u => (
+                <tr key={u.id} className="border-t">
+                  <td className="p-3">{u.email}</td>
+                  <td className="p-3">{u.name || '-'}</td>
+                  <td className="p-3">{new Date(u.createdAt).toLocaleString()}</td>
+                  <td className="p-3 flex gap-2">
+                    <form action={approveUser}>
+                      <input type="hidden" name="userId" value={u.id} />
+                      <button className="px-3 py-1 rounded bg-blue-600 text-white">승인</button>
+                    </form>
+                    <form action={rejectUser} className="flex gap-2">
+                      <input type="hidden" name="userId" value={u.id} />
+                      <input name="memo" placeholder="메모(선택)" className="border px-2 py-1 rounded" />
+                      <button className="px-3 py-1 rounded bg-amber-600 text-white">거절</button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* 2) 갤러리 관리 */}
+      <section id="gallery" className="space-y-4">
+        <h2 className="text-xl font-semibold">학원 갤러리 관리</h2>
+        <form action={addGalleryImage} className="flex gap-2 items-end">
+          <div className="flex-1">
+            <label className="block text-sm mb-1">이미지 URL</label>
+            <input name="url" required placeholder="https://..." className="w-full border px-3 py-2 rounded" />
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm mb-1">캡션(선택)</label>
+            <input name="caption" placeholder="예: 정우석 원장 수업 현장" className="w-full border px-3 py-2 rounded" />
+          </div>
+          <button className="px-4 h-10 rounded bg-green-600 text-white">추가</button>
+        </form>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {gallery.map(g => (
+            <div key={g.id} className="border rounded-lg p-3 space-y-2">
+              <img src={g.url} alt={g.caption || 'gallery'} className="w-full h-40 object-cover rounded" />
+              <div className="text-sm">{g.caption || '-'}</div>
+              <div className="flex gap-2">
+                <form action={toggleGalleryVisibility}>
+                  <input type="hidden" name="id" value={g.id} />
+                  <input type="hidden" name="visible" value={(!g.visible).toString()} />
+                  <button className="px-3 py-1 rounded bg-slate-700 text-white">
+                    {g.visible ? '숨기기' : '보이기'}
+                  </button>
+                </form>
+                <form action={deleteGalleryImage}>
+                  <input type="hidden" name="id" value={g.id} />
+                  <button className="px-3 py-1 rounded bg-red-600 text-white">삭제</button>
+                </form>
+              </div>
+            </div>
+          ))}
+          {gallery.length === 0 && <p className="text-sm text-slate-500">등록된 이미지가 없습니다.</p>}
+        </div>
+      </section>
+
+      {/* 3) 동영상 링크 등록 */}
+      <section id="videos" className="space-y-4">
+        <h2 className="text-xl font-semibold">동영상 링크 등록</h2>
+        <form action={addVideoLink} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm mb-1">코스</label>
+            <select name="courseId" required className="w-full border px-3 py-2 rounded">
+              <option value="">코스 선택</option>
+              {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm mb-1">제목</label>
+            <input name="title" required className="w-full border px-3 py-2 rounded" />
+          </div>
+          <div>
+            <label className="block text-sm mb-1">외부 링크(NAS 등)</label>
+            <input name="externalUrl" required placeholder="https://..." className="w-full border px-3 py-2 rounded" />
+          </div>
+          <div>
+            <label className="block text-sm mb-1">공개 여부</label>
+            <select name="isPublished" className="w-full border px-3 py-2 rounded">
+              <option value="true">공개</option>
+              <option value="false">비공개</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm mb-1">접근 시작(선택)</label>
+            <input type="datetime-local" name="accessStart" className="w-full border px-3 py-2 rounded" />
+          </div>
+          <div>
+            <label className="block text-sm mb-1">접근 종료(선택)</label>
+            <input type="datetime-local" name="accessEnd" className="w-full border px-3 py-2 rounded" />
+          </div>
+          <div className="md:col-span-2">
+            <button className="px-4 h-10 rounded bg-indigo-600 text-white">링크 추가</button>
+          </div>
+        </form>
+        <p className="text-xs text-slate-500">
+          * 접근 제어는 Video의 accessStart/accessEnd 및 isPublished, 그리고 사용자 역할(VERIFIED/ADMIN)에 의해 결정됩니다.
+        </p>
+      </section>
+    </div>
+  );
+}
+
+4) 404를 영원히 피하는 라우트 별칭/리디렉션
+
+사용자가 주소를 헷갈려도 절대 404가 안 뜨도록 별칭을 만든다. 아래 3개 파일을 추가해서 모두 비밀 경로로 리디렉트:
+
+src/app/superadmin/page.tsx
+
+import { redirect } from 'next/navigation';
+export default function Page(){ redirect(process.env.SUPERADMIN_PATH || '/_superadmin'); }
+
+
+src/app/super-admin/page.tsx
+
+import { redirect } from 'next/navigation';
+export default function Page(){ redirect(process.env.SUPERADMIN_PATH || '/_superadmin'); }
+
+
+src/app/admin/super/page.tsx
+
+import { redirect } from 'next/navigation';
+export default function Page(){ redirect(process.env.SUPERADMIN_PATH || '/_superadmin'); }
+
+
+이렇게 하면 /superadmin, /super-admin, /admin/super 로 들어와도 전부 비밀 경로로 합류 → 404 방지.
+
+5) 접근 테스트(수용 기준)
+
+ 로그인 안 한 상태에서 /_superadmin 접속 → /login?next=...로 리디렉트
+
+ 일반 사용자(VERIFIED)로 접속 → 404 노출(비밀 보호)
+
+ 관리자(ADMIN)로 접속 → 슈퍼관리자 대시보드 정상 표시
+
+ 가입 대기자 승인/거절 → Role 변경 및 페이지 즉시 갱신
+
+ 갤러리 이미지 URL 추가/삭제/숨김 토글 → 리스트 즉시 갱신
+
+ 코스 선택 후 동영상 링크 등록 → 코스 상세에서 해당 영상 보임(기간/공개 여부 반영)
+
+ /superadmin, /super-admin, /admin/super → 전부 /_superadmin으로 이동, 404 없음
+
+6) 흔한 실수 방지(필수 체크)
+
+ next export 사용 금지 (정적 내보내기는 App Router + 서버액션과 충돌 → 404 유발)
+
+ prisma db push 실행 완료
+
+ authOptions와 prisma 경로는 @/lib/auth, @/lib/prisma로 존재해야 함(다르면 import 경로 맞춰 수정)
+
+ ADMIN 권한 계정 존재(없으면 seeding 또는 DB에서 role 수정)

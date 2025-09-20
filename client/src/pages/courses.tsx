@@ -102,7 +102,7 @@ export default function Courses() {
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
               체계적인 커리큘럼으로 구성된 온라인 강의를 통해 효과적으로 영어 실력을 향상시키세요.
-              정우석 원장의 노하우가 집약된 프리미엄 강의를 만나보세요.
+              시대영재 학원 원장의 노하우가 집약된 프리미엄 강의를 만나보세요.
             </p>
             
             {!isAuthenticated && (
@@ -246,7 +246,7 @@ export default function Courses() {
               강의의 특징
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              정우석 영어학원의 온라인 강의만의 특별한 장점들을 확인해보세요.
+              시대영재 학원의 온라인 강의만의 특별한 장점들을 확인해보세요.
             </p>
           </div>
 

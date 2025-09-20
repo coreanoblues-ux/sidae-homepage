@@ -31,16 +31,30 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
+  // 🎯 개발/배포 환경 대응 세션 쿠키 설정
+  const isDev = process.env.NODE_ENV === 'development';
+  const cookieDomain = process.env.COOKIE_DOMAIN;
+  
+  const cookieConfig: any = {
+    httpOnly: true,
+    secure: !isDev, // 개발환경은 false, 배포환경은 true
+    sameSite: isDev ? 'lax' : 'none', // 개발환경은 lax, 배포환경은 none
+    path: '/',
+    maxAge: sessionTtl,
+  };
+
+  // 배포환경에서만 도메인 설정
+  if (!isDev && cookieDomain) {
+    cookieConfig.domain = cookieDomain;
+  }
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: true,
-      maxAge: sessionTtl,
-    },
+    cookie: cookieConfig,
   });
 }
 
@@ -116,6 +130,24 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
+    // 환경변수 기반 통일된 쿠키 옵션
+    const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+    const cookieOpts = { 
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'none' as const, 
+      domain: cookieDomain, 
+      path: '/' 
+    };
+    
+    // 관리자 쿠키가 있으면 먼저 정리
+    if (req.cookies?.sid === 'admin-token') {
+      res.clearCookie('sid', cookieOpts);
+      res.cookie('sid', '', { ...cookieOpts, maxAge: 0 });
+      return res.redirect("/");
+    }
+    
+    // 일반 Replit OAuth 로그아웃
     req.logout(() => {
       res.redirect(
         client.buildEndSessionUrl(config, {
@@ -125,10 +157,105 @@ export async function setupAuth(app: Express) {
       );
     });
   });
+
+  // 관리자 비밀번호 로그인 (개발 및 배포 환경 모두 지원)
+  app.post("/api/dev/login", async (req, res) => {
+    const { password } = req.body;
+    const correctPassword = process.env.SUPERADMIN_PASSWORD || "671321";
+      
+      if (password !== correctPassword) {
+        return res.status(401).json({ message: "잘못된 비밀번호입니다." });
+      }
+
+      // 개발용 관리자 사용자 생성/업데이트
+      await storage.upsertUser({
+        id: "dev-admin",
+        email: "admin@sidaeyeongjae.kr",
+        firstName: "관리자",
+        lastName: "개발용",
+        profileImageUrl: null,
+        role: "ADMIN"
+      });
+
+      // 쿠키 설정 - 도메인 체크 개선
+      const host = req.get('host') || '';
+      const isReplitApp = host.includes('replit.app');
+      const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+      
+      console.log('[SET-COOKIE] Host:', host); // 진단 로그
+      
+      // 개발용 세션 쿠키 설정 - 도메인별로 다르게 처리
+      const cookieOptions: any = {
+        httpOnly: true,
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 1주일
+      };
+      
+      if (isReplitApp || isLocalhost) {
+        // Replit 또는 로컬 환경 - 도메인 설정하지 않음
+        if (isReplitApp) {
+          cookieOptions.secure = true;
+          cookieOptions.sameSite = 'none';
+        }
+      } else {
+        // 커스텀 도메인 환경
+        cookieOptions.secure = true;
+        cookieOptions.sameSite = 'none';
+        cookieOptions.domain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+      }
+      
+      res.cookie('sid', 'admin-token', cookieOptions);
+
+      res.json({ success: true, message: "개발용 로그인 성공" });
+    });
+
+  app.post("/api/dev/logout", (req, res) => {
+    // 쿠키 정리 - 도메인별로 처리
+    const host = req.get('host') || '';
+    const isReplitApp = host.includes('replit.app');
+    const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+    
+    const cookieOpts: any = { 
+      httpOnly: true, 
+      path: '/' 
+    };
+    
+    if (isReplitApp || isLocalhost) {
+      // Replit 또는 로컬 환경
+      if (isReplitApp) {
+        cookieOpts.secure = true;
+        cookieOpts.sameSite = 'none';
+      }
+    } else {
+      // 커스텀 도메인 환경
+      cookieOpts.secure = true;
+      cookieOpts.sameSite = 'none';
+      cookieOpts.domain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';
+    }
+    
+    res.clearCookie('sid', cookieOpts);
+    res.cookie('sid', '', { ...cookieOpts, maxAge: 0 });
+    
+    res.json({ success: true, message: "로그아웃 완료" });
+  });
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
+
+  // 개발/배포 환경에서 관리자 쿠키 확인
+  if (req.cookies?.sid === 'admin-token') {
+    // 개발용 세션 생성
+    req.user = {
+      claims: { 
+        sub: 'dev-admin',
+        email: 'admin@sidaeyeongjae.kr',
+        first_name: '관리자',
+        last_name: '개발용'
+      }
+    };
+    return next();
+  }
 
   if (!req.isAuthenticated() || !user.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });

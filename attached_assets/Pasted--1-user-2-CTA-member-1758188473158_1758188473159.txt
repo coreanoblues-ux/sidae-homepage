@@ -1,0 +1,58 @@
+🎯 목표
+1) 일반회원(user)은 로그인 직후 자동 리다이렉트 금지 → 항상 랜딩('/') 유지
+2) 랜딩의 CTA(“시대영재 온라인 강의 듣기”) 클릭 시에만 '/members'로 이동
+3) '/members' 및 하위는 인증 필요(401→/login), 관리자와 분리
+4) 관리자(admin)는 로그인 시 '/admin'으로 유지
+
+## 1) 로그인 후 리다이렉트 정책 수정
+- auth/login 성공 핸들러(프론트)에서 현재 role에 따라 분기:
+  if (role === 'admin') router.replace('/admin');
+  else router.replace('/');               // 일반회원은 항상 랜딩으로
+
+- 기존에 user도 '/members' 등으로 자동 보내는 코드가 있으면 제거.
+
+## 2) 보호 라우트 컴포넌트 도입(또는 정리)
+- 파일: src/routes/Protected.tsx
+  export function Protected({ children, role }: {children: ReactNode; role?: 'admin'|'user'}) {
+    const me = useMe(); // /api/auth/me 호출로 {authenticated, role}
+    if (me.loading) return null; // 스켈레톤
+    if (!me.authenticated) { router.replace('/login'); return null; }
+    if (role && me.role !== role) { router.replace('/'); return null; }
+    return <>{children}</>;
+  }
+
+- 라우팅 예:
+  <Route path="/members" element={<Protected role="user"><MembersHome/></Protected>} />
+  <Route path="/admin/*" element={<Protected role="admin"><AdminLayout/></Protected>} />
+
+## 3) 랜딩 CTA 클릭 로직(핵심)
+- 파일: src/pages/Landing.tsx
+  const me = useMe();  // {authenticated, role}
+  const onClickCTA = () => {
+    if (me.authenticated && me.role === 'user') router.push('/members');
+    else router.push('/login'); // 비로그인/타역할은 로그인으로
+  };
+
+  <Button onClick={onClickCTA}>시대영재 온라인 강의 듣기</Button>
+
+- Nav 표시: 일반회원 로그인 상태라도 랜딩에 머무르므로, 우상단에 ‘내 강의로 가기’ 버튼을 추가(선택):
+  {me.authenticated && me.role==='user' && (
+     <Link to="/members">내 강의로 가기</Link>
+  )}
+
+## 4) 서버 가드(보안 일치)
+- '/members' 관련 API는 미인증 시 401 JSON:
+  if (!req.user || req.user.role!=='user') return res.status(401).json({ok:false, code:'UNAUTHENTICATED'});
+- HTML 리다이렉트 금지(항상 JSON), 프론트는 401 받으면 /login으로.
+
+## 5) 프리페치/자동 네비 차단(중요)
+- 라우터/메뉴에서 로그인 성공 시 user를 '/members'로 미리 보내는 useEffect가 있으면 제거.
+- Next/Vite에서 Link prefetch로 자동 이동 유발하는 코드가 있으면 off.
+
+## 6) 간단 E2E 체크(필수)
+- 시나리오:
+  (A) 비회원 → 랜딩 → CTA 클릭 → /login
+  (B) 일반회원 로그인 성공 → 즉시 '/' 유지 → CTA 클릭 → '/members'
+  (C) 일반회원이 직접 '/members' 접근 → 통과
+  (D) 일반회원이 '/admin' 접근 → '/'로 리다이렉트
+  (E) 비회원이 '/members' 접근 → /login
