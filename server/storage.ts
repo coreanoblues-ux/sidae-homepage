@@ -64,8 +64,10 @@ export interface IStorage {
   
   // User approval operations
   getPendingUsers(): Promise<User[]>;
+  getVerifiedUsers(): Promise<User[]>;
   approveUser(userId: string, adminId: string | null, memo?: string): Promise<void>;
   rejectUser(userId: string, adminId: string | null, memo?: string): Promise<void>;
+  revokeUserApproval(userId: string, adminId: string | null, memo?: string): Promise<void>;
   getUserApprovals(userId: string): Promise<Approval[]>;
   
   // Gallery operations
@@ -272,6 +274,15 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(users.createdAt));
   }
 
+  // 🎯 승인된 회원 목록 조회
+  async getVerifiedUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.role, 'VERIFIED'))
+      .orderBy(desc(users.createdAt));
+  }
+
   async approveUser(userId: string, adminId: string | null, memo?: string): Promise<void> {
     await db.transaction(async (tx) => {
       await tx
@@ -294,6 +305,23 @@ export class DatabaseStorage implements IStorage {
       adminId,
       status: 'REJECTED',
       memo,
+    });
+  }
+
+  // 🎯 승인 취소 (VERIFIED → PENDING)
+  async revokeUserApproval(userId: string, adminId: string | null, memo?: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      await tx
+        .update(users)
+        .set({ role: 'PENDING', updatedAt: new Date() })
+        .where(eq(users.id, userId));
+
+      await tx.insert(approvals).values({
+        userId,
+        adminId,
+        status: 'REJECTED', // 승인 취소도 REJECTED로 기록
+        memo: memo || '관리자 승인 취소',
+      });
     });
   }
 
