@@ -12,20 +12,24 @@ interface Video {
   id: string;
   title: string;
   description?: string;
+  externalUrl: string;
   durationSec?: number;
   isPublished: boolean;
   accessStart?: string;
   accessEnd?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Course {
   id: string;
   title: string;
-  slug: string;
   description?: string;
   thumbnail?: string;
   tags: string[];
   order: number;
+  createdAt: string;
+  updatedAt: string;
   videos: Video[];
 }
 
@@ -127,7 +131,7 @@ export default function CourseDetail() {
               <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <span className="flex items-center">
                   <Calendar className="w-4 h-4 mr-1" />
-                  최근 업데이트
+                  {new Date(course.createdAt).toLocaleDateString()}
                 </span>
                 <span className="flex items-center">
                   <VideoIcon className="w-4 h-4 mr-1" />
@@ -135,7 +139,7 @@ export default function CourseDetail() {
                 </span>
                 <span className="flex items-center">
                   <User className="w-4 h-4 mr-1" />
-                  시대영재 학원 원장
+                  정우석 원장
                 </span>
               </div>
             </div>
@@ -221,7 +225,7 @@ export default function CourseDetail() {
                 
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">강사</span>
-                  <span className="font-semibold">시대영재 학원 원장</span>
+                  <span className="font-semibold">정우석 원장</span>
                 </div>
                 
                 <div className="flex justify-between">
@@ -254,12 +258,12 @@ export default function CourseDetail() {
               <CardContent>
                 <div className="flex items-center space-x-4 mb-4">
                   <img
-                    src="/images/IMG_6558_1758101099677.JPG"
-                    alt="시대영재 학원 원장"
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100"
+                    alt="정우석 원장"
                     className="w-16 h-16 rounded-full object-cover"
                   />
                   <div>
-                    <h3 className="font-semibold text-foreground">시대영재 학원 원장</h3>
+                    <h3 className="font-semibold text-foreground">정우석 원장</h3>
                     <p className="text-sm text-muted-foreground">토익 만점 강사</p>
                   </div>
                 </div>

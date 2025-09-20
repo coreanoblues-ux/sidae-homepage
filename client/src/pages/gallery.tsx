@@ -1,48 +1,31 @@
-import { useQuery } from "@tanstack/react-query";
 import { Gallery } from "@/components/shared/Gallery";
 import { Card, CardContent } from "@/components/ui/card";
 import { Camera, Image, Users, Building } from "lucide-react";
 
 export default function GalleryPage() {
-  // 데이터베이스에서 갤러리 이미지 불러오기 (visible=true인 것만)
-  const { data: galleryImages = [], isLoading, error } = useQuery({
-    queryKey: ['/api/gallery'],
-  });
+  // Gallery images organized by category
+  const instructorImages = [
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+  ];
 
-  // 표시할 이미지들만 필터링 (visible이 true인 것들)
-  const visibleImages = (galleryImages as any[]).filter(img => img.visible);
-  
-  // 카테고리별로 분류 (caption으로 구분하거나 전체를 하나로 표시)
-  const allImages = visibleImages.map((img: any) => img.url);
-  
-  // 로딩 상태
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">갤러리를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
+  const classroomImages = [
+    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+  ];
 
-  // 에러 상태
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground mb-4">갤러리를 불러올 수 없습니다.</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            다시 시도
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const facilityImages = [
+    "https://images.unsplash.com/photo-1497486751825-1233686d5d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+  ];
+
+  const allImages = [...instructorImages, ...classroomImages, ...facilityImages];
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,7 +37,7 @@ export default function GalleryPage() {
               학원 갤러리
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              시대영재 학원의 교육 환경과 수업 현장을 확인해보세요.
+              정우석 영어학원의 교육 환경과 수업 현장을 확인해보세요.
               원장님의 모습과 학원의 시설, 수업 분위기를 생생하게 만나보실 수 있습니다.
             </p>
             
@@ -64,7 +47,7 @@ export default function GalleryPage() {
                   <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h3 className="font-semibold text-foreground">원장 & 강의</h3>
-                <p className="text-sm text-muted-foreground">시대영재 학원 원장의 강의 모습</p>
+                <p className="text-sm text-muted-foreground">정우석 원장의 강의 모습</p>
               </div>
               
               <div className="text-center">
@@ -97,55 +80,56 @@ export default function GalleryPage() {
             </p>
           </div>
           
-          {allImages.length > 0 ? (
-            <Gallery images={allImages} data-testid="gallery-all" />
-          ) : (
-            <div className="text-center py-12">
-              <Image className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground text-lg">
-                아직 등록된 갤러리 이미지가 없습니다.
-              </p>
-              <p className="text-muted-foreground text-sm mt-2">
-                곧 멋진 학원 사진들로 채워질 예정입니다.
-              </p>
-            </div>
-          )}
+          <Gallery images={allImages} data-testid="gallery-all" />
         </div>
       </section>
 
-      {/* Gallery Images with Captions */}
-      {allImages.length > 0 && (
-        <section className="py-20 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl font-bold text-foreground">갤러리 상세</h2>
-              <p className="text-muted-foreground">
-                각 이미지의 설명과 함께 보기
-              </p>
+      {/* Categorized Galleries */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          {/* Instructor Section */}
+          <div className="mb-20">
+            <div className="flex items-center mb-8">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-4">
+                <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">정우석 원장</h2>
+                <p className="text-muted-foreground">원장님의 프로필과 강의 모습</p>
+              </div>
             </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {visibleImages.map((image: any) => (
-                <div key={image.id} className="group">
-                  <div className="aspect-square overflow-hidden rounded-lg shadow-lg">
-                    <img 
-                      src={image.url} 
-                      alt={image.caption || '학원 갤러리 이미지'}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      data-testid={`gallery-image-${image.id}`}
-                    />
-                  </div>
-                  {image.caption && (
-                    <p className="mt-3 text-sm text-muted-foreground text-center">
-                      {image.caption}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
+            <Gallery images={instructorImages} data-testid="gallery-instructor" />
           </div>
-        </section>
-      )}
+
+          {/* Classroom Section */}
+          <div className="mb-20">
+            <div className="flex items-center mb-8">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-4">
+                <Camera className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">수업 현장</h2>
+                <p className="text-muted-foreground">실제 수업이 진행되는 모습들</p>
+              </div>
+            </div>
+            <Gallery images={classroomImages} data-testid="gallery-classroom" />
+          </div>
+
+          {/* Facilities Section */}
+          <div>
+            <div className="flex items-center mb-8">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mr-4">
+                <Building className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">학원 시설</h2>
+                <p className="text-muted-foreground">현대적이고 쾌적한 교육 환경</p>
+              </div>
+            </div>
+            <Gallery images={facilityImages} data-testid="gallery-facilities" />
+          </div>
+        </div>
+      </section>
 
       {/* Visit Information */}
       <section className="py-20">
@@ -166,9 +150,9 @@ export default function GalleryPage() {
                   <div>
                     <h3 className="font-semibold text-foreground mb-4">학원 정보</h3>
                     <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">주소:</span> 광주광역시 남구 봉선중앙로16, 2층</p>
-                      <p><span className="font-medium">교통:</span> 버스 정류장 인근, 접근성 우수</p>
-                      <p><span className="font-medium">주차:</span> 건물 주차 공간 이용 가능</p>
+                      <p><span className="font-medium">주소:</span> 광주광역시 동구 봉선동 교육 1번지</p>
+                      <p><span className="font-medium">교통:</span> 지하철 1호선 봉선역 2번 출구 도보 3분</p>
+                      <p><span className="font-medium">주차:</span> 학원 전용 주차장 완비</p>
                     </div>
                   </div>
 
@@ -188,14 +172,14 @@ export default function GalleryPage() {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <a 
-                      href="tel:062-462-0990" 
+                      href="tel:062-123-4567" 
                       className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors inline-flex items-center justify-center"
                       data-testid="button-call"
                     >
-                      📞 전화 상담 (062-462-0990)
+                      📞 전화 상담 (062-123-4567)
                     </a>
                     <a 
-                      href="mailto:info@sidaeyoungjae.kr" 
+                      href="mailto:info@jwsacademy.co.kr" 
                       className="px-6 py-3 border border-border text-foreground rounded-lg font-medium hover:bg-muted transition-colors inline-flex items-center justify-center"
                       data-testid="button-email"
                     >

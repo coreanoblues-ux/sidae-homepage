@@ -16,11 +16,11 @@ export default function About() {
                 원장 소개
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
-                시대영재 학원 원장
+                정우석 원장
               </h1>
               <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
-                강남영단기 1타강사, 해커스 50만뷰+ 인기강사, TOEIC 990점<br />
-                캐나다국적 원장이 직접 지도하는 중고등부 입시영어 전문교육
+                10년 이상의 영어 교육 경험과 해외 유학 경험을 바탕으로<br />
+                학생들의 영어 실력 향상을 위해 최선을 다하고 있습니다.
               </p>
               <Button 
                 size="lg" 
@@ -34,8 +34,8 @@ export default function About() {
 
             <div className="fade-in">
               <img
-                src="/images/IMG_6558_1758101099677.JPG"
-                alt="시대영재 학원 원장 프로필 사진"
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1000"
+                alt="정우석 원장 프로필 사진"
                 className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover aspect-[4/5]"
                 data-testid="img-profile-main"
               />
@@ -67,7 +67,7 @@ export default function About() {
                   Bishop's University
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  캐나다 퀘벡주 명문 대학교 우등졸업 (with honors)
+                  캐나다 퀘벡주 명문 대학교 영어영문학과 졸업
                 </p>
                 <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                   캐나다 유학
@@ -103,7 +103,7 @@ export default function About() {
                   대형 학원 강사
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  강남영단기 1타강사, 해커스 50만뷰+ 인기강사
+                  해커스, 영단기 등 대형 어학원 인기 강사 출신
                 </p>
                 <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                   검증된 강의력
@@ -120,25 +120,25 @@ export default function About() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="grid grid-cols-2 gap-4">
               <img
-                src="/images/IMG_6558_1758101099677.JPG"
-                alt="TIME 잡지 스타일 TOEIC 포트레이트"
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=800"
+                alt="정우석 원장 프로필"
                 className="rounded-xl shadow-lg object-cover aspect-[3/4] w-full"
                 data-testid="img-profile-formal"
               />
 
               <div className="space-y-4">
                 <img
-                  src="@assets/IMG_6554_1758101087993.JPG"
-                  alt="시대영재 학원 강사진 단체 사진"
+                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400"
+                  alt="강의 중인 정우석 원장"
                   className="rounded-xl shadow-lg object-cover aspect-[3/2] w-full"
-                  data-testid="img-teaching-staff"
+                  data-testid="img-teaching"
                 />
 
                 <img
-                  src="@assets/IMG_6556_1758101093935.JPG"
-                  alt="창의적인 교육 방법론"
+                  src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400"
+                  alt="학위증서 및 자격증"
                   className="rounded-xl shadow-lg object-cover aspect-[3/2] w-full"
-                  data-testid="img-creative-education"
+                  data-testid="img-certificates"
                 />
               </div>
             </div>
@@ -249,7 +249,7 @@ export default function About() {
               학생들의 평가
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              시대영재 학원 원장님과 함께 공부한 학생들의 생생한 후기입니다.
+              정우석 원장님과 함께 공부한 학생들의 생생한 후기입니다.
             </p>
           </div>
 
@@ -311,7 +311,7 @@ export default function About() {
               함께 영어 실력을 높여보세요
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              시대영재 학원 원장과 함께 체계적이고 효과적인 영어 학습을 시작해보세요.
+              정우석 원장과 함께 체계적이고 효과적인 영어 학습을 시작해보세요.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" data-testid="button-start-learning">

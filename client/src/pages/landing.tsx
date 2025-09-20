@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
 import { Star, Trophy, University, Presentation, Video, Phone, Calendar, Medal, Laptop, ChartLine, MapPin, Mail, NotebookPen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,9 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useAuth } from "@/hooks/useAuth";
-// Images are now in public/images folder
 
 const contactFormSchema = z.object({
   name: z.string().min(1, "이름을 입력해주세요"),
@@ -27,10 +23,6 @@ const contactFormSchema = z.object({
 export default function Landing() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [password, setPassword] = useState("");
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
 
   const form = useForm<z.infer<typeof contactFormSchema>>({
     resolver: zodResolver(contactFormSchema),
@@ -64,183 +56,89 @@ export default function Landing() {
     }
   };
 
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      // /api/dev/login으로 실제 로그인 처리
-      const response = await fetch('/api/dev/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ password }),
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        // 로그인 성공 - 관리자 쿠키 설정됨
-        setPassword("");
-        setShowPasswordDialog(false);
-        
-        // 잠시 대기 후 관리자 페이지로 이동
-        setTimeout(() => {
-          window.location.href = "/admin";
-        }, 500);
-      } else {
-        alert("잘못된 비밀번호입니다.");
-        setPassword("");
-      }
-    } catch (error) {
-      alert("오류가 발생했습니다. 다시 시도해주세요.");
-      setPassword("");
-    }
-  };
-
-  const handleSpecialClick = () => {
-    setShowPasswordDialog(true);
-  };
-
-  // CTA 버튼 클릭 핸들러 (핵심 로직) - 상단 '동영상' 버튼과 동일한 페이지로 연결
-  const onClickCTA = () => {
-    if (isAuthenticated && ((user as any)?.role === 'VERIFIED' || (user as any)?.role === 'ADMIN')) {
-      setLocation('/videos'); // 모든 인증된 사용자는 동영상 페이지로
-    } else {
-      setLocation('/login'); // 비로그인/PENDING은 로그인으로
-    }
-  };
-
-  // Gallery images - 실제 시대영재 학원 이미지들
+  // Gallery images
   const galleryImages = [
-    "/images/IMG_6558_1758101099677.JPG",
-    "/images/IMG_6544_1758101075476.JPG",
-    "/images/IMG_6554_1758101087993.JPG",
-    "/images/IMG_6556_1758101093935.JPG",
-    "/images/IMG_6559_1758101109393.JPG",
+    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1497486751825-1233686d5d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
+    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600",
   ];
 
   return (
     <div className="min-h-screen">
-      {/* Password Dialog */}
-      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>관리자 접속</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handlePasswordSubmit} className="space-y-4">
-            <Input
-              type="password"
-              placeholder="비밀번호를 입력하세요"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoFocus
-              data-testid="input-admin-password"
-            />
-            <div className="flex gap-2 justify-end">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  setShowPasswordDialog(false);
-                  setPassword("");
-                }}
-              >
-                취소
-              </Button>
-              <Button type="submit" data-testid="button-admin-login">
-                확인
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
       {/* Hero Section */}
-      <section className="hero-gradient pattern-bg text-white py-20 lg:py-32 relative z-0">
+      <section className="hero-gradient text-white py-20 lg:py-32">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="fade-in">
               <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-sm mb-6">
                 <Star className="text-yellow-400 mr-2 w-4 h-4" />
-                만점 강사의 검증된 커리<span 
-                  onClick={handleSpecialClick} 
-                  className="hover:bg-white/20 px-1 rounded transition-colors cursor-pointer"
-                >큘</span>럼
+                토익 만점 강사의 검증된 커리큘럼
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
-                중고등부<br />
+                영어 실력의<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-                  입시영어 전문
+                  완전한 변화
                 </span>
               </h1>
               <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
-                '(전) 영단기 현강 대표강사, (전) 해커스 인강' 의 정우석 원장과 함께 하는 시대영재학원
+                캐나다 Bishop's University 졸업, 해커스·영단기 인기강사 출신<br />
+                <strong>정우석 원장</strong>과 함께하는 프리미엄 영어 교육
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg" 
                   className="px-8 py-4 bg-primary text-primary-foreground font-semibold text-lg hover:bg-primary/90 transition-all transform hover:scale-105"
-                  onClick={onClickCTA}
-                  data-testid="button-cta-online-lecture"
+                  asChild
                 >
-                  <Video className="mr-2 w-5 h-5" />
-                  시대영재 온라인 강의 듣기
+                  <a href="/api/login">
+                    <Video className="mr-2 w-5 h-5" />
+                    온라인 강의 시작하기
+                  </a>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="px-8 py-4 border-2 border-gray-400 text-gray-400 font-semibold text-lg hover:bg-gray-400 hover:text-white transition-all"
-                  asChild
+                  className="px-8 py-4 border-2 border-white text-white font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all"
                 >
-                  <a href="tel:062-462-0990">
-                    <Phone className="mr-2 w-5 h-5" />
-                    062-462-0990
-                  </a>
+                  <Phone className="mr-2 w-5 h-5" />
+                  상담 문의하기
                 </Button>
               </div>
             </div>
 
             <div className="fade-in lg:ml-8">
               <img
-                src="/images/new-team-photo.PNG"
-                alt="시대영재 학원 전문 강사진"
-                className="rounded-2xl shadow-2xl w-full max-w-lg mx-auto object-cover float-slow"
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1000"
+                alt="정우석 원장 프로필 사진"
+                className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover aspect-[4/5]"
               />
 
               <div className="relative -mt-16 mx-4">
-                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg float-rotate-2">
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg transform rotate-2">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
                       <Trophy className="text-white w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">강남 1타강사</p>
-                      <p className="text-sm text-gray-600">(전)영단기 현강 전타임 마감강사</p>
+                      <p className="font-semibold text-gray-900">TOEIC 990점</p>
+                      <p className="text-sm text-gray-600">만점 달성</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg -mt-2 ml-8 float-rotate-neg1">
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg transform -rotate-1 -mt-2 ml-8">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
                       <University className="text-white w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">봉선동 시대영재 학원</p>
-                      <p className="text-sm text-gray-600">중고등부 입시영어 전문</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg -mt-2 mr-4 float-rotate-1">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                      <Medal className="text-white w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">중등부 입시영어 * 고등부 내신*수능*TOEIC*TOEFL</p>
-                      <p className="text-sm text-gray-600">완벽 대응 커리큘럼</p>
+                      <p className="font-semibold text-gray-900">Bishop's University</p>
+                      <p className="text-sm text-gray-600">캐나다 명문대 졸업</p>
                     </div>
                   </div>
                 </div>
@@ -250,15 +148,15 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features Section - 강의 버튼 클릭 시 스크롤 대상 */}
-      <section id="programs" className="py-20 bg-muted/30 pattern-bg-alt scroll-mt-20">
+      {/* Features Section */}
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              왜 시대영재 학원인가?
+              왜 정우석 영어학원인가?
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              중고등부 입시영어에 특화된 차별화된 커리큘럼으로 확실한 성적 향상을 보장합니다.
+              검증된 강사진과 체계적인 커리큘럼으로 여러분의 영어 실력을 한 단계 높여드립니다.
             </p>
           </div>
 
@@ -268,14 +166,14 @@ export default function Landing() {
                 <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                   <Medal className="text-primary w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-card-foreground mb-4">중등부 프로그램</h3>
+                <h3 className="text-xl font-semibold text-card-foreground mb-4">검증된 강사진</h3>
                 <p className="text-muted-foreground mb-4">
-                  탄탄한 문법 만들기와 정확하고 빠른 독해 습관 만들기로 고등학교 진학 완벽 준비
+                  해커스, 영단기 출신 인기강사의 노하우와 캐나다 유학 경험을 바탕으로 한 실용적인 영어 교육
                 </p>
-                <Link href="/curriculum/middle" className="flex items-center text-sm text-primary font-medium hover:underline" data-testid="link-program-middle">
-                  <span>중등부 커리큘럼 보기</span>
+                <div className="flex items-center text-sm text-primary font-medium">
+                  <span>더 알아보기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
-                </Link>
+                </div>
               </CardContent>
             </Card>
 
@@ -284,14 +182,14 @@ export default function Landing() {
                 <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                   <Laptop className="text-primary w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-card-foreground mb-4">고등부 프로그램</h3>
+                <h3 className="text-xl font-semibold text-card-foreground mb-4">온라인 학습 시스템</h3>
                 <p className="text-muted-foreground mb-4">
-                  (일반고/특목고) 서술형 문제 정복과 SYNTAX구문독해로 대학입시 완벽 대비
+                  언제 어디서나 접근 가능한 온라인 강의 플랫폼으로 효율적인 학습을 지원합니다
                 </p>
-                <Link href="/curriculum/high" className="flex items-center text-sm text-primary font-medium hover:underline" data-testid="link-program-high">
-                  <span>고등부 커리큘럼 보기</span>
+                <div className="flex items-center text-sm text-primary font-medium">
+                  <span>시스템 체험하기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
-                </Link>
+                </div>
               </CardContent>
             </Card>
 
@@ -300,14 +198,14 @@ export default function Landing() {
                 <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
                   <ChartLine className="text-primary w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-card-foreground mb-4">내신 & 수능 대비</h3>
+                <h3 className="text-xl font-semibold text-card-foreground mb-4">맞춤형 커리큘럼</h3>
                 <p className="text-muted-foreground mb-4">
-                  학교별 내신 및 수능지문에 대한 정독&스킬 강의로 실전 점수 향상 보장
+                  개인별 수준과 목표에 맞춘 체계적인 학습 계획으로 확실한 실력 향상을 보장합니다
                 </p>
-                <Link href="/program/exam-prep" className="flex items-center text-sm text-primary font-medium hover:underline" data-testid="link-program-exam">
-                  <span>내신/수능 프로그램 보기</span>
+                <div className="flex items-center text-sm text-primary font-medium">
+                  <span>커리큘럼 보기</span>
                   <ChartLine className="ml-2 w-4 h-4" />
-                </Link>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -315,7 +213,7 @@ export default function Landing() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 geometric-shapes">
+      <section id="about" className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -324,31 +222,21 @@ export default function Landing() {
                 원장 소개
               </div>
               <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-6">
-                실력있는 원장과 탄탄한 강사진
+                정우석 원장
               </h2>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                (전)강남영단기 1타강사 출신 캐나다국적 원장과 서울대, 경희대, 광주교대 출신 
-                교육학 석사 자격을 갖춘 최고의 강사진이 함께합니다.
+                10년 이상의 영어 교육 경험과 해외 유학 경험을 바탕으로 
+                학생들의 영어 실력 향상을 위해 최선을 다하고 있습니다.
               </p>
 
               <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Medal className="text-primary w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">내신과 수능 두마리 토끼를 확실히 잡아 주는 영어 잘하는 학원</h4>
-                    <p className="text-muted-foreground">체계적인 커리큘럼으로 내신과 수능 모두 완벽 대비</p>
-                  </div>
-                </div>
-
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center flex-shrink-0">
                     <University className="text-blue-600 dark:text-blue-400 w-6 h-6" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Bishop's University (캐나다)</h4>
-                    <p className="text-muted-foreground">우등졸업 (with honors), 현지 문화와 언어에 대한 깊은 이해</p>
+                    <p className="text-muted-foreground">영어영문학과 졸업, 현지 문화와 언어에 대한 깊은 이해</p>
                   </div>
                 </div>
 
@@ -359,11 +247,6 @@ export default function Landing() {
                   <div>
                     <h4 className="font-semibold text-foreground">TOEIC 990점 만점 달성</h4>
                     <p className="text-muted-foreground">완벽한 영어 실력을 바탕으로 한 체계적인 시험 대비 전략</p>
-                    <img 
-                      src="/images/IMG_6544_1758101075476.JPG"
-                      alt="TOEIC 990점 만점 성적표"
-                      className="mt-2 rounded-lg shadow-md max-w-48 object-cover"
-                    />
                   </div>
                 </div>
 
@@ -372,13 +255,8 @@ export default function Landing() {
                     <Presentation className="text-green-600 dark:text-green-400 w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground">(전)강남영단기 1타강사 & (전) 해커스 50만뷰+</h4>
-                    <p className="text-muted-foreground">현강 1타강사와 인터넷 50만뷰 돌파 인기강사의 검증된 강의력</p>
-                    <img 
-                      src="/images/IMG_6559_1758101109393.JPG"
-                      alt="해커스 온라인 강의 화면"
-                      className="mt-2 rounded-lg shadow-md max-w-48 object-cover"
-                    />
+                    <h4 className="font-semibold text-foreground">해커스·영단기 인기 강사</h4>
+                    <p className="text-muted-foreground">대형 학원에서 검증된 강의력과 수많은 학생들의 성공 사례</p>
                   </div>
                 </div>
               </div>
@@ -389,36 +267,25 @@ export default function Landing() {
               </Button>
             </div>
 
-            <div className="relative">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Main team photo */}
-                <div className="col-span-1">
-                  <img
-                    src="/images/team-photo.PNG"
-                    alt="시대영재 학원 강사진"
-                    className="rounded-xl shadow-2xl object-cover w-full h-[400px] transform hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute -bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-lg">
-                    <p className="text-sm font-semibold text-gray-900">시대영재 학원 전문 강사진</p>
-                    <p className="text-xs text-gray-600">검증된 실력과 경험을 바탕으로 최고의 교육을 제공합니다</p>
-                  </div>
-                </div>
-                
-                {/* Magazine cover as secondary highlight */}
-                <div className="col-span-1 flex flex-col justify-center">
-                  <div className="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-xl p-6 transform rotate-2 hover:rotate-0 transition-transform duration-300">
-                    <img
-                      src="/images/magazine-cover.PNG"
-                      alt="1타강사 인증"
-                      className="rounded-lg shadow-lg object-cover w-full max-w-xs mx-auto"
-                    />
-                    <div className="text-center mt-4">
-                      <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
-                        인증받은 1타강사
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=800"
+                alt="정우석 원장 프로필"
+                className="rounded-xl shadow-lg object-cover aspect-[3/4] w-full"
+              />
+
+              <div className="space-y-4">
+                <img
+                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400"
+                  alt="강의 중인 정우석 원장"
+                  className="rounded-xl shadow-lg object-cover aspect-[3/2] w-full"
+                />
+
+                <img
+                  src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400"
+                  alt="학위증서 및 자격증"
+                  className="rounded-xl shadow-lg object-cover aspect-[3/2] w-full"
+                />
               </div>
             </div>
           </div>
@@ -426,23 +293,14 @@ export default function Landing() {
       </section>
 
       {/* Gallery Section */}
-      <section id="gallery" className="py-20 bg-muted/30 pattern-bg">
+      <section id="gallery" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <div className="flex items-center justify-center gap-4">
-              <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-                학원 갤러리
-              </h2>
-              {/* 관리자 로그인시에만 보이는 편집 버튼 */}
-              {/* {user?.role === 'ADMIN' && (
-                <Button variant="outline" size="sm" className="mb-4">
-                  <Edit className="w-4 h-4 mr-2" />
-                  갤러리 편집
-                </Button>
-              )} */}
-            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              학원 갤러리
+            </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              시대영재 학원의 교육 환경과 수업 현장을 확인해보세요.
+              정우석 영어학원의 교육 환경과 수업 현장을 확인해보세요.
             </p>
           </div>
 
@@ -451,23 +309,14 @@ export default function Landing() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 pattern-bg-alt">
+      <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <div className="flex items-center justify-center gap-4">
-              <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-                수강생 후기
-              </h2>
-              {/* 관리자 로그인시에만 보이는 편집 버튼 */}
-              {/* {user?.role === 'ADMIN' && (
-                <Button variant="outline" size="sm" className="mb-4">
-                  <Edit className="w-4 h-4 mr-2" />
-                  후기 편집
-                </Button>
-              )} */}
-            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              수강생 후기
+            </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              시대영재 학원에서 실제로 성과를 얻은 수강생들의 생생한 후기를 확인해보세요.
+              정우석 영어학원에서 실제로 성과를 얻은 수강생들의 생생한 후기를 확인해보세요.
             </p>
           </div>
 
@@ -475,63 +324,21 @@ export default function Landing() {
             {[
               {
                 rating: 5,
-                text: "중학교 때까지는 문법·독해가 제일 약했어요. 고등학교 올라오면서 루틴을 다시 잡았고, 영어만큼은 한 번도 1등급을 놓치지 않았습니다. 솔직히 서울대 합격의 결정타는 영어였어요.",
-                author: "배*두",
-                course: "고등부 수능/내신"
+                text: "토익 점수가 650점에서 920점으로 올랐어요! 정우석 원장님의 체계적인 커리큘럼과 개인별 맞춤 지도 덕분입니다.",
+                author: "김○○ 님",
+                course: "직장인 토익반"
               },
               {
                 rating: 5,
-                text: "초반엔 빈칸/문장삽입이 무서웠는데, 유형별 해설 루틴대로 하니 3→2→1등급으로 안정됐습니다. '해석보다 구조'라는 말이 실감났습니다. 감사합니다.",
-                author: "*형*",
-                course: "수능대비반"
+                text: "온라인 강의 시스템이 정말 편리해요. 언제든지 복습할 수 있어서 실력 향상에 큰 도움이 되었습니다.",
+                author: "이○○ 님",
+                course: "대학생 회화반"
               },
               {
                 rating: 5,
-                text: "내신 3등급 초반이었는데 서술형 영작 템플릿이 큰 도움 됐어요. 중간·기말 모두 1등급으로 마무리했습니다.",
-                author: "김*현",
-                course: "고2 내신반"
-              },
-              {
-                rating: 5,
-                text: "오답을 '왜 틀렸는지' 한 줄로 적게 하신 게 신의 한 수. 모의 2등급대 → 수능 1등급 나왔습니다.",
-                author: "이*서",
-                course: "고3 파이널"
-              },
-              {
-                rating: 5,
-                text: "문법이 제일 싫었는데, 5문형→구조 읽기로 바꾸니 독해 속도가 확 늘었습니다. 내신도 자연스럽게 올랐어요.",
-                author: "박*진",
-                course: "고1 기본밀기"
-              },
-              {
-                rating: 5,
-                text: "문법은 버리려 했는데, 핵심만 압축된 핸드아웃으로 한 달 만에 빈칸/문법문항 전부 맞췄습니다.",
-                author: "최*윤",
-                course: "고3 파이널 문법특강"
-              },
-              {
-                rating: 5,
-                text: "학교 연구 일정 때문에 시간이 없었는데, 파트별 시간배분/패러프레이즈 리스트로 첫 응시 940점 받았습니다. 필요만 딱 잡아준 게 컸습니다.",
-                author: "오*찬",
-                course: "광주영재고 · TOEIC"
-              },
-              {
-                rating: 5,
-                text: "단어만 외우던 습관을 버리고 지문 '중심/전환'만 표시했어요. 모고 3→1등급, 내신도 안정됐습니다.",
-                author: "유*빈",
-                course: "고2 내신·모고 병행"
-              },
-              {
-                rating: 5,
-                text: "매주 미니 모의고사와 해설 코멘트가 압도적이었어요. 9월 평가원 이후 전 과목 중 영어가 제일 안정됐습니다.",
-                author: "한*호",
-                course: "고3 실전모의반"
-              },
-              {
-                rating: 5,
-                text: "중2 때는 해석이 늘 막혔는데, 문장 성분 표시 연습으로 지문 읽는 속도가 확실히 달라졌어요. 모의 90점대 꾸준히 유지 중입니다.",
-                author: "정*아",
-                course: "중등부 심화"
+                text: "원장님의 해외 경험과 노하우가 정말 도움이 많이 되었습니다. 실용적인 영어를 배울 수 있어서 좋았어요.",
+                author: "박○○ 님",
+                course: "비즈니스 영어반"
               }
             ].map((testimonial, index) => (
               <Card key={index}>
@@ -564,7 +371,7 @@ export default function Landing() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-muted/30 geometric-shapes">
+      <section id="contact" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16">
             <div>
@@ -580,25 +387,10 @@ export default function Landing() {
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     <MapPin className="text-primary w-6 h-6" />
                   </div>
-                  <div className="flex-1">
+                  <div>
                     <h4 className="font-semibold text-foreground">학원 위치</h4>
-                    <p className="text-muted-foreground">광주광역시 남구 봉선중앙로16, 2층</p>
-                    <p className="text-sm text-muted-foreground mt-1">문의전화: 062-462-0990</p>
-                    
-                    {/* 구글 지도 */}
-                    <div className="mt-4">
-                      <iframe 
-                        src={`https://maps.google.com/maps?width=200&height=200&hl=ko&q=${encodeURIComponent('광주광역시 남구 봉선중앙로16 시대영재학원')}&ie=UTF8&t=&z=17&iwloc=B&output=embed`}
-                        width="200" 
-                        height="200" 
-                        style={{border: 0, borderRadius: '8px'}} 
-                        allowFullScreen 
-                        loading="lazy" 
-                        referrerPolicy="no-referrer-when-downgrade"
-                        className="shadow-md"
-                        title="시대영재학원 위치"
-                      ></iframe>
-                    </div>
+                    <p className="text-muted-foreground">광주광역시 동구 봉선동 교육 1번지</p>
+                    <p className="text-sm text-muted-foreground mt-1">지하철 1호선 봉선역 2번 출구 도보 3분</p>
                   </div>
                 </div>
 
@@ -608,11 +400,21 @@ export default function Landing() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">전화 상담</h4>
-                    <p className="text-muted-foreground">062-462-0990</p>
-                    <p className="text-sm text-muted-foreground mt-1">상담시간: 월-금 14:00-22:00, 토-일 09:30-18:00</p>
+                    <p className="text-muted-foreground">062-123-4567</p>
+                    <p className="text-sm text-muted-foreground mt-1">상담시간: 월-금 09:00-22:00, 토 09:00-18:00</p>
                   </div>
                 </div>
 
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Mail className="text-primary w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">이메일 문의</h4>
+                    <p className="text-muted-foreground">info@jwsacademy.co.kr</p>
+                    <p className="text-sm text-muted-foreground mt-1">24시간 접수, 1일 이내 답변</p>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -721,13 +523,13 @@ export default function Landing() {
                   <Presentation className="text-primary-foreground w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold">시대영재 학원</h3>
-                  <p className="text-sm text-secondary-foreground/70">광주광역시 남구 봉선중앙로16, 2층</p>
+                  <h3 className="text-xl font-bold">정우석 영어학원</h3>
+                  <p className="text-sm text-secondary-foreground/70">광주 봉선동 교육 1번지</p>
                 </div>
               </div>
               <p className="text-secondary-foreground/80 mb-4 leading-relaxed">
-(전)강남영단기 1타강사, (전) 해커스 50만뷰+ 인기강사, TOEIC 990점
-                캐나다국적 원장과 함께하는 중고등부 입시영어 전문교육
+                캐나다 Bishop's University 졸업, 토익 만점, 해커스·영단기 출신 인기강사 정우석 원장과 함께 
+                영어 실력의 완전한 변화를 경험해보세요.
               </p>
             </div>
 
@@ -754,7 +556,7 @@ export default function Landing() {
 
           <div className="border-t border-secondary-foreground/20 mt-12 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center text-sm text-secondary-foreground/60">
-              <p>&copy; 2024 시대영재 학원. All rights reserved.</p>
+              <p>&copy; 2024 정우석 영어학원. All rights reserved.</p>
               <div className="flex space-x-6 mt-4 md:mt-0">
                 <a href="#" className="hover:text-primary transition-colors">이용약관</a>
                 <a href="#" className="hover:text-primary transition-colors">개인정보처리방침</a>

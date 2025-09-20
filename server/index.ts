@@ -1,28 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
-import cookieParser from "cookie-parser";
-import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { seedProgramsIfEmpty } from "./seedData";
 
 const app = express();
-
-// 🎯 배포 환경 설정 (가이드 적용)
-app.set('trust proxy', 1); // 프록시 신뢰 설정
-
-// 환경변수 정합 
-const frontOrigin = process.env.FRONT_ORIGIN || 'https://sidae-edu.com';
-const apiOrigin = process.env.API_ORIGIN || 'https://sidae-edu.com';
-
-// CORS/프록시 차이 제거 - 명시적 CORS 설정
-app.use(cors({ 
-  origin: frontOrigin, 
-  credentials: true 
-}));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -56,9 +38,6 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
-
-  // 🌱 시드 데이터 초기화 (배포 환경에서 프로그램 데이터 없을 때 자동 생성)
-  await seedProgramsIfEmpty();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
