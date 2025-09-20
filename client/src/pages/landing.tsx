@@ -116,9 +116,9 @@ export default function Landing() {
   const galleryImages = [
     "/images/IMG_6558_1758101099677.JPG",
     "/images/IMG_6544_1758101075476.JPG",
-    "@assets/1_1758369121798.png",
-    "@assets/블로그에 넣을1_1758369126544.jpg",
-    "@assets/IMG_20231119_085358_1758369130216.JPG",
+    "/images/academy-hallway-1.png",
+    "/images/academy-banner-1.jpg",
+    "/images/academy-interior-1.JPG",
     "/images/IMG_6556_1758101093935.JPG",
     "/images/IMG_6559_1758101109393.JPG",
   ];
