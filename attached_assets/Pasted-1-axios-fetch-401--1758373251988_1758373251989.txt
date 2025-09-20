@@ -1,0 +1,87 @@
+1) 전역 요청 래퍼(axios/fetch)에서 401 처리 규칙 변경
+
+“보호 페이지(관리자/학생 인증 필요한 경로)”에서만 팝업 + 리디렉션.
+
+그 외 페이지(랜딩, 프로그램 소개, 갤러리 등)는 무음 처리: 유저 상태만 null로 갱신.
+
+// client/src/lib/api.ts
+import { isProtectedPath } from "@/lib/routeGuard";
+
+export async function api(input: RequestInfo, init: RequestInit = {}) {
+  const r = await fetch(input, { credentials: "include", ...init });
+  if (r.status === 401) {
+    // 보호 경로에서만 안내/리다이렉트
+    if (isProtectedPath(location.pathname)) {
+      // 안내 + 로그인 화면 이동
+      alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+      location.assign("/login?next=" + encodeURIComponent(location.pathname));
+    }
+    // 공개 경로면 조용히 실패만 반환
+    return { ok: false, status: 401 } as any;
+  }
+  return r;
+}
+
+// client/src/lib/routeGuard.ts
+export function isProtectedPath(path: string) {
+  return path.startsWith("/admin") || path.startsWith("/student") || path.startsWith("/videos");
+}
+
+2) 로그아웃 플로우에서 “잔여 요청/폴링” 정리
+
+관리자 대시보드 언마운트 시 폴링/타이머/요청 취소.
+
+로그아웃 때 스토어 초기화 → 네비게이트 → 추가 검사 순서.
+
+// client/src/stores/auth.ts
+export async function hardLogout(navigate = (p:string)=>location.assign(p)) {
+  try { await fetch("/api/auth/logout", { method:"POST", credentials:"include" }); } catch {}
+  // ① 폴링/구독 중지 (AbortController 사용했다면 abort)
+  window.dispatchEvent(new Event("admin:stopPolling"));
+
+  // ② 상태 초기화
+  authStore.setState({ user:null, loading:false });
+  localStorage.removeItem("auth_user");
+  sessionStorage.removeItem("auth_user");
+
+  // ③ 홈으로 이동
+  navigate("/");
+
+  // ④ 서버 상태 재확인(무음)
+  await fetch("/api/auth/me", { credentials:"include", cache:"no-store" });
+}
+
+
+관리자 탭에서 폴링 중이면:
+
+useEffect(()=>{
+  const ctrl = new AbortController();
+  const timer = setInterval(()=> fetch("/api/admin/...", { signal: ctrl.signal, credentials:"include" }), 15000);
+  const stop = () => { clearInterval(timer); ctrl.abort(); };
+  window.addEventListener("admin:stopPolling", stop);
+  return () => { stop(); window.removeEventListener("admin:stopPolling", stop); };
+}, []);
+
+3) 공개 페이지에서는 401을 알림 없이 무시
+
+랜딩/홈에서 사용자 상태 확인용 /api/auth/me를 호출하더라도:
+
+useEffect(()=>{
+  (async()=>{
+    const r = await fetch("/api/auth/me", { credentials:"include", cache:"no-store" });
+    if (r.ok) { const d = await r.json(); setUser(d.user); }
+    else { setUser(null); }  // ❌ alert 금지
+  })();
+}, []);
+
+4) 서버 캐시 금지(재확인용)
+// /api/auth/me 핸들러 직전 또는 공통 미들웨어
+res.setHeader("Cache-Control","no-store, no-cache, must-revalidate");
+res.setHeader("Pragma","no-cache");
+res.setHeader("Expires","0");
+
+5) 쿠키 설정은 유지
+
+이미 적용한 SameSite=None; Secure; Domain=.replit.app; Path=/ 그대로 유지.
+
+로그아웃 시 동일 옵션으로 clearCookie 호출(이전 단계에서 완료).

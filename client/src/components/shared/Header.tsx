@@ -132,26 +132,27 @@ export function Header() {
     },
   });
 
-  // 🔑 가이드 4) 프론트 로그아웃 함수 보강 (Replit 전용)
+  // 🎯 가이드 2) 로그아웃 플로우에서 "잔여 요청/폴링" 정리
   const hardLogout = async () => {
-    await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+    try { 
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' }); 
+    } catch {}
+    
+    // ① 폴링/구독 중지 (AbortController 사용했다면 abort)
+    window.dispatchEvent(new Event("admin:stopPolling"));
 
-    // 로컬 상태 싹 지우기
+    // ② 상태 초기화
     localStorage.removeItem('auth_user');
     sessionStorage.removeItem('auth_user');
     localStorage.clear();
     sessionStorage.clear();
     queryClient.clear();
 
-    // 🔑 가이드 4) 크롬 캐시 무시하고 다시 확인
-    const r = await fetch('/api/auth/user', { credentials: 'include', cache: 'no-store' });
-    if (r.status !== 401) {
-      // 여전히 로그인처럼 보이면 쿠키 변종일 가능성 → 다시 강제 삭제
-      await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
-    }
-    
-    // 랜딩페이지로 이동
+    // ③ 홈으로 이동
     setLocation('/');
+
+    // ④ 서버 상태 재확인(무음)
+    await fetch('/api/auth/user', { credentials: 'include', cache: 'no-store' });
   };
 
   const logoutMutation = useMutation({

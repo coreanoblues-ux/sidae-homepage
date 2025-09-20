@@ -6,15 +6,16 @@ import { normalizeVideo, VIDEO_ERROR_MESSAGES } from '../utils/videos';
 
 const router = Router();
 
-// 🎯 환경별 자동 감지 쿠키 설정 (개발/배포 모두 대응)
+// 🎯 완전한 환경별 쿠키 설정 (HTTPS 환경 올바른 감지)
 const getCookieBase = (req: any) => {
   const isDev = process.env.NODE_ENV === 'development';
   const hostname = req.hostname || req.headers.host || '';
+  const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
   
-  console.log('🍪 Cookie 환경 감지:', { isDev, hostname });
+  console.log('🍪 Cookie 환경 감지:', { isDev, hostname, isLocalhost });
   
-  // 개발환경: 도메인 설정 없음 (host-only)
-  if (isDev || hostname.includes('localhost') || hostname.includes('.replit.dev')) {
+  // 🔑 실제 로컬호스트만 secure: false 사용 
+  if (isLocalhost) {
     return {
       httpOnly: true,
       secure: false,
@@ -23,12 +24,33 @@ const getCookieBase = (req: any) => {
     };
   }
   
-  // 배포환경 (.replit.app): 크롬 대응 설정
+  // 🔑 .replit.dev는 HTTPS 필수 (개발환경이지만 secure: true)
+  if (hostname.includes('.replit.dev')) {
+    return {
+      httpOnly: true,
+      secure: true,           // .replit.dev는 HTTPS
+      sameSite: 'none' as const, // Cross-origin 대응
+      domain: '.replit.dev',   // 개발 도메인
+      path: '/',
+    };
+  }
+  
+  // 🔑 .replit.app 배포환경: 크롬 대응 설정
+  if (hostname.includes('.replit.app')) {
+    return {
+      httpOnly: true,
+      secure: true,             // 크롬은 SameSite=none일 때 필수
+      sameSite: 'none' as const,
+      domain: '.replit.app',    // 하위 도메인 모두 커버
+      path: '/',
+    };
+  }
+  
+  // 🔑 기본값 (HTTPS 환경)
   return {
     httpOnly: true,
-    secure: true,             // 크롬은 SameSite=none일 때 필수
-    sameSite: 'none' as const,
-    domain: '.replit.app',    // 하위 도메인 모두 커버
+    secure: true,
+    sameSite: 'lax' as const,
     path: '/',
   };
 };

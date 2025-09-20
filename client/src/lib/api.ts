@@ -63,6 +63,20 @@ export async function apiRequest<TResponse, TBody = unknown>(
   });
   
   if (!res.ok) {
+    // 🎯 가이드 1) 401 처리 - 보호된 경로에서만 팝업
+    if (res.status === 401) {
+      // 보호 경로에서만 안내/리다이렉트 
+      if (typeof window !== 'undefined') {
+        const { isProtectedPath } = await import('@/lib/routeGuard');
+        if (isProtectedPath(location.pathname)) {
+          alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+          location.assign("/login?next=" + encodeURIComponent(location.pathname));
+        }
+      }
+      // 공개 경로면 조용히 실패만 반환
+      throw new Error(`API ${method} ${url} ${res.status}: Unauthorized`);
+    }
+    
     const text = await res.text().catch(() => '');
     throw new Error(`API ${method} ${url} ${res.status}: ${text}`);
   }
