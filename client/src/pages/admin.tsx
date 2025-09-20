@@ -61,12 +61,14 @@ export default function AdminPage() {
   // 대기 중인 사용자 목록 조회  
   const { data: pendingUsers, isLoading: usersLoading } = useQuery<ApprovedUser[]>({
     queryKey: ["/api/admin/members", "pending"],
+    queryFn: () => fetch("/api/admin/members?status=pending").then(res => res.json()).then(data => data.items),
     enabled: isAuthenticated && user?.role === "ADMIN",
   });
 
   // 승인된 사용자 목록 조회
   const { data: approvedUsers, isLoading: approvedLoading } = useQuery<ApprovedUser[]>({
     queryKey: ["/api/admin/members", "verified"],
+    queryFn: () => fetch("/api/admin/members?status=verified").then(res => res.json()).then(data => data.items),
     enabled: isAuthenticated && user?.role === "ADMIN",
   });
 
@@ -85,7 +87,8 @@ export default function AdminPage() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/members", "pending"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/members", "verified"] });
       toast({
         title: "처리 완료",
         description: "사용자 승인 요청이 처리되었습니다."
@@ -109,7 +112,8 @@ export default function AdminPage() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/members"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/members", "verified"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/members", "pending"] });
       toast({
         title: "승인 취소 완료",
         description: "회원 승인이 취소되었습니다."
