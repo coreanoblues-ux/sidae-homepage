@@ -41,9 +41,8 @@ export function Gallery({ images, className = "" }: GalleryProps) {
               alt={`갤러리 이미지 ${index + 1}`}
               loading="lazy"
               onError={(e) => {
-                const target = e.currentTarget;
-                target.src = '/api/placeholder/400/400';
-                target.alt = '이미지를 불러올 수 없습니다';
+                console.error('Gallery image failed to load:', image);
+                // 가이드에 따른 에러 핸들링 제거 - 실제 이미지 로드 허용
               }}
               className="rounded-lg object-cover w-full aspect-square"
             />

@@ -10,13 +10,14 @@ import sanitizeHtml from "sanitize-html";
 import { hashPassword, verifyPassword, signupSchema, loginSchema } from "./auth-utils";
 import adminRouter from "./routes/admin";
 import proxyVideoRouter from "./routes/proxy.video";
+import debugRouter from "./routes/debug";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // 🎯 /uploads 정적 서빙을 API보다 먼저 등록 (가이드 적용)
-  const UPLOAD_DIR = path.join(import.meta.dirname, '..', 'uploads');
+  // 🎯 /uploads 정적 서빙을 런타임 기준으로 고정 (가이드 적용)
+  const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads');
   const IMAGES_DIR = path.join(import.meta.dirname, '..', 'public', 'images');
   
   app.use('/uploads', express.static(UPLOAD_DIR, {
@@ -84,6 +85,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  // 🎯 디버그 라우터 추가 (진단용)
+  app.use(debugRouter);
+  
   // 🎯 새로운 관리자 API 라우터를 제일 먼저 마운트 (우선순위 확보)
   app.use('/api/admin', adminRouter);
 
