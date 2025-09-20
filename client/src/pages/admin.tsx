@@ -31,6 +31,15 @@ interface PendingUser {
   role: string;
 }
 
+interface ApprovedUser {
+  id: string;
+  name: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  createdAt: string;
+}
+
 interface VideoUpload {
   title: string;
   description: string;
@@ -49,9 +58,15 @@ export default function AdminPage() {
     courseId: ""
   });
 
-  // 대기 중인 사용자 목록 조회
-  const { data: pendingUsers, isLoading: usersLoading } = useQuery<PendingUser[]>({
-    queryKey: ["/api/admin/pending-users"],
+  // 대기 중인 사용자 목록 조회  
+  const { data: pendingUsers, isLoading: usersLoading } = useQuery<ApprovedUser[]>({
+    queryKey: ["/api/admin/members", "pending"],
+    enabled: isAuthenticated && user?.role === "ADMIN",
+  });
+
+  // 승인된 사용자 목록 조회
+  const { data: approvedUsers, isLoading: approvedLoading } = useQuery<ApprovedUser[]>({
+    queryKey: ["/api/admin/members", "verified"],
     enabled: isAuthenticated && user?.role === "ADMIN",
   });
 
@@ -64,12 +79,13 @@ export default function AdminPage() {
   // 사용자 승인/거부 뮤테이션
   const approveUserMutation = useMutation({
     mutationFn: async ({ userId, action }: { userId: string; action: 'approve' | 'reject' }) => {
-      return await apiRequest(`/api/admin/users/${userId}/${action}`, {
-        method: 'POST'
+      return await apiRequest(`/api/admin/${action}-user`, {
+        method: 'POST',
+        body: JSON.stringify({ userId })
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/members"] });
       toast({
         title: "처리 완료",
         description: "사용자 승인 요청이 처리되었습니다."
@@ -79,6 +95,30 @@ export default function AdminPage() {
       toast({
         title: "오류 발생",
         description: error.message || "처리 중 오류가 발생했습니다.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // 사용자 승인 취소 뮤테이션
+  const revokeUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return await apiRequest('/api/admin/revoke-user', {
+        method: 'POST',
+        body: JSON.stringify({ userId })
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/members"] });
+      toast({
+        title: "승인 취소 완료",
+        description: "회원 승인이 취소되었습니다."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "오류 발생",
+        description: error.message || "승인 취소 중 오류가 발생했습니다.",
         variant: "destructive"
       });
     }
@@ -134,6 +174,10 @@ export default function AdminPage() {
     approveUserMutation.mutate({ userId, action });
   };
 
+  const handleRevokeUser = (userId: string) => {
+    revokeUserMutation.mutate(userId);
+  };
+
   const handleVideoUpload = (e: React.FormEvent) => {
     e.preventDefault();
     if (!videoForm.title || !videoForm.videoUrl) {
@@ -172,18 +216,22 @@ export default function AdminPage() {
         </div>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              회원 승인 관리
+              대기중 회원
+            </TabsTrigger>
+            <TabsTrigger value="approved" className="flex items-center gap-2">
+              <Check className="w-4 h-4" />
+              승인된 회원
             </TabsTrigger>
             <TabsTrigger value="videos" className="flex items-center gap-2">
               <Video className="w-4 h-4" />
-              동영상 업로드
+              동영상 관리
             </TabsTrigger>
             <TabsTrigger value="gallery" className="flex items-center gap-2">
               <ImageIcon className="w-4 h-4" />
-              갤러리 관리
+              공지사 관리
             </TabsTrigger>
           </TabsList>
 
@@ -206,8 +254,8 @@ export default function AdminPage() {
                     {pendingUsers.map((user) => (
                       <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex-1">
-                          <h4 className="font-semibold text-foreground">{user.displayName}</h4>
-                          <p className="text-sm text-muted-foreground">@{user.username}</p>
+                          <h4 className="font-semibold text-foreground">{[user.firstName, user.lastName].filter(Boolean).join(' ') || user.email}</h4>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
                           <div className="flex items-center gap-2 mt-2">
                             <Badge variant="outline">
                               <Calendar className="w-3 h-3 mr-1" />
@@ -243,6 +291,63 @@ export default function AdminPage() {
                   <div className="text-center py-8">
                     <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                     <p className="text-muted-foreground">승인 대기 중인 회원이 없습니다.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* 승인된 회원 관리 탭 */}
+          <TabsContent value="approved" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Check className="w-5 h-5" />
+                  승인된 회원 목록
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {approvedLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : approvedUsers && approvedUsers.length > 0 ? (
+                  <div className="space-y-4">
+                    {approvedUsers.map((user) => (
+                      <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">{[user.firstName, user.lastName].filter(Boolean).join(' ') || user.email}</h4>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge variant="outline">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                            </Badge>
+                            <Badge variant="default" className="bg-green-100 text-green-800">
+                              <Check className="w-3 h-3 mr-1" />
+                              승인됨
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => revokeUserMutation.mutate(user.id)}
+                            disabled={revokeUserMutation.isPending}
+                            data-testid={`button-revoke-${user.id}`}
+                          >
+                            <X className="w-4 h-4 mr-1" />
+                            취소
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Check className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">승인된 회원이 없습니다.</p>
                   </div>
                 )}
               </CardContent>

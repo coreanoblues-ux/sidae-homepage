@@ -89,6 +89,19 @@ router.get('/members', adminGuard, async (req, res) => {
           createdAt: user.createdAt
         }))
       });
+    } else if (status === 'verified') {
+      const members = await storage.getVerifiedUsers();
+      res.json({ 
+        ok: true, 
+        items: members.map(user => ({
+          id: user.id,
+          name: `${user.firstName} ${user.lastName}`.trim() || user.email,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          createdAt: user.createdAt
+        }))
+      });
     } else {
       res.json({ ok: true, items: [] });
     }
@@ -127,6 +140,22 @@ router.post('/reject-user', adminGuard, async (req, res) => {
   } catch (error) {
     console.error('Error rejecting user:', error);
     res.status(500).json({ ok: false, message: 'Failed to reject user' });
+  }
+});
+
+// ✅ 회원 승인 취소
+router.post('/revoke-user', adminGuard, async (req, res) => {
+  try {
+    const { userId, memo } = req.body;
+    if (!userId) {
+      return res.status(400).json({ ok: false, message: 'User ID is required' });
+    }
+    
+    await storage.revokeUserApproval(userId, null, memo || '관리자 승인 취소');
+    res.json({ ok: true, message: '회원 승인이 취소되었습니다' });
+  } catch (error) {
+    console.error('Error revoking user:', error);
+    res.status(500).json({ ok: false, message: 'Failed to revoke user approval' });
   }
 });
 

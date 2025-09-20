@@ -272,6 +272,14 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(users.createdAt));
   }
 
+  async getVerifiedUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.role, 'VERIFIED'))
+      .orderBy(asc(users.createdAt));
+  }
+
   async approveUser(userId: string, adminId: string | null, memo?: string): Promise<void> {
     await db.transaction(async (tx) => {
       await tx
@@ -303,6 +311,22 @@ export class DatabaseStorage implements IStorage {
       .from(approvals)
       .where(eq(approvals.userId, userId))
       .orderBy(desc(approvals.createdAt));
+  }
+
+  async revokeUserApproval(userId: string, adminId: string | null, memo?: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      await tx
+        .update(users)
+        .set({ role: 'PENDING', updatedAt: new Date() })
+        .where(eq(users.id, userId));
+
+      await tx.insert(approvals).values({
+        userId,
+        adminId,
+        status: 'REVOKED',
+        memo,
+      });
+    });
   }
 
   // Gallery operations
