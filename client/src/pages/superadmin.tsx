@@ -81,6 +81,12 @@ export default function SuperAdmin() {
     enabled: isAuthed,
   });
 
+  // 🎯 승인된 회원 목록
+  const { data: verifiedUsers = [], refetch: refetchVerifiedUsers } = useQuery({
+    queryKey: ['/api/superadmin/verified-users'],
+    enabled: isAuthed,
+  });
+
   // 갤러리 이미지 목록 (관리자용 - 모든 이미지)
   const { data: galleryImages = [], refetch: refetchGallery } = useQuery({
     queryKey: ['/api/superadmin/gallery'],
@@ -124,6 +130,21 @@ export default function SuperAdmin() {
     },
     onError: () => {
       toast({ title: "오류", description: "거절 처리 중 오류가 발생했습니다.", variant: "destructive" });
+    },
+  });
+
+  // 🎯 회원 승인 취소
+  const revokeMutation = useMutation({
+    mutationFn: async ({ userId, memo }: { userId: string; memo?: string }) => {
+      return await apiRequest<any>('/api/superadmin/revoke-user', { method: 'POST', body: { userId, memo } });
+    },
+    onSuccess: () => {
+      toast({ title: "승인 취소", description: "회원 승인이 취소되었습니다." });
+      refetchVerifiedUsers();
+      refetchPendingUsers(); // 대기자 목록도 새로고침 (취소된 회원이 다시 대기자가 됨)
+    },
+    onError: () => {
+      toast({ title: "오류", description: "승인 취소 처리 중 오류가 발생했습니다.", variant: "destructive" });
     },
   });
 
@@ -414,8 +435,9 @@ export default function SuperAdmin() {
       </div>
 
       <Tabs defaultValue="approvals" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="approvals">가입 승인</TabsTrigger>
+          <TabsTrigger value="members">회원 관리</TabsTrigger>
           <TabsTrigger value="gallery">갤러리 관리</TabsTrigger>
           <TabsTrigger value="programs">프로그램 관리</TabsTrigger>
           <TabsTrigger value="videos">동영상 링크</TabsTrigger>
@@ -466,6 +488,68 @@ export default function SuperAdmin() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* 🎯 승인된 회원 관리 */}
+        <TabsContent value="members" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>승인된 회원 관리</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                현재 승인된 회원들의 목록입니다. 필요시 승인을 취소할 수 있습니다.
+              </p>
+            </CardHeader>
+            <CardContent>
+              {(verifiedUsers as any[]).length === 0 ? (
+                <p className="text-muted-foreground">승인된 회원이 없습니다.</p>
+              ) : (
+                <div className="space-y-4">
+                  {(verifiedUsers as any[]).map((user: any) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg bg-green-50 dark:bg-green-900/20">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{user.email}</p>
+                          <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                            ✓ 승인됨
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : '-'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          승인일: {new Date(user.updatedAt || user.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            if (confirm(`${user.email} 회원의 승인을 취소하시겠습니까?\n승인 취소 시 해당 회원은 다시 대기 상태가 됩니다.`)) {
+                              revokeMutation.mutate({ userId: user.id, memo: '관리자 승인 취소' });
+                            }
+                          }}
+                          disabled={revokeMutation.isPending}
+                          data-testid={`button-revoke-${user.id}`}
+                        >
+                          {revokeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                          승인 취소
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {(verifiedUsers as any[]).length > 0 && (
+                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    💡 <strong>승인 취소 안내:</strong> 승인을 취소한 회원은 다시 "가입 승인" 탭의 대기 목록으로 이동됩니다. 
+                    필요시 재승인이 가능합니다.
+                  </p>
                 </div>
               )}
             </CardContent>
