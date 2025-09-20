@@ -13,7 +13,8 @@ import {
   Clock, 
   TrendingUp,
   BarChart3,
-  Activity
+  Activity,
+  X
 } from "lucide-react";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -73,6 +74,13 @@ export default function AdminDashboard() {
 
   const { data: notices = [] } = useQuery({
     queryKey: ["/api/admin/notices"],
+    enabled: isAuthenticated && user?.role === "ADMIN",
+  });
+
+  // 승인된 회원 조회
+  const { data: verifiedUsers = [] } = useQuery({
+    queryKey: ["/api/admin/members", "verified"],
+    queryFn: () => fetch("/api/admin/members?status=verified").then(res => res.json()).then(data => data.items),
     enabled: isAuthenticated && user?.role === "ADMIN",
   });
 
@@ -246,6 +254,69 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* 승인된 회원 관리 섹션 */}
+        <Card className="mb-8" data-testid="card-approved-members">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <UserCheck className="mr-2 w-5 h-5" />
+              승인된 회원 관리
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {verifiedUsers.length === 0 ? (
+              <div className="text-center py-8">
+                <UserCheck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">승인된 회원이 없습니다.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {verifiedUsers.slice(0, 5).map((user: any) => (
+                  <div 
+                    key={user.id} 
+                    className="flex items-center justify-between p-3 rounded-lg border border-border"
+                    data-testid={`approved-user-${user.id}`}
+                  >
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {[user.firstName, user.lastName].filter(Boolean).join(' ') || user.email}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.email} • {new Date(user.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => {
+                        if (confirm('정말로 이 회원의 승인을 취소하시겠습니까?')) {
+                          fetch('/api/admin/revoke-user', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId: user.id })
+                          }).then(() => {
+                            window.location.reload(); // 간단히 새로고침
+                          });
+                        }
+                      }}
+                      data-testid={`button-revoke-${user.id}`}
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      취소
+                    </Button>
+                  </div>
+                ))}
+                {verifiedUsers.length > 5 && (
+                  <div className="text-center pt-4">
+                    <p className="text-sm text-muted-foreground">
+                      총 {verifiedUsers.length}명의 승인된 회원이 있습니다.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Recent Activity & Quick Actions */}
         <div className="grid lg:grid-cols-2 gap-8">
