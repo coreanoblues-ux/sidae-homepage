@@ -94,7 +94,7 @@ export function Header() {
       // 역할별 리다이렉트 (지침 1번)
       setTimeout(() => {
         if (data.user.role === 'ADMIN') {
-          setLocation('/admin'); // 관리자는 /admin으로
+          setLocation('/admin-dashboard'); // 🎯 통합: 관리자는 /admin-dashboard로
         } else {
           setLocation('/'); // 일반회원은 항상 랜딩으로
         }

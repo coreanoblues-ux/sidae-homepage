@@ -40,7 +40,7 @@ export default function Login() {
   // 이미 로그인된 경우 리다이렉트
   if (isAuthenticated) {
     if ((user as any)?.role === 'ADMIN') {
-      setLocation('/admin');
+      setLocation('/admin-dashboard'); // 🎯 통합: 관리자는 /admin-dashboard로
     } else {
       setLocation('/');
     }
@@ -82,7 +82,7 @@ export default function Login() {
       
       // 역할별 리다이렉트
       if (data.user.role === 'ADMIN') {
-        setLocation('/admin');
+        setLocation('/admin-dashboard'); // 🎯 통합: 관리자는 /admin-dashboard로
       } else {
         setLocation('/');
       }

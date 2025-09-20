@@ -87,7 +87,7 @@ export default function Landing() {
         
         // 잠시 대기 후 관리자 페이지로 이동
         setTimeout(() => {
-          window.location.href = "/admin";
+          window.location.href = "/admin-dashboard"; // 🎯 통합: 관리자는 /admin-dashboard로
         }, 500);
       } else {
         alert("잘못된 비밀번호입니다.");
