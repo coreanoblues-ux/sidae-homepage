@@ -1,0 +1,140 @@
+관리자 로그아웃 “확실 종료” 가이드 (서버+프론트 둘 다)
+1) 서버: 쿠키를 정확히 지우기 (설정값을 “지울 때도” 동일하게)
+
+로그인 시 썼던 옵션과 완전히 동일한 옵션으로 지워야 한다. (domain, path, sameSite, secure)
+
+// server/auth/logout.ts
+import { Router } from 'express';
+const r = Router();
+
+// 로그인 때 썼던 것과 동일
+const cookieBase = {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'None' as const,
+  domain: process.env.COOKIE_DOMAIN || '.sidae-edu.com',
+  path: '/',
+};
+
+r.post('/api/auth/logout', (req, res) => {
+  // 이름이 여러 개면 모두 지운다 (예: sid, token)
+  res.clearCookie('sid', cookieBase);
+  res.cookie('sid', '', { ...cookieBase, maxAge: 0 });
+
+  // 혹시 과거에 잘못 설정된 변종 쿠키까지 제거 (도메인/경로 변형)
+  res.clearCookie('sid', { ...cookieBase, domain: 'sidae-edu.com' });
+  res.clearCookie('sid', { ...cookieBase, domain: undefined }); // host-only
+  res.clearCookie('sid', { ...cookieBase, path: '/api' });
+
+  return res.json({ ok: true });
+});
+
+export default r;
+
+
+포인트
+
+domain: .sidae-edu.com(apex와 www를 모두 커버)
+
+path: '/' (서브경로로 발급된 쿠키가 있으면 그 경로로도 clearCookie 호출)
+
+과거 프리뷰/서브도메인에서 발급된 변종 쿠키까지 같이 지워준다.
+
+2) 서버: 인증 확인 API는 절대 캐시 금지
+
+로그아웃 직후 /api/auth/me를 브라우저/프록시가 캐시해 두면 “로그인처럼 보이는” 현상이 생긴다.
+
+// 공통 미들웨어 또는 /api/auth/me 핸들러 상단
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
+// me 응답은 반드시 쿠키 기준으로 실시간 계산
+app.get('/api/auth/me', (req, res) => {
+  // ...토큰 검사
+  if (!req.user) return res.status(401).json({ ok:false });
+  res.json({ ok:true, user: { id:req.user.id, role:req.user.role, name:req.user.name }});
+});
+
+3) 프론트: 하드 로그아웃 루틴
+
+서버 호출 + 로컬 상태/스토리지 싹 정리 + 재검증까지 한 번에.
+
+// client/src/stores/auth.ts or logout handler
+export async function hardLogout(navigate: (path:string)=>void) {
+  try {
+    await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
+  } catch {}
+
+  // 1) 상태/스토리지 초기화
+  authStore.setState({ user: null, loading: false });
+  localStorage.removeItem('auth_user');
+  sessionStorage.removeItem('auth_user');
+
+  // 2) 화면 즉시 갱신
+  navigate('/');
+
+  // 3) 서버 재검증으로 “진짜 로그아웃” 보장
+  const r = await fetch('/api/auth/me', { credentials:'include', cache:'no-store' });
+  if (r.ok) {
+    const d = await r.json();
+    if (d?.ok) {
+      // 혹시 남아있다면 한 번 더 로그아웃(변종 쿠키 제거용)
+      await fetch('/api/auth/logout', { method:'POST', credentials:'include' });
+      authStore.setState({ user: null });
+    }
+  }
+}
+
+
+헤더/상단 네비의 “로그아웃” 버튼에 위 함수를 연결.
+
+cache:'no-store'로 브라우저 캐시까지 차단.
+
+4) www ↔ apex 도메인 동작 통일
+
+사이트가 https://sidae-edu.com과 https://www.sidae-edu.com 양쪽에서 열리면, 로그인/로그아웃을 한쪽에서 하고 다른쪽에서 보면 쿠키 도메인/리다이렉트 때문에 “로그인처럼 보이는” 오해가 생긴다.
+
+한쪽으로 강제 리다이렉트 추천(예: 모두 apex로).
+
+// server/index.ts — 최상단 리다이렉트
+app.use((req,res,next)=>{
+  const host = req.headers.host || '';
+  const proto = req.headers['x-forwarded-proto'] || 'http';
+  if (proto !== 'https' || host === 'www.sidae-edu.com') {
+    return res.redirect(301, `https://sidae-edu.com${req.originalUrl}`);
+  }
+  next();
+});
+
+5) 서비스 워커/프리캐시가 있으면 비활성화
+
+CRA/PWA 설정이나 SW가 /api/auth/me 결과를 캐싱 중이면 로그아웃 후에도 로그인처럼 보임.
+
+SW 사용 중이면 auth/me는 networkOnly로, 아니면 SW 자체를 꺼두자.
+
+6) 디버깅 도구(선택): 현재 쿠키 상태 확인
+// server/routes/debug.ts
+r.get('/api/debug/cookies', (req,res)=>{
+  res.json({ cookies: req.headers.cookie || '' });
+});
+
+
+로그아웃 후 GET /api/debug/cookies로 쿠키가 실제로 비었는지 바로 확인.
+
+체크리스트
+
+ res.clearCookie에 로그인 때와 동일한 옵션(domain/path/sameSite/secure) 사용
+
+ /api/auth/me 응답은 Cache-Control: no-store
+
+ 프론트 hardLogout()에서 상태/스토리지 초기화 + 재검증
+
+ www는 apex로 301 리다이렉트
+
+ 서비스 워커/프리캐시가 auth를 캐싱하지 않음
+
+이 5가지만 맞추면, 로그아웃 → 홈으로 이동 뒤에 상단이 “관리자 로그인 상태”로 보이는 현상은 깔끔하게 사라진다.

@@ -132,37 +132,63 @@ export function Header() {
     },
   });
 
-  // Logout mutation (표준화)
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include"
+  // 🎯 가이드에 따른 하드 로그아웃 루틴 (관리자 로그아웃 완전 해결)
+  const hardLogout = async () => {
+    try {
+      // 1) 서버 로그아웃 호출 (올바른 엔드포인트)
+      await fetch('/api/admin/logout', { 
+        method: 'POST', 
+        credentials: 'include' 
       });
-      return response.json();
-    },
+    } catch (error) {
+      console.error('Logout API failed:', error);
+    }
+
+    // 2) 로컬 상태/스토리지 완전 초기화
+    localStorage.clear();
+    sessionStorage.clear();
+    queryClient.clear(); // React Query 캐시 완전 삭제
+    
+    // 3) 랜딩페이지로 즉시 이동
+    setLocation('/');
+    
+    // 4) 서버 재검증으로 "진짜 로그아웃" 보장 (가이드 적용)
+    setTimeout(async () => {
+      try {
+        const response = await fetch('/api/auth/user', { 
+          credentials: 'include', 
+          cache: 'no-store' 
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data?.id) {
+            // 혹시 남아있다면 한 번 더 로그아웃 (변종 쿠키 제거용)
+            await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+            window.location.reload(); // 강제 새로고침
+          }
+        }
+      } catch (e) {
+        // 재검증 실패는 정상 (로그아웃된 상태)
+        console.log('✅ 로그아웃 재검증 완료');
+      }
+    }, 100);
+  };
+
+  const logoutMutation = useMutation({
+    mutationFn: hardLogout,
     onSuccess: () => {
       toast({
         title: "로그아웃 완료",
         description: "안전하게 로그아웃되었습니다.",
       });
-      
-      /** 상태/캐시 완전 초기화 **/
-      localStorage.removeItem('auth');           // 쓰는 키 모두 제거
-      sessionStorage.clear?.();
-      queryClient.clear(); // React Query 캐시 완전 삭제
-      
-      // 잠깐 대기 후 새로고침으로 남은 캐시 차단
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
     },
     onError: (error) => {
       toast({
-        title: "로그아웃 실패",
-        description: error.message,
+        title: "로그아웃 실패", 
+        description: "다시 시도해주세요.",
         variant: "destructive",
       });
+      console.error('Hard logout failed:', error);
     },
   });
 
