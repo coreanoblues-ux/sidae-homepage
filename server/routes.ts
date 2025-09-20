@@ -93,8 +93,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Enhanced auth middleware for both OAuth and local users (엄격한 인증)
   const enhancedAuth = async (req: any, res: any, next: any) => {
-    // 캐시 금지 헤더 설정
-    res.set('Cache-Control', 'no-store');
+    // 🎯 가이드에 따른 캐시 금지 헤더 설정 (배포환경 로그아웃 문제 해결)
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     
     // 1. Check for local user session first
     const localUserId = (req.session as any)?.localUserId;
