@@ -323,7 +323,7 @@ export class DatabaseStorage implements IStorage {
       await tx.insert(approvals).values({
         userId,
         adminId,
-        status: 'REVOKED',
+        status: 'REJECTED',
         memo,
       });
     });

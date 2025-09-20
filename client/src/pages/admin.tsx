@@ -105,12 +105,12 @@ export default function AdminPage() {
 
   // 사용자 승인 취소 뮤테이션
   const revokeUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      return await apiRequest('/api/admin/revoke-user', {
+    mutationFn: (userId: string) => 
+      fetch('/api/admin/revoke-user', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId })
-      });
-    },
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/members", "verified"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/members", "pending"] });
