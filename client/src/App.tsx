@@ -170,8 +170,8 @@ function Router() {
       {/* Simple Admin - 새로운 단순한 관리자 페이지 */}
       <Route path="/simple-admin" component={SimpleAdmin} />
       
-      {/* New Admin System */}
-      <Route path="/_superadmin" component={AdminLoginPage} />
+      {/* Legacy Admin System */}
+      <Route path="/_admin_legacy" component={AdminLoginPage} />
       <Route path="/admin-dashboard" component={NewAdminDashboard} />
       
       {/* Remove public aliases for security */}
@@ -188,6 +188,15 @@ function AppContent() {
   
   // 독립적인 관리자 페이지들 - Layout 없이 렌더링
   if (location === '/_superadmin') {
+    return (
+      <>
+        <Toaster />
+        <SuperAdmin />
+      </>
+    );
+  }
+  
+  if (location === '/_admin_legacy') {
     return (
       <>
         <Toaster />
