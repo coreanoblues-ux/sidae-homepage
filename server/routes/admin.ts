@@ -3,56 +3,11 @@ import { storage } from '../storage';
 import { insertSimpleVideoSchema } from '../../shared/schema';
 import { z } from 'zod';
 import { normalizeVideo, VIDEO_ERROR_MESSAGES } from '../utils/videos';
+import { cookieOptions } from '../auth/cookie';
 
 const router = Router();
 
-// 🎯 완전한 환경별 쿠키 설정 (HTTPS 환경 올바른 감지)
-const getCookieBase = (req: any) => {
-  const isDev = process.env.NODE_ENV === 'development';
-  const hostname = req.hostname || req.headers.host || '';
-  const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-  
-  console.log('🍪 Cookie 환경 감지:', { isDev, hostname, isLocalhost });
-  
-  // 🔑 실제 로컬호스트만 secure: false 사용 
-  if (isLocalhost) {
-    return {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax' as const,
-      path: '/',
-    };
-  }
-  
-  // 🔑 .replit.dev 개발환경: 단순한 설정으로 변경
-  if (hostname.includes('.replit.dev')) {
-    return {
-      httpOnly: true,
-      secure: false,          // 🎯 개발환경에서는 secure: false로 테스트
-      sameSite: 'lax' as const, 
-      path: '/',
-    };
-  }
-  
-  // 🔑 .replit.app 배포환경: 크롬 대응 설정
-  if (hostname.includes('.replit.app')) {
-    return {
-      httpOnly: true,
-      secure: true,             // 크롬은 SameSite=none일 때 필수
-      sameSite: 'none' as const,
-      domain: '.replit.app',    // 하위 도메인 모두 커버
-      path: '/',
-    };
-  }
-  
-  // 🔑 기본값 (HTTPS 환경)
-  return {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax' as const,
-    path: '/',
-  };
-};
+// 🎯 제거됨 - cookieOptions 모듈 사용
 
 // 🔒 관리자 권한 체크 미들웨어
 const adminGuard = (req: any, res: any, next: any) => {
@@ -81,34 +36,31 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ ok: false, message: '잘못된 비밀번호입니다.' });
   }
   
-  // sid 쿠키 설정 (환경 자동 감지)
-  const cookieBase = getCookieBase(req);
-  console.log('🍪 쿠키 설정:', { cookieBase, value: 'admin-token' });
+  // 🎯 새로운 쿠키 처리 모듈 사용
+  const opts = cookieOptions(req);
+  console.log('🍪 쿠키 설정:', { opts, value: 'admin-token' });
   
-  res.cookie('sid', 'admin-token', { ...cookieBase, maxAge: 1000 * 60 * 60 });
+  res.cookie('sid', 'admin-token', { ...opts, maxAge: 1000 * 60 * 60 });
   
   console.log('✅ 로그인 성공 - 쿠키 설정 완료');
   res.json({ ok: true, message: '로그인 성공' });
 });
 
-// ✅ 환경별 완전 로그아웃 (개발/배포 모두 대응)
+// ✅ 새로운 로그아웃 처리
 router.post('/logout', (req, res) => {
-  const cookieBase = getCookieBase(req);
-  const hostname = req.hostname || req.headers.host || '';
+  const opts = cookieOptions(req);
+  console.log('🚪 로그아웃 시도:', { opts });
   
-  console.log('🚪 로그아웃 시도:', { hostname, cookieBase });
+  res.clearCookie('sid', opts);
+  res.cookie('sid', '', { ...opts, maxAge: 0 });
+
+  // 과거에 잘못 남은 변종까지 삭제
+  [undefined, '.replit.dev', '.replit.app', '.sidae-edu.com'].forEach(d => {
+    res.clearCookie('sid', { ...opts, domain: d });
+  });
   
-  // 🔑 모든 가능한 변종 쿠키 제거 (환경 무관)
-  res.clearCookie('sid', { path: '/' }); // Host-only
-  res.clearCookie('sid', { domain: '.replit.app', path: '/' }); // 배포환경
-  res.clearCookie('sid', { domain: '.replit.dev', path: '/' }); // 개발환경
-  res.clearCookie('sid', { domain: 'edu-stream-1-coreanoblues.replit.app', path: '/' });
-  
-  // 🔑 현재 환경 설정과 동일한 옵션으로 삭제 (가장 중요)
-  res.clearCookie('sid', cookieBase);
-  
-  console.log('✅ 로그아웃 완료 - 모든 환경 쿠키 삭제됨');
-  res.json({ ok: true, message: '로그아웃 완료' });
+  console.log('✅ 로그아웃 완료');
+  res.json({ ok: true });
 });
 
 // ✅ 대기중인 회원 목록

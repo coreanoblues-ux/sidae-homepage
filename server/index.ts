@@ -16,9 +16,17 @@ const apiOrigin = process.env.API_ORIGIN || 'https://sidae-edu.com';
 
 // CORS/프록시 차이 제거 - 명시적 CORS 설정
 app.use(cors({ 
-  origin: frontOrigin, 
+  origin: process.env.FRONT_ORIGIN,  // dev/배포 각각 실제 Origin 값
   credentials: true 
 }));
+
+// 🎯 auth 상태는 캐시 금지
+app.use((_, res, next) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
