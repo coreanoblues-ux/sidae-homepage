@@ -668,6 +668,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🎯 승인된 회원 목록
+  app.get('/api/superadmin/verified-users', isAuthenticated, async (req: any, res) => {
+    try {
+      const isAuthorized = await checkSuperAdminAuth(req, res);
+      if (!isAuthorized) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const verifiedUsers = await storage.getVerifiedUsers();
+      res.json(verifiedUsers);
+    } catch (error) {
+      console.error("Error fetching verified users:", error);
+      res.status(500).json({ message: "Failed to fetch verified users" });
+    }
+  });
+
   app.post('/api/superadmin/approve-user', isAuthenticated, async (req: any, res) => {
     try {
       const isAuthorized = await checkSuperAdminAuth(req, res);
@@ -705,6 +720,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error rejecting user:", error);
       res.status(500).json({ message: "Failed to reject user" });
+    }
+  });
+
+  // 🎯 승인 취소 (VERIFIED → PENDING)
+  app.post('/api/superadmin/revoke-user', isAuthenticated, async (req: any, res) => {
+    try {
+      const isAuthorized = await checkSuperAdminAuth(req, res);
+      if (!isAuthorized) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const { userId, memo } = req.body;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      // sid 쿠키인 경우 임시 사용자 ID 사용
+      const adminId = req.cookies?.sid === 'admin-token' ? 'dev-admin' : (await storage.getUser(req.user.claims.sub))?.id || 'unknown-admin';
+      await storage.revokeUserApproval(userId, adminId, memo);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error revoking user approval:", error);
+      res.status(500).json({ message: "Failed to revoke user approval" });
     }
   });
 
