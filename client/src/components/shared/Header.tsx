@@ -132,46 +132,26 @@ export function Header() {
     },
   });
 
-  // 🎯 가이드에 따른 하드 로그아웃 루틴 (관리자 로그아웃 완전 해결)
+  // 🔑 가이드 4) 프론트 로그아웃 함수 보강 (Replit 전용)
   const hardLogout = async () => {
-    try {
-      // 1) 서버 로그아웃 호출 (올바른 엔드포인트)
-      await fetch('/api/admin/logout', { 
-        method: 'POST', 
-        credentials: 'include' 
-      });
-    } catch (error) {
-      console.error('Logout API failed:', error);
-    }
+    await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
 
-    // 2) 로컬 상태/스토리지 완전 초기화
+    // 로컬 상태 싹 지우기
+    localStorage.removeItem('auth_user');
+    sessionStorage.removeItem('auth_user');
     localStorage.clear();
     sessionStorage.clear();
-    queryClient.clear(); // React Query 캐시 완전 삭제
+    queryClient.clear();
+
+    // 🔑 가이드 4) 크롬 캐시 무시하고 다시 확인
+    const r = await fetch('/api/auth/user', { credentials: 'include', cache: 'no-store' });
+    if (r.status !== 401) {
+      // 여전히 로그인처럼 보이면 쿠키 변종일 가능성 → 다시 강제 삭제
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+    }
     
-    // 3) 랜딩페이지로 즉시 이동
+    // 랜딩페이지로 이동
     setLocation('/');
-    
-    // 4) 서버 재검증으로 "진짜 로그아웃" 보장 (가이드 적용)
-    setTimeout(async () => {
-      try {
-        const response = await fetch('/api/auth/user', { 
-          credentials: 'include', 
-          cache: 'no-store' 
-        });
-        if (response.ok) {
-          const data = await response.json();
-          if (data?.id) {
-            // 혹시 남아있다면 한 번 더 로그아웃 (변종 쿠키 제거용)
-            await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
-            window.location.reload(); // 강제 새로고침
-          }
-        }
-      } catch (e) {
-        // 재검증 실패는 정상 (로그아웃된 상태)
-        console.log('✅ 로그아웃 재검증 완료');
-      }
-    }, 100);
   };
 
   const logoutMutation = useMutation({

@@ -6,27 +6,13 @@ import { normalizeVideo, VIDEO_ERROR_MESSAGES } from '../utils/videos';
 
 const router = Router();
 
-// 🎯 개발/배포 환경 대응 쿠키 설정 (Replit 배포 도메인 자동 감지)
-const getCookieOptions = (req: any) => {
-  const isDev = process.env.NODE_ENV === 'development';
-  const hostname = req.hostname || req.headers.host || '';
-  
-  // Replit 배포 환경 자동 감지
-  const isReplitApp = hostname.includes('.replit.app');
-  const cookieDomain = isReplitApp ? `.replit.app` : process.env.COOKIE_DOMAIN;
-  
-  console.log('🍪 Environment:', isDev ? 'dev' : 'prod', 'Hostname:', hostname, 'Domain:', cookieDomain);
-  
-  const cookieOpts = {
-    httpOnly: true,
-    secure: !isDev || isReplitApp, // 개발환경도 .replit.app이면 secure
-    sameSite: (isDev && !isReplitApp) ? 'lax' as const : 'none' as const,
-    path: '/',
-    maxAge: 1000 * 60 * 60 * 24 * 7 // 7일
-  };
-  
-  // 배포환경이거나 .replit.app 도메인일 때 도메인 설정
-  return (isReplitApp && cookieDomain) ? { ...cookieOpts, domain: cookieDomain } : cookieOpts;
+// 🎯 크롬 전용 이슈 방어를 포함한 Replit 쿠키 설정 (가이드 적용)
+const cookieBase = {
+  httpOnly: true,
+  secure: true,             // 크롬은 SameSite=none일 때 필수
+  sameSite: 'none' as const,
+  domain: '.replit.app',    // 하위 도메인 모두 커버
+  path: '/',
 };
 
 // 🔒 관리자 권한 체크 미들웨어
@@ -46,44 +32,25 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ ok: false, message: '잘못된 비밀번호입니다.' });
   }
   
-  // sid 쿠키 설정
-  const cookieOptions = getCookieOptions(req);
-  res.cookie('sid', 'admin-token', cookieOptions);
+  // sid 쿠키 설정 (가이드: 로그인 시)
+  res.cookie('sid', 'admin-token', { ...cookieBase, maxAge: 1000 * 60 * 60 });
   
   res.json({ ok: true, message: '로그인 성공' });
 });
 
-// ✅ 강화된 로그아웃 (배포/개발 환경 완전 대응)
+// ✅ 가이드에 따른 완전한 로그아웃 (Replit 환경 전용)
 router.post('/logout', (req, res) => {
-  const cookieOptions = getCookieOptions(req);
-  const hostname = req.hostname || req.headers.host || '';
+  console.log('🚪 로그아웃 시도 - Replit 환경');
   
-  console.log('🚪 로그아웃 시도:', hostname);
+  // 🔑 가이드 2) 크롬을 위한 모든 변종 쿠키 제거
+  res.clearCookie('sid', { domain: '.replit.app', path: '/' });
+  res.clearCookie('sid', { domain: 'edu-stream-1-coreanoblues.replit.app', path: '/' });
+  res.clearCookie('sid', { path: '/' }); // 혹시 기본 도메인 쿠키 대비
   
-  // 🧹 모든 가능한 도메인 조합으로 쿠키 삭제 (가이드 적용)
-  const clearOptions = [
-    // 현재 환경 설정
-    cookieOptions,
-    // Host-only (도메인 없음)
-    { httpOnly: true, secure: true, sameSite: 'none' as const, path: '/' },
-    { httpOnly: true, secure: false, sameSite: 'lax' as const, path: '/' },
-    // Replit 도메인들
-    { domain: '.replit.app', httpOnly: true, secure: true, sameSite: 'none' as const, path: '/' },
-    { domain: '.replit.dev', httpOnly: true, secure: false, sameSite: 'lax' as const, path: '/' },
-    // 기타 가능한 도메인들
-    { domain: '.sidae-edu.com', httpOnly: true, secure: true, sameSite: 'none' as const, path: '/' }
-  ];
+  // 🔑 가이드 1) 로그아웃 시 (로그인과 100% 동일한 설정) - 크롬 완전 대응
+  res.clearCookie('sid', cookieBase);
   
-  clearOptions.forEach(opts => {
-    res.clearCookie('sid', opts);
-  });
-  
-  // ✅ 즉시 만료 쿠키로 덮어쓰기 (모든 조합)
-  clearOptions.forEach(opts => {
-    res.cookie('sid', '', { ...opts, maxAge: 0 });
-  });
-  
-  console.log('✅ 로그아웃 완료 - 모든 쿠키 삭제됨');
+  console.log('✅ 로그아웃 완료 - 모든 쿠키 변종 삭제됨');
   res.json({ ok: true, message: '로그아웃 완료' });
 });
 
