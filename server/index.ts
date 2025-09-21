@@ -80,6 +80,15 @@ const isAdmin = (req: any) => {
   catch { return false; }
 };
 
+// 📁 uploads 디렉토리 정적 파일 서빙 설정 (API/정적/SPA보다 위에 위치)
+const UPLOAD_DIR = path.resolve(process.cwd(), "uploads");
+app.use("/uploads", express.static(UPLOAD_DIR, {
+  fallthrough: false,
+  setHeaders(res) { 
+    res.setHeader("Cache-Control", "public, max-age=3600"); 
+  }
+}));
+
 const INDEX = path.join(__dirname, "dist/index.html");
 
 (async () => {

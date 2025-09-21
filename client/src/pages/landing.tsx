@@ -362,7 +362,7 @@ export default function Landing() {
                     <h4 className="font-semibold text-foreground">TOEIC 990점 만점 달성</h4>
                     <p className="text-muted-foreground">완벽한 영어 실력을 바탕으로 한 체계적인 시험 대비 전략</p>
                     <img 
-                      src="/images/IMG_6544_1758101075476.JPG"
+                      src="/uploads/IMG_6544_1758101075476.JPG"
                       alt="TOEIC 990점 만점 성적표"
                       className="mt-2 rounded-lg shadow-md max-w-48 object-cover"
                     />
@@ -377,7 +377,7 @@ export default function Landing() {
                     <h4 className="font-semibold text-foreground">(전)강남영단기 1타강사 & (전) 해커스 50만뷰+</h4>
                     <p className="text-muted-foreground">현강 1타강사와 인터넷 50만뷰 돌파 인기강사의 검증된 강의력</p>
                     <img 
-                      src="/images/IMG_6559_1758101109393.JPG"
+                      src="/uploads/IMG_6559_1758101109393.JPG"
                       alt="해커스 온라인 강의 화면"
                       className="mt-2 rounded-lg shadow-md max-w-48 object-cover"
                     />
