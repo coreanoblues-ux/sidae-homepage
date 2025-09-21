@@ -129,6 +129,26 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
+  // 🎯 강화된 로그아웃 (POST) - 변종 쿠키 완전 제거
+  app.post('/api/auth/logout', (req, res) => {
+    const { cookieOpts } = require('./auth/cookie');
+    const opts = cookieOpts(req);
+    
+    // 메인 쿠키 제거
+    res.clearCookie('sid', opts);
+    res.cookie('sid', '', { ...opts, maxAge: 0 });
+
+    // 혹시 남아 있는 변종 쿠키도 다 제거
+    [undefined, '/'].forEach(p => {
+      [undefined, '.sidae-edu.com', '.replit.app', '.replit.dev'].forEach(d => {
+        res.clearCookie('sid', { domain: d, path: p });
+      });
+    });
+
+    res.json({ ok: true });
+  });
+
+  // 🎯 기존 GET 로그아웃 (호환성 유지)
   app.get("/api/logout", (req, res) => {
     // 환경변수 기반 통일된 쿠키 옵션
     const cookieDomain = process.env.COOKIE_DOMAIN || 'sidae-edu.com';

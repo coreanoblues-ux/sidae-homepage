@@ -91,3 +91,23 @@ export async function apiGet<TResponse>(url: string, opts?: { query?: Query; ini
   const qs = toQueryString(opts?.query);
   return apiRequest<TResponse>(`${url}${qs}`, { method: 'GET', ...(opts?.init || {}) });
 }
+
+// 🎯 API 요청 (캐시 무시)
+export async function api(input: RequestInfo, init: RequestInit = {}) {
+  const r = await fetch(input, { credentials: 'include', cache: 'no-store', ...init });
+  if (r.status === 401 && location.pathname.startsWith('/admin')) {
+    location.assign('/_superadmin?next=' + encodeURIComponent(location.pathname));
+  }
+  return r;
+}
+
+// 🎯 강화된 하드 로그아웃 (완전 정리)
+export async function hardLogout(navigate = (p: string) => location.assign(p)) {
+  await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+    .catch(() => {});
+  localStorage.clear(); 
+  sessionStorage.clear();
+  navigate('/'); // 홈으로
+  // 캐시 무시하고 재검증(무음)
+  await fetch('/api/auth/me', { credentials: 'include', cache: 'no-store' });
+}

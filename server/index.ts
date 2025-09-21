@@ -16,6 +16,19 @@ const app = express();
 // 🎯 배포 환경 설정 (가이드 적용)
 app.set('trust proxy', 1); // 프록시 신뢰 설정
 
+// 🎯 캐닉컬 도메인 리다이렉션 (배포 환경)
+const CANONICAL = 'sidae-edu.com';
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    const host = req.headers.host || '';
+    const proto = (req.headers['x-forwarded-proto'] as string) || 'http';
+    if (host !== CANONICAL || proto !== 'https') {
+      return res.redirect(301, `https://${CANONICAL}${req.originalUrl}`);
+    }
+    next();
+  });
+}
+
 // 환경변수 정합 
 const frontOrigin = process.env.FRONT_ORIGIN || 'https://sidae-edu.com';
 const apiOrigin = process.env.API_ORIGIN || 'https://sidae-edu.com';
@@ -26,9 +39,19 @@ app.use(cors({
   credentials: true 
 }));
 
-// 🎯 auth 상태는 캐시 금지
+// 🎯 인증 관련 엔드포인트는 강력한 캐시 차단
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/auth')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
+
+// 🎯 전역 auth 상태는 캐시 금지
 app.use((_, res, next) => {
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
   next();
