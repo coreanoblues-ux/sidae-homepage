@@ -129,23 +129,92 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  // 🎯 강화된 로그아웃 (POST) - 변종 쿠키 완전 제거
+  // 🎯 강화된 관리자 로그아웃 (POST) - 변종 쿠키 완전 제거
   app.post('/api/auth/logout', (req, res) => {
     const { cookieOpts } = require('./auth/cookie');
     const opts = cookieOpts(req);
     
+    // 세션 무효화 (Passport 세션)
+    req.logout(() => {});
+    
     // 메인 쿠키 제거
     res.clearCookie('sid', opts);
+    res.clearCookie('connect.sid', opts);
     res.cookie('sid', '', { ...opts, maxAge: 0 });
+    res.cookie('connect.sid', '', { ...opts, maxAge: 0 });
 
-    // 혹시 남아 있는 변종 쿠키도 다 제거
-    [undefined, '/'].forEach(p => {
-      [undefined, '.sidae-edu.com', '.replit.app', '.replit.dev'].forEach(d => {
-        res.clearCookie('sid', { domain: d, path: p });
+    // 🎯 강화된 변종 쿠키 제거 - 모든 도메인/경로 조합
+    const allDomains = [undefined, '.sidae-edu.com', '.replit.app', '.replit.dev', '.replit.co'];
+    const allPaths = ['/', '/api'];
+    allDomains.forEach(domain => {
+      allPaths.forEach(path => {
+        ['sid', 'connect.sid'].forEach(name => {
+          // 즉시 만료 쿠키 설정 (다양한 조합으로)
+          res.clearCookie(name, { domain, path, secure: true, sameSite: 'none' as const });
+          res.cookie(name, '', { domain, path, expires: new Date(0), secure: true, sameSite: 'none' as const });
+          res.cookie(name, '', { domain, path, maxAge: 0, secure: true, sameSite: 'none' as const });
+        });
       });
     });
 
-    res.json({ ok: true });
+    // 현재 호스트용 쿠키도 제거
+    ['sid', 'connect.sid'].forEach(name => {
+      res.clearCookie(name, { expires: new Date(0), httpOnly: true, secure: true, sameSite: 'none' as const });
+      res.cookie(name, '', { expires: new Date(0), httpOnly: true, secure: true, sameSite: 'none' as const, maxAge: 0 });
+      res.cookie(name, '', { expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), httpOnly: true, secure: true, sameSite: 'none' as const });
+      res.cookie(name, '', { expires: new Date(), maxAge: 0, secure: true, sameSite: 'none' as const });
+    });
+    
+    // 강력한 캐시 방지 헤더
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    res.json({ ok: true, loggedOut: true, message: '로그아웃되었습니다' });
+  });
+
+  // 🎯 학생 전용 로그아웃 (POST) - 완전한 쿠키 제거
+  app.post('/api/auth/student-logout', (req, res) => {
+    const { cookieOpts } = require('./auth/cookie');
+    const opts = cookieOpts(req);
+    
+    // 세션 무효화 (Passport 세션)
+    req.logout(() => {});
+    
+    // 메인 쿠키 제거 (현재 옵션으로)
+    res.clearCookie('sid', opts);
+    res.clearCookie('connect.sid', opts);
+    res.cookie('sid', '', { ...opts, maxAge: 0 });
+    res.cookie('connect.sid', '', { ...opts, maxAge: 0 });
+
+    // 🎯 변종 쿠키 완전 제거 - 모든 가능한 도메인/경로 조합
+    const domains = [undefined, '.sidae-edu.com', '.replit.app', '.replit.dev', '.replit.co'];
+    const paths = ['/', '/api'];
+    
+    domains.forEach(domain => {
+      paths.forEach(path => {
+        ['sid', 'connect.sid'].forEach(cookieName => {
+          // 다양한 삭제 방법 시도 (브라우저별 호환성)
+          res.clearCookie(cookieName, { domain, path, secure: true, sameSite: 'none' as const });
+          res.cookie(cookieName, '', { domain, path, expires: new Date(0), secure: true, sameSite: 'none' as const });
+          res.cookie(cookieName, '', { domain, path, maxAge: 0, secure: true, sameSite: 'none' as const });
+        });
+      });
+    });
+
+    // 호스트 전용 쿠키도 제거 (현재 요청 호스트)
+    ['sid', 'connect.sid'].forEach(cookieName => {
+      res.clearCookie(cookieName, { expires: new Date(0), httpOnly: true, secure: true, sameSite: 'none' as const });
+      res.cookie(cookieName, '', { expires: new Date(0), httpOnly: true, secure: true, sameSite: 'none' as const, maxAge: 0 });
+      res.cookie(cookieName, '', { expires: new Date(), maxAge: 0, secure: true, sameSite: 'none' as const });
+    });
+    
+    // 강력한 캐시 방지 헤더 
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    res.json({ ok: true, loggedOut: true, message: '안전하게 로그아웃되었습니다' });
   });
 
   // 🎯 기존 GET 로그아웃 (호환성 유지)

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { hardStudentLogout } from "@/lib/api";
 import { User, Calendar, CheckCircle, XCircle, Clock, LogOut, Edit, Shield, Award } from "lucide-react";
 
 interface Approval {
@@ -19,6 +20,30 @@ export default function Account() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // 🎯 학생 전용 로그아웃 핸들러
+  const handleStudentLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까?')) return;
+    
+    try {
+      await hardStudentLogout();
+      
+      // 🎯 로그아웃 후 TanStack Query 캐시 완전 정리
+      queryClient.clear(); // 모든 캐시 정리로 충분
+      
+      toast({
+        title: "로그아웃 완료",
+        description: "안전하게 로그아웃되었습니다.",
+      });
+    } catch (error) {
+      toast({
+        title: "로그아웃 실패", 
+        description: "다시 시도해주세요.",
+        variant: "destructive",
+      });
+      console.error('Student logout failed:', error);
+    }
+  };
 
   const { data: approvals = [] } = useQuery<Approval[]>({
     queryKey: ["/api/user/approvals", user?.id],
@@ -152,11 +177,14 @@ export default function Account() {
                     프로필 편집 (준비 중)
                   </Button>
                   
-                  <Button variant="outline" className="w-full" asChild data-testid="button-logout">
-                    <a href="/api/logout">
-                      <LogOut className="mr-2 w-4 h-4" />
-                      로그아웃
-                    </a>
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={handleStudentLogout}
+                    data-testid="button-logout"
+                  >
+                    <LogOut className="mr-2 w-4 h-4" />
+                    로그아웃
                   </Button>
                 </div>
               </CardContent>

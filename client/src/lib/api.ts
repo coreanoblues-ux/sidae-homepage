@@ -101,7 +101,7 @@ export async function api(input: RequestInfo, init: RequestInit = {}) {
   return r;
 }
 
-// 🎯 강화된 하드 로그아웃 (완전 정리)
+// 🎯 강화된 관리자 하드 로그아웃 (완전 정리)
 export async function hardLogout(navigate = (p: string) => location.assign(p)) {
   await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
     .catch(() => {});
@@ -109,5 +109,37 @@ export async function hardLogout(navigate = (p: string) => location.assign(p)) {
   sessionStorage.clear();
   navigate('/'); // 홈으로
   // 캐시 무시하고 재검증(무음)
-  await fetch('/api/auth/me', { credentials: 'include', cache: 'no-store' });
+  await fetch('/api/auth/user', { credentials: 'include', cache: 'no-store' });
+}
+
+// 🎯 학생 전용 하드 로그아웃 (완전 정리)
+export async function hardStudentLogout(navigate = (p: string) => location.assign(p)) {
+  try {
+    await fetch('/api/auth/student-logout', { method: 'POST', credentials: 'include' });
+  } catch {}
+  
+  // 로컬 스토리지 완전 정리
+  localStorage.removeItem('auth_user');
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('session');
+  
+  // 세션 스토리지 완전 정리
+  sessionStorage.removeItem('auth_user');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
+  sessionStorage.removeItem('session');
+  
+  // 서비스워커 정리
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(registration => registration.unregister());
+    });
+  }
+  
+  // 홈으로 이동
+  navigate('/');
+  
+  // 무음 재검증으로 캐시된 인증 상태 무효화 (관리자와 일관성을 위해 /api/auth/user 사용)
+  await fetch('/api/auth/user', { credentials: 'include', cache: 'no-store' }).catch(() => {});
 }

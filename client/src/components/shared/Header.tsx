@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "./ThemeProvider";
 import { GraduationCap, Menu, X, Moon, Sun, User, LogOut, UserPlus } from "lucide-react";
+import { hardStudentLogout } from "@/lib/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -132,10 +133,10 @@ export function Header() {
     },
   });
 
-  // 🎯 가이드 2) 로그아웃 플로우에서 "잔여 요청/폴링" 정리
-  const hardLogout = async () => {
+  // 🎯 관리자용 로그아웃 (가이드 2) 
+  const hardAdminLogout = async () => {
     try { 
-      await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' }); 
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); 
     } catch {}
     
     // ① 폴링/구독 중지 (AbortController 사용했다면 abort)
@@ -155,8 +156,21 @@ export function Header() {
     await fetch('/api/auth/user', { credentials: 'include', cache: 'no-store' });
   };
 
+  // 🎯 역할별 로그아웃 함수 선택
+  const performLogout = async () => {
+    if (user?.role === 'ADMIN') {
+      await hardAdminLogout();
+    } else {
+      // 학생/일반 사용자는 hardStudentLogout 사용
+      await hardStudentLogout(() => setLocation('/'));
+    }
+    
+    // 🎯 로그아웃 후 TanStack Query 캐시 완전 정리
+    queryClient.clear(); // 모든 캐시 정리로 충분
+  };
+
   const logoutMutation = useMutation({
-    mutationFn: hardLogout,
+    mutationFn: performLogout,
     onSuccess: () => {
       toast({
         title: "로그아웃 완료",
@@ -169,7 +183,7 @@ export function Header() {
         description: "다시 시도해주세요.",
         variant: "destructive",
       });
-      console.error('Hard logout failed:', error);
+      console.error('Logout failed:', error);
     },
   });
 
