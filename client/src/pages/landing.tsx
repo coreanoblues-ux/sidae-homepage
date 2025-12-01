@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 // Images are now in public/images folder
+import leadOneLogoImage from "@assets/image_1764582588281.png";
 
 const contactFormSchema = z.object({
   name: z.string().min(1, "이름을 입력해주세요"),
@@ -176,9 +177,28 @@ export default function Landing() {
                   입시영어 전문
                 </span>
               </h1>
-              <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
+              <p className="text-xl lg:text-2xl text-gray-200 mb-6 leading-relaxed">
                 '(전) 영단기 현강 대표강사, (전) 해커스 인강' 의 정우석 원장과 함께 하는 시대영재학원
               </p>
+              
+              {/* With 리드원 글로벌 의약대 파트너십 */}
+              <div className="flex items-center gap-3 mb-8">
+                <span className="text-lg font-medium text-gray-300">With</span>
+                <a 
+                  href="https://globaldoctor.kr/webUser/content.do?positionSettingIdx=position_setting_24020800002&clientMenuIdx=client_menu_24020800015&clientMenuOrderRank=2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-white rounded-lg px-4 py-2 hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl"
+                  data-testid="link-leadone-partner"
+                >
+                  <img 
+                    src={leadOneLogoImage} 
+                    alt="리드원 글로벌 의약대" 
+                    className="h-10 w-auto object-contain"
+                  />
+                </a>
+              </div>
+              
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg" 
