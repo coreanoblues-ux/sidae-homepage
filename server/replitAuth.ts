@@ -80,6 +80,16 @@ async function upsertUser(
   });
 }
 
+// 🎯 세션 + passport만 설정 (Replit OIDC 없이) - Railway 배포용
+export function setupSessionOnly(app: Express) {
+  app.set("trust proxy", 1);
+  app.use(getSession());
+  app.use(passport.initialize());
+  app.use(passport.session());
+  passport.serializeUser((user: Express.User, cb) => cb(null, user));
+  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+}
+
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());

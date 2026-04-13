@@ -3,7 +3,7 @@ import express from "express";
 import path from "path";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, setupSessionOnly, isAuthenticated } from "./replitAuth";
 import { insertCourseSchema, insertVideoSchema, insertNoticeSchema, insertGalleryImageSchema, insertProgramSchema } from "@shared/schema";
 import { z } from "zod";
 import sanitizeHtml from "sanitize-html";
@@ -13,8 +13,8 @@ import proxyVideoRouter from "./routes/proxy.video";
 import debugRouter from "./routes/debug";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  // await setupAuth(app);
+  // Auth middleware - 세션만 설정 (Replit OIDC 제외)
+  setupSessionOnly(app);
 
   // 🎯 /uploads 정적 서빙을 런타임 기준으로 고정 (가이드 적용)
   const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads');
