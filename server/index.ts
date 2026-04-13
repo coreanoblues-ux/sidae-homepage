@@ -17,7 +17,7 @@ const app = express();
 app.set('trust proxy', 1); // 프록시 신뢰 설정
 
 // 🎯 캐닉컬 도메인 리다이렉션 (배포 환경)
-const CANONICAL = 'sidae-edu.com';
+const CANONICAL = 'www.sidae-edu.com';
 app.get('/health', (_req, res) => res.send('ok'));
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
@@ -30,9 +30,9 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// 환경변수 정합 
-const frontOrigin = process.env.FRONT_ORIGIN || 'https://sidae-edu.com';
-const apiOrigin = process.env.API_ORIGIN || 'https://sidae-edu.com';
+// 환경변수 정합
+const frontOrigin = process.env.FRONT_ORIGIN || 'https://www.sidae-edu.com';
+const apiOrigin = process.env.API_ORIGIN || 'https://www.sidae-edu.com';
 
 // CORS/프록시 차이 제거 - 명시적 CORS 설정
 app.use(cors({ 
