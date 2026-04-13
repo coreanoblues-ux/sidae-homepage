@@ -14,7 +14,7 @@ import debugRouter from "./routes/debug";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
+  // await setupAuth(app);
 
   // 🎯 /uploads 정적 서빙을 런타임 기준으로 고정 (가이드 적용)
   const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads');
