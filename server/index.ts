@@ -18,6 +18,7 @@ app.set('trust proxy', 1); // 프록시 신뢰 설정
 
 // 🎯 캐닉컬 도메인 리다이렉션 (배포 환경)
 const CANONICAL = 'sidae-edu.com';
+app.get('/health', (_req, res) => res.send('ok'));
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     const host = req.headers.host || '';
