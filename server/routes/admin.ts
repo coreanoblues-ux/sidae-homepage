@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { storage } from '../storage';
-import { insertSimpleVideoSchema } from './shared/schema';
+import { insertSimpleVideoSchema } from '../shared/schema';
 import { z } from 'zod';
 import { normalizeVideo, VIDEO_ERROR_MESSAGES } from '../utils/videos';
 import { cookieOpts } from '../auth/cookie';
