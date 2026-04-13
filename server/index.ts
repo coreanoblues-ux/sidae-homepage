@@ -7,6 +7,8 @@ import jwt from "jsonwebtoken";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedProgramsIfEmpty } from "./seedData";
+import { getSession } from "./replitAuth";
+import passport from "passport";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,6 +63,13 @@ app.use((_, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// 🎯 세션 & Passport 미들웨어 (라우트 등록 전에 반드시 위치)
+app.use(getSession());
+app.use(passport.initialize());
+app.use(passport.session());
+passport.serializeUser((user: any, cb) => cb(null, user));
+passport.deserializeUser((user: any, cb) => cb(null, user));
 
 app.use((req, res, next) => {
   const start = Date.now();
