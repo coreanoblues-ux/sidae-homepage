@@ -115,7 +115,7 @@ export async function hardLogout(navigate = (p: string) => location.assign(p)) {
 // 🎯 학생 전용 하드 로그아웃 (완전 정리)
 export async function hardStudentLogout(navigate = (p: string) => location.assign(p)) {
   try {
-    await fetch('/api/auth/student-logout', { method: 'POST', credentials: 'include' });
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
   } catch {}
   
   // 로컬 스토리지 완전 정리
