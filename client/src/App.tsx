@@ -1,5 +1,5 @@
 import { Switch, Route, useLocation, Router as WouterRouter } from "wouter";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,29 +7,40 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/shared/Layout";
 import { useAuth } from "@/hooks/useAuth";
 
-// Pages
+// 🎯 즉시 로딩 (첫 화면에 필요한 페이지만)
 import Landing from "@/pages/landing";
-import Home from "@/pages/home";
-import About from "@/pages/about";
 import Login from "@/pages/login";
-import Courses from "@/pages/courses";
-import CourseDetail from "@/pages/course-detail";
-import Gallery from "@/pages/gallery";
-import Account from "@/pages/account";
-import Members from "@/pages/members";
-import Admin from "@/pages/admin";
-import AdminDashboard from "@/pages/admin/dashboard";
-import AdminMembers from "@/pages/admin/members";
-import AdminVideos from "@/pages/admin/videos";
-import AdminCourses from "@/pages/admin/courses";
-import AdminNotices from "@/pages/admin/notices";
-import SuperAdmin from "@/pages/superadmin";
-import SimpleAdmin from "@/pages/simple-admin";
-import NewAdminDashboard from "@/pages/AdminDashboard";
-import AdminLoginPage from "@/pages/AdminLoginPage";
-import Videos from "@/pages/Videos";
-import ProgramPage from "@/pages/program";
 import NotFound from "@/pages/not-found";
+
+// 🚀 코드 스플리팅 - 필요할 때만 로딩
+const Home = lazy(() => import("@/pages/home"));
+const About = lazy(() => import("@/pages/about"));
+const Courses = lazy(() => import("@/pages/courses"));
+const CourseDetail = lazy(() => import("@/pages/course-detail"));
+const Gallery = lazy(() => import("@/pages/gallery"));
+const Account = lazy(() => import("@/pages/account"));
+const Members = lazy(() => import("@/pages/members"));
+const Videos = lazy(() => import("@/pages/Videos"));
+const ProgramPage = lazy(() => import("@/pages/program"));
+
+// 🔒 관리자 페이지 - 별도 청크로 분리
+const Admin = lazy(() => import("@/pages/admin"));
+const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
+const AdminMembers = lazy(() => import("@/pages/admin/members"));
+const AdminVideos = lazy(() => import("@/pages/admin/videos"));
+const AdminCourses = lazy(() => import("@/pages/admin/courses"));
+const AdminNotices = lazy(() => import("@/pages/admin/notices"));
+const SuperAdmin = lazy(() => import("@/pages/superadmin"));
+const SimpleAdmin = lazy(() => import("@/pages/simple-admin"));
+const NewAdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
+const AdminLoginPage = lazy(() => import("@/pages/AdminLoginPage"));
+
+// 로딩 스피너
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
 
 // Redirect component for route aliases
 function Redirect({ to }: { to: string }) {
@@ -90,6 +101,7 @@ function ProtectedRoute({ children, requireAuth = true, allowedRoles }: {
 
 function Router() {
   return (
+    <Suspense fallback={<PageLoader />}>
     <Switch>
       {/* Public Routes - 모든 사용자가 접근 가능 */}
       <Route path="/" component={Landing} />
@@ -180,6 +192,7 @@ function Router() {
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
+    </Suspense>
   );
 }
 
