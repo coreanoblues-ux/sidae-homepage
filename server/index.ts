@@ -117,8 +117,9 @@ const isAdmin = (req: any) => {
 const UPLOAD_DIR = path.resolve(process.cwd(), "uploads");
 app.use("/uploads", express.static(UPLOAD_DIR, {
   fallthrough: false,
-  setHeaders(res) { 
-    res.setHeader("Cache-Control", "public, max-age=3600"); 
+  setHeaders(res) {
+    // 이미지 1년 캐시 (immutable: 파일명에 타임스탬프 포함)
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
   }
 }));
 

@@ -421,6 +421,9 @@ export default function Landing() {
                     src="/images/team-photo.PNG"
                     alt="시대영재 학원 강사진"
                     className="rounded-xl shadow-2xl object-cover w-full h-[400px] transform hover:scale-105 transition-transform duration-300"
+                    width="600"
+                    height="400"
+                    fetchPriority="high"
                   />
                   <div className="absolute -bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-lg">
                     <p className="text-sm font-semibold text-gray-900">시대영재 학원 전문 강사진</p>
@@ -435,6 +438,9 @@ export default function Landing() {
                       src="/images/magazine-cover.PNG"
                       alt="1타강사 인증"
                       className="rounded-lg shadow-lg object-cover w-full max-w-xs mx-auto"
+                      width="320"
+                      height="400"
+                      loading="lazy"
                     />
                     <div className="text-center mt-4">
                       <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
