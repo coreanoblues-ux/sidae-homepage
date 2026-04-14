@@ -198,35 +198,35 @@ function Router() {
 
 function AppContent() {
   const [location] = useLocation();
-  
+
   // 독립적인 관리자 페이지들 - Layout 없이 렌더링
   if (location === '/_superadmin') {
     return (
-      <>
+      <Suspense fallback={<PageLoader />}>
         <Toaster />
         <AdminLoginPage />
-      </>
+      </Suspense>
     );
   }
-  
+
   if (location === '/admin-dashboard') {
     return (
-      <>
+      <Suspense fallback={<PageLoader />}>
         <Toaster />
         <NewAdminDashboard />
-      </>
+      </Suspense>
     );
   }
-  
+
   if (location === '/simple-admin') {
     return (
-      <>
+      <Suspense fallback={<PageLoader />}>
         <Toaster />
         <SimpleAdmin />
-      </>
+      </Suspense>
     );
   }
-  
+
   // 나머지 페이지는 기존대로 Layout 사용
   return (
     <Layout>
