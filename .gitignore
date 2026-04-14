@@ -1,6 +1,47 @@
+# Dependencies
 node_modules
+package-lock.json
+
+# Build output
 dist
 .DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Replit specific
+.replit
+.local
+.agents
+
+# Test & temporary files
+*.log
+*.txt
+test-cookies.txt
+cookies.txt
+fresh_cookies.txt
+cookies_after_logout.txt
+deployment-test.txt
+final-test.txt
+
+# Build artifacts
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Uploads (보통 실제 업로드는 서버가 관리)
+# 필요시 attached_assets도 제외하려면 아래 주석 해제
+# attached_assets
