@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import express from "express";
 import path from "path";
+import { fileURLToPath } from "url";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, setupSessionOnly, isAuthenticated } from "./replitAuth";
@@ -12,13 +13,16 @@ import adminRouter from "./routes/admin";
 import proxyVideoRouter from "./routes/proxy.video";
 import debugRouter from "./routes/debug";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware - 세션만 설정 (Replit OIDC 제외)
   setupSessionOnly(app);
 
   // 🎯 /uploads 정적 서빙을 런타임 기준으로 고정 (가이드 적용)
   const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads');
-  const IMAGES_DIR = path.join(import.meta.dirname, '..', 'public', 'images');
+  const IMAGES_DIR = path.join(__dirname, '..', 'public', 'images');
   
   app.use('/uploads', express.static(UPLOAD_DIR, {
     fallthrough: false,
