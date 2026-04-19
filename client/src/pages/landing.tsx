@@ -15,28 +15,24 @@ const heroSlides = [
     badge: null, // slide 0 uses special click badge
     headlineTop: "중고등부",
     headlineHighlight: "입시영어 전문",
-    gradientText: "from-orange-400 via-orange-300 to-yellow-200",
     sub: "'(전) 영단기 현강 대표강사, (전) 해커스 인강' 의 정우석 원장과 함께 하는 시대영재학원",
   },
   {
     badge: "TOEIC 990점 만점 · 캐나다 명문 Bishop's University 졸업 원장 직강",
     headlineTop: "검증된 실력으로",
     headlineHighlight: "직접 가르칩니다",
-    gradientText: "from-orange-400 via-orange-300 to-yellow-300",
     sub: "(전)강남영단기 현강 1타강사 · (전)해커스 인강 50만뷰+ 인기강사의 노하우를 그대로 전달합니다",
   },
   {
     badge: "실제 합격생 후기 기반",
     headlineTop: "수능 영어 1등급,",
     headlineHighlight: "이제 우리 아이 차례",
-    gradientText: "from-yellow-300 via-orange-400 to-orange-300",
     sub: "내신 · 수능 완벽 대응 커리큘럼",
   },
   {
     badge: "검증된 강의력 · 독보적 커리큘럼",
     headlineTop: "일반고 최상위권의 선택,",
     headlineHighlight: "영재고·상산고가 다시 찾는",
-    gradientText: "from-orange-300 via-orange-400 to-yellow-300",
     sub: "영재고·상산고 입학생이 다시 찾는 독보적 강의, 검증된 실력이 만드는 차이를 경험하세요",
   },
 ];
@@ -156,33 +152,20 @@ export default function Landing() {
       </Dialog>
 
       {/* ═══════════════════════════════════════════
-          HERO SECTION — 풀스크린 슬라이드쇼
+          HERO SECTION — Minimal Bright 슬라이드쇼
       ═══════════════════════════════════════════ */}
       <section
         className="relative min-h-screen flex items-center overflow-hidden"
+        style={{ background: 'linear-gradient(160deg, #ffffff 0%, #fff8f4 55%, #ffffff 100%)' }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Rich warm dark background */}
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(135deg, #1a0c05 0%, #2a1508 30%, #1f100a 60%, #250e05 100%)' }}
-        />
-
-        {/* Ambient glow effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-orange-700/10 rounded-full blur-3xl" />
-          <div className="absolute top-3/4 left-1/2 w-[300px] h-[300px] bg-orange-500/5 rounded-full blur-2xl" />
+        {/* Subtle decorative blobs — very light, Apple-style */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-[700px] h-[700px] bg-orange-50 rounded-full opacity-70" />
+          <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-orange-50 rounded-full opacity-50" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-50/40 rounded-full" />
         </div>
-
-        {/* Subtle texture overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage: 'repeating-linear-gradient(45deg, #f97316 0px, #f97316 1px, transparent 1px, transparent 60px)',
-          }}
-        />
 
         {/* Slide content */}
         <div className="container mx-auto px-4 py-24 lg:py-32 relative z-10">
@@ -190,15 +173,15 @@ export default function Landing() {
 
             {/* Animated slide text — key forces re-mount → fade-in replays */}
             <div key={currentSlide} className="fade-in">
-              {/* Badge */}
-              <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-orange-500/15 border border-orange-400/25 text-orange-300 text-sm mb-8 backdrop-blur-sm">
-                <Star className="w-3.5 h-3.5 mr-2 fill-orange-400 text-orange-400 flex-shrink-0" />
+              {/* Badge — clean pill on light bg */}
+              <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-[#FF6B00] text-sm font-medium mb-8">
+                <Star className="w-3.5 h-3.5 mr-2 fill-[#FF6B00] text-[#FF6B00] flex-shrink-0" />
                 {currentSlide === 0 ? (
                   <span>
                     만점 강사의 검증된 커리
                     <span
                       onClick={handleSpecialClick}
-                      className="cursor-pointer hover:bg-orange-500/20 px-0.5 rounded transition-colors"
+                      className="cursor-pointer hover:bg-orange-100 px-0.5 rounded transition-colors"
                     >
                       큘
                     </span>
@@ -209,26 +192,26 @@ export default function Landing() {
                 )}
               </div>
 
-              {/* Main headline */}
-              <h1 className="text-5xl lg:text-7xl font-black text-white mb-6 leading-tight tracking-tight">
+              {/* Main headline — DARK text, orange gradient highlight */}
+              <h1 className="text-5xl lg:text-7xl font-black text-gray-900 mb-6 leading-tight tracking-tight">
                 {heroSlides[currentSlide].headlineTop}
                 <br />
-                <span className={`text-transparent bg-clip-text bg-gradient-to-r ${heroSlides[currentSlide].gradientText}`}>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">
                   {heroSlides[currentSlide].headlineHighlight}
                 </span>
               </h1>
 
-              {/* Subtitle */}
-              <p className="text-lg lg:text-xl text-orange-100/70 mb-2 max-w-2xl mx-auto leading-relaxed">
+              {/* Subtitle — soft gray */}
+              <p className="text-lg lg:text-xl text-gray-500 mb-2 max-w-2xl mx-auto leading-relaxed">
                 {heroSlides[currentSlide].sub}
               </p>
             </div>
 
-            {/* ── CTA Buttons (항상 고정) ── */}
+            {/* ── CTA Buttons ── */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10 mb-12">
               <Button
                 size="lg"
-                className="px-8 py-4 bg-orange-500 hover:bg-orange-400 text-white font-bold text-lg shadow-lg shadow-orange-900/30 transition-all hover:scale-105 border-0"
+                className="px-8 py-4 bg-[#FF6B00] hover:bg-orange-600 text-white font-bold text-lg shadow-lg shadow-orange-200 transition-all hover:scale-105 border-0"
                 onClick={onClickCTA}
                 data-testid="button-cta-online-lecture"
               >
@@ -238,7 +221,7 @@ export default function Landing() {
               <Button
                 size="lg"
                 variant="outline"
-                className="px-8 py-4 border-2 border-orange-400/40 text-orange-300 hover:bg-orange-500/15 hover:border-orange-400/70 font-semibold text-lg transition-all"
+                className="px-8 py-4 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 font-semibold text-lg transition-all"
                 asChild
               >
                 <a href="tel:062-462-0990">
@@ -249,19 +232,34 @@ export default function Landing() {
             </div>
 
             {/* ── Stats row ── */}
-            <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto mb-10 py-6 border-y border-orange-400/20">
+            <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto mb-10 py-6 border-y border-gray-200">
               <div className="text-center">
-                <p className="text-2xl lg:text-3xl font-black text-orange-400">990점</p>
-                <p className="text-xs text-orange-200/55 mt-1 tracking-wide uppercase">TOEIC 만점</p>
+                <p className="text-2xl lg:text-3xl font-black text-[#FF6B00]">990점</p>
+                <p className="text-xs text-gray-400 mt-1 tracking-wide uppercase">TOEIC 만점</p>
               </div>
-              <div className="text-center border-x border-orange-400/20">
-                <p className="text-2xl lg:text-3xl font-black text-orange-400">50만+</p>
-                <p className="text-xs text-orange-200/55 mt-1 tracking-wide uppercase">(전)해커스인강</p>
+              <div className="text-center border-x border-gray-200">
+                <p className="text-2xl lg:text-3xl font-black text-[#FF6B00]">50만+</p>
+                <p className="text-xs text-gray-400 mt-1 tracking-wide uppercase">(전)해커스인강</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl lg:text-3xl font-black text-orange-400">1타</p>
-                <p className="text-xs text-orange-200/55 mt-1 tracking-wide uppercase">(전)강남영단기</p>
+                <p className="text-2xl lg:text-3xl font-black text-[#FF6B00]">1타</p>
+                <p className="text-xs text-gray-400 mt-1 tracking-wide uppercase">(전)강남영단기</p>
               </div>
+            </div>
+
+            {/* ── 레벨테스트 / 입학대기 신청 CTA ── */}
+            <div className="mb-10">
+              <a
+                href="https://forms.gle/GOOGLE_FORM_URL_HERE"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-[#FF6B00] hover:bg-orange-600 text-white text-xl font-black rounded-2xl shadow-xl shadow-orange-200 transition-all hover:scale-105 hover:shadow-orange-300"
+                data-testid="button-level-test-apply"
+              >
+                <NotebookPen className="w-6 h-6 flex-shrink-0" />
+                레벨테스트 / 입학대기 신청
+              </a>
+              <p className="text-sm text-gray-400 mt-3">온라인으로 간편하게 신청 · 영업일 1일 이내 연락</p>
             </div>
 
             {/* ── Slide indicator dots ── */}
@@ -272,8 +270,8 @@ export default function Landing() {
                   onClick={() => setCurrentSlide(i)}
                   className={`rounded-full transition-all duration-500 ${
                     i === currentSlide
-                      ? 'w-8 h-2.5 bg-orange-400'
-                      : 'w-2.5 h-2.5 bg-orange-500/30 hover:bg-orange-500/60'
+                      ? 'w-8 h-2.5 bg-[#FF6B00]'
+                      : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
                   }`}
                   aria-label={`슬라이드 ${i + 1}`}
                 />
@@ -282,17 +280,17 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* ── Prev / Next arrows ── */}
+        {/* ── Prev / Next arrows — clean on light bg ── */}
         <button
           onClick={() => setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length)}
-          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-orange-500/15 border border-orange-400/25 text-orange-300 hover:bg-orange-500/25 flex items-center justify-center transition-all backdrop-blur-sm"
+          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-orange-50 hover:border-orange-200 hover:text-[#FF6B00] flex items-center justify-center transition-all shadow-sm"
           aria-label="이전 슬라이드"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={() => setCurrentSlide(prev => (prev + 1) % heroSlides.length)}
-          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-orange-500/15 border border-orange-400/25 text-orange-300 hover:bg-orange-500/25 flex items-center justify-center transition-all backdrop-blur-sm"
+          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-orange-50 hover:border-orange-200 hover:text-[#FF6B00] flex items-center justify-center transition-all shadow-sm"
           aria-label="다음 슬라이드"
         >
           <ChevronRight className="w-5 h-5" />
@@ -440,10 +438,16 @@ export default function Landing() {
                 </div>
               </div>
 
-              <Button className="mt-8 font-bold" size="lg">
-                <Calendar className="mr-2 w-5 h-5" />
-                상담 예약하기
-              </Button>
+              <a
+                href="https://forms.gle/GOOGLE_FORM_URL_HERE"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center mt-8 px-7 py-3.5 bg-[#FF6B00] hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-200 transition-all hover:scale-105"
+                data-testid="button-about-apply"
+              >
+                <NotebookPen className="mr-2 w-5 h-5" />
+                레벨테스트 / 입학대기 신청
+              </a>
             </div>
 
             <div className="relative">
