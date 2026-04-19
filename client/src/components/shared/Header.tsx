@@ -277,9 +277,9 @@ export function Header() {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <img
-              src="/images/logo.png"
+              src="/images/logo-transparent.png"
               alt="시대영재 학원"
-              className="h-11 w-auto object-contain"
+              className="h-10 w-auto object-contain"
             />
           </Link>
 
