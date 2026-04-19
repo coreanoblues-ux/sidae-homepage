@@ -1,55 +1,55 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Pretendard:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: hsl(210, 40%, 98%);
-  --foreground: hsl(215, 25%, 15%);
+  --background: hsl(40, 25%, 97%);
+  --foreground: hsl(25, 32%, 12%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(215, 25%, 15%);
+  --card-foreground: hsl(25, 32%, 12%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(215, 25%, 15%);
-  --primary: hsl(217, 91%, 60%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(215, 30%, 18%);
-  --secondary-foreground: hsl(0, 0%, 100%);
-  --muted: hsl(215, 15%, 95%);
-  --muted-foreground: hsl(215, 15%, 40%);
-  --accent: hsl(217, 91%, 60%);
-  --accent-foreground: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(25, 32%, 12%);
+  --primary: hsl(38, 88%, 46%);
+  --primary-foreground: hsl(25, 70%, 8%);
+  --secondary: hsl(25, 35%, 14%);
+  --secondary-foreground: hsl(38, 25%, 92%);
+  --muted: hsl(38, 20%, 93%);
+  --muted-foreground: hsl(25, 15%, 46%);
+  --accent: hsl(38, 88%, 46%);
+  --accent-foreground: hsl(25, 70%, 8%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(215, 15%, 90%);
-  --input: hsl(215, 15%, 95%);
-  --ring: hsl(217, 91%, 60%);
-  --radius: 0.5rem;
-  --font-sans: 'Inter', 'Pretendard', system-ui, sans-serif;
+  --border: hsl(38, 18%, 87%);
+  --input: hsl(38, 18%, 93%);
+  --ring: hsl(38, 88%, 46%);
+  --radius: 0.625rem;
+  --font-sans: 'Noto Sans KR', 'Inter', system-ui, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
 }
 
 .dark {
-  --background: hsl(215, 30%, 7%);
-  --foreground: hsl(0, 0%, 95%);
-  --card: hsl(215, 30%, 10%);
-  --card-foreground: hsl(0, 0%, 95%);
-  --popover: hsl(215, 30%, 10%);
-  --popover-foreground: hsl(0, 0%, 95%);
-  --primary: hsl(217, 91%, 60%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(215, 30%, 15%);
-  --secondary-foreground: hsl(0, 0%, 100%);
-  --muted: hsl(215, 30%, 15%);
-  --muted-foreground: hsl(215, 20%, 65%);
-  --accent: hsl(217, 91%, 60%);
-  --accent-foreground: hsl(0, 0%, 100%);
+  --background: hsl(24, 22%, 8%);
+  --foreground: hsl(38, 22%, 92%);
+  --card: hsl(24, 22%, 11%);
+  --card-foreground: hsl(38, 22%, 92%);
+  --popover: hsl(24, 22%, 11%);
+  --popover-foreground: hsl(38, 22%, 92%);
+  --primary: hsl(38, 90%, 52%);
+  --primary-foreground: hsl(24, 50%, 8%);
+  --secondary: hsl(24, 22%, 16%);
+  --secondary-foreground: hsl(38, 22%, 88%);
+  --muted: hsl(24, 22%, 16%);
+  --muted-foreground: hsl(38, 15%, 60%);
+  --accent: hsl(38, 90%, 52%);
+  --accent-foreground: hsl(24, 50%, 8%);
   --destructive: hsl(0, 62%, 30%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(215, 30%, 18%);
-  --input: hsl(215, 30%, 18%);
-  --ring: hsl(217, 91%, 60%);
+  --border: hsl(24, 22%, 20%);
+  --input: hsl(24, 22%, 18%);
+  --ring: hsl(38, 90%, 52%);
 }
 
 @layer base {
@@ -64,24 +64,24 @@
 
 @layer components {
   .hero-gradient {
-    background: linear-gradient(135deg, hsl(215, 30%, 7%) 0%, hsl(217, 91%, 20%) 100%);
+    background: linear-gradient(135deg, hsl(24, 50%, 8%) 0%, hsl(32, 55%, 18%) 100%);
   }
-  
+
   .card-hover {
     transition: all 0.3s ease;
   }
-  
+
   .card-hover:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 20px 25px -5px rgba(180, 100, 0, 0.08), 0 10px 10px -5px rgba(180, 100, 0, 0.04);
   }
-  
+
   .fade-in {
     opacity: 0;
     transform: translateY(20px);
-    animation: fadeInUp 0.6s ease-out forwards;
+    animation: fadeInUp 0.7s ease-out forwards;
   }
-  
+
   .navbar-blur {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -95,7 +95,7 @@
   }
 }
 
-/* 3D Background Patterns */
+/* Background Patterns - warm amber tones */
 .pattern-bg {
   position: relative;
   overflow: hidden;
@@ -108,10 +108,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
-    radial-gradient(circle at 80% 50%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
-    linear-gradient(135deg, transparent 25%, rgba(59, 130, 246, 0.03) 25%, rgba(59, 130, 246, 0.03) 50%, transparent 50%, transparent 75%, rgba(99, 102, 241, 0.03) 75%);
+  background:
+    radial-gradient(circle at 20% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(249, 115, 22, 0.04) 0%, transparent 50%),
+    linear-gradient(135deg, transparent 25%, rgba(245, 158, 11, 0.02) 25%, rgba(245, 158, 11, 0.02) 50%, transparent 50%, transparent 75%, rgba(249, 115, 22, 0.02) 75%);
   background-size: 200px 200px, 150px 150px, 60px 60px;
   background-position: 0 0, 100px 100px, 0 0;
   animation: pattern-move 20s linear infinite;
@@ -131,15 +131,15 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.04) 0%, transparent 50%),
+  background:
+    radial-gradient(circle at 30% 40%, rgba(245, 158, 11, 0.04) 0%, transparent 50%),
     radial-gradient(circle at 70% 60%, rgba(251, 191, 36, 0.04) 0%, transparent 50%),
     repeating-linear-gradient(
       45deg,
       transparent,
       transparent 20px,
-      rgba(59, 130, 246, 0.02) 20px,
-      rgba(59, 130, 246, 0.02) 40px
+      rgba(245, 158, 11, 0.02) 20px,
+      rgba(245, 158, 11, 0.02) 40px
     );
   background-size: 180px 180px, 120px 120px, 80px 80px;
   background-position: 0 0, 50px 50px, 0 0;
@@ -149,24 +149,16 @@
 }
 
 @keyframes pattern-move {
-  0% {
-    background-position: 0 0, 100px 100px, 0 0;
-  }
-  100% {
-    background-position: 200px 200px, 300px 300px, 60px 60px;
-  }
+  0% { background-position: 0 0, 100px 100px, 0 0; }
+  100% { background-position: 200px 200px, 300px 300px, 60px 60px; }
 }
 
 @keyframes pattern-move-alt {
-  0% {
-    background-position: 0 0, 50px 50px, 0 0;
-  }
-  100% {
-    background-position: 180px 180px, 170px 170px, 80px 80px;
-  }
+  0% { background-position: 0 0, 50px 50px, 0 0; }
+  100% { background-position: 180px 180px, 170px 170px, 80px 80px; }
 }
 
-/* 3D Geometric Shapes - Simplified to avoid conflicts */
+/* Geometric shapes - warm amber tones */
 .geometric-bg {
   position: relative;
   overflow: hidden;
@@ -180,14 +172,13 @@
   right: 10%;
   width: 80px;
   height: 80px;
-  background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+  background: linear-gradient(45deg, rgba(245, 158, 11, 0.1), rgba(249, 115, 22, 0.1));
   border-radius: 20px;
   transform: rotate(15deg) perspective(500px) rotateX(15deg);
   animation: geometric-float 8s ease-in-out infinite;
   z-index: 1;
 }
 
-/* Additional geometric shapes for sections that need multiple shapes */
 .geometric-shapes {
   position: relative;
   overflow: hidden;
@@ -201,7 +192,7 @@
   left: 15%;
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(251, 191, 36, 0.08));
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(251, 191, 36, 0.08));
   border-radius: 50%;
   transform: perspective(500px) rotateY(25deg);
   animation: geometric-float 10s ease-in-out infinite reverse;
@@ -215,7 +206,7 @@
   right: 20%;
   width: 40px;
   height: 40px;
-  background: linear-gradient(225deg, rgba(236, 72, 153, 0.06), rgba(168, 85, 247, 0.06));
+  background: linear-gradient(225deg, rgba(249, 115, 22, 0.06), rgba(245, 158, 11, 0.06));
   border-radius: 8px;
   transform: rotate(45deg) perspective(300px) rotateZ(25deg);
   animation: geometric-float 12s ease-in-out infinite;
@@ -231,7 +222,7 @@
   }
 }
 
-/* 3D floating animations for elements - fixed to preserve transforms */
+/* Float animations */
 .float-slow {
   animation: float-slow 8s ease-in-out infinite;
 }
@@ -253,46 +244,26 @@
 }
 
 @keyframes float-slow {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
 @keyframes float-fast {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
 
 @keyframes float-rotate-2 {
-  0%, 100% {
-    transform: translateY(0px) rotate(2deg);
-  }
-  50% {
-    transform: translateY(-8px) rotate(4deg);
-  }
+  0%, 100% { transform: translateY(0px) rotate(2deg); }
+  50% { transform: translateY(-8px) rotate(4deg); }
 }
 
 @keyframes float-rotate-neg1 {
-  0%, 100% {
-    transform: translateY(0px) rotate(-1deg);
-  }
-  50% {
-    transform: translateY(-6px) rotate(-3deg);
-  }
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50% { transform: translateY(-6px) rotate(-3deg); }
 }
 
 @keyframes float-rotate-1 {
-  0%, 100% {
-    transform: translateY(0px) rotate(1deg);
-  }
-  50% {
-    transform: translateY(-7px) rotate(3deg);
-  }
+  0%, 100% { transform: translateY(0px) rotate(1deg); }
+  50% { transform: translateY(-7px) rotate(3deg); }
 }
