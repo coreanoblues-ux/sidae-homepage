@@ -160,12 +160,6 @@ export default function Landing() {
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Subtle decorative blobs — very light, Apple-style */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-[700px] h-[700px] bg-orange-50 rounded-full opacity-70" />
-          <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-orange-50 rounded-full opacity-50" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-50/40 rounded-full" />
-        </div>
 
         {/* Slide content */}
         <div className="container mx-auto px-4 py-24 lg:py-32 relative z-10">
