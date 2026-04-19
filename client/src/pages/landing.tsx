@@ -457,8 +457,9 @@ export default function Landing() {
                     fetchPriority="high"
                   />
                   <div className="absolute -bottom-4 left-4 bg-white/95 dark:bg-card/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-border/40">
-                    <p className="text-sm font-bold text-foreground">시대영재 학원 전문 강사진</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">검증된 실력과 경험을 바탕으로 최고의 교육을 제공합니다</p>
+                    <p className="text-sm font-bold text-foreground">검증된 강사진과 고등부 내신을 위한 학교별 데이터 전략 분석 센터</p>
+                    <p className="text-xs text-muted-foreground mt-1">캐나다 Bishop's University 졸업, TOEIC990 만점, (전)해커스, (전)강남영단기 1타 &nbsp;원장 정우석</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">서울대 사학과 졸업, 멘사 만점회원 &nbsp;팀장 이홍석</p>
                   </div>
                 </div>
 
