@@ -681,13 +681,14 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="lg:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
-                <img
-                  src="/images/logo.png"
-                  alt="시대영재 학원 로고"
-                  className="h-10 w-auto object-contain brightness-0 invert"
-                />
+                <div className="w-10 h-10 bg-[#FF6B00] rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-black text-base">시</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-black">시대영재 학원</h3>
+                  <p className="text-sm text-secondary-foreground/70">광주광역시 남구 봉선중앙로16, 2층</p>
+                </div>
               </div>
-              <p className="text-sm text-secondary-foreground/70 mb-2">광주광역시 남구 봉선중앙로16, 2층</p>
               <p className="text-secondary-foreground/75 mb-4 leading-relaxed">
                 실력 있는 강사가 실력 있는 학생을 만든다는 믿음, 시대영재의 시작입니다.
               </p>
