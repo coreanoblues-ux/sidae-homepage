@@ -156,7 +156,7 @@ export default function Landing() {
       ═══════════════════════════════════════════ */}
       <section
         className="relative min-h-screen flex items-center overflow-hidden"
-        style={{ background: 'linear-gradient(160deg, #ffffff 0%, #fff8f4 55%, #ffffff 100%)' }}
+        style={{ background: 'linear-gradient(160deg, #F0F0F2 0%, #EBEBED 50%, #F0F0F2 100%)' }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
