@@ -681,17 +681,15 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="lg:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-                  <Presentation className="text-primary-foreground w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black">시대영재 학원</h3>
-                  <p className="text-sm text-secondary-foreground/70">광주광역시 남구 봉선중앙로16, 2층</p>
-                </div>
+                <img
+                  src="/images/logo.png"
+                  alt="시대영재 학원 로고"
+                  className="h-10 w-auto object-contain brightness-0 invert"
+                />
               </div>
+              <p className="text-sm text-secondary-foreground/70 mb-2">광주광역시 남구 봉선중앙로16, 2층</p>
               <p className="text-secondary-foreground/75 mb-4 leading-relaxed">
-                (전)강남영단기 1타강사, (전) 해커스 50만뷰+ 인기강사, TOEIC 990점
-                캐나다국적 원장과 함께하는 중고등부 입시영어 전문교육
+                실력 있는 강사가 실력 있는 학생을 만든다는 믿음, 시대영재의 시작입니다.
               </p>
             </div>
 

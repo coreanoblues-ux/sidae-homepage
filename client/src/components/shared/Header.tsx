@@ -275,14 +275,12 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-background/80 navbar-blur border-b border-border">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <GraduationCap className="text-primary-foreground text-lg" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">시대영재 학원</h1>
-              <p className="text-xs text-muted-foreground">중고등부 입시영어 전문</p>
-            </div>
+          <Link href="/" className="flex items-center">
+            <img
+              src="/images/logo.png"
+              alt="시대영재 학원"
+              className="h-10 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Navigation */}
