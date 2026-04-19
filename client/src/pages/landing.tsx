@@ -250,7 +250,7 @@ export default function Landing() {
             {/* ── 레벨테스트 / 입학대기 신청 CTA ── */}
             <div className="mb-10">
               <a
-                href="https://forms.gle/GOOGLE_FORM_URL_HERE"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSd_c2YdUxewRPDwW3I6FAnngfEVysh5oYu8CwctR14ne5RnBg/viewform"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-[#FF6B00] hover:bg-orange-600 text-white text-xl font-black rounded-2xl shadow-xl shadow-orange-200 transition-all hover:scale-105 hover:shadow-orange-300"
@@ -439,7 +439,7 @@ export default function Landing() {
               </div>
 
               <a
-                href="https://forms.gle/GOOGLE_FORM_URL_HERE"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSd_c2YdUxewRPDwW3I6FAnngfEVysh5oYu8CwctR14ne5RnBg/viewform"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center mt-8 px-7 py-3.5 bg-[#FF6B00] hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-200 transition-all hover:scale-105"
