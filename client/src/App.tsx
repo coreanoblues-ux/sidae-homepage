@@ -22,6 +22,7 @@ const Account = lazy(() => import("@/pages/account"));
 const Members = lazy(() => import("@/pages/members"));
 const Videos = lazy(() => import("@/pages/Videos"));
 const ProgramPage = lazy(() => import("@/pages/program"));
+const LocationPage = lazy(() => import("@/pages/location"));
 
 // 🔒 관리자 페이지 - 별도 청크로 분리
 const Admin = lazy(() => import("@/pages/admin"));
@@ -114,6 +115,9 @@ function Router() {
       </Route>
       <Route path="/gallery" component={Gallery} />
       <Route path="/program/:slug" component={ProgramPage} />
+
+      {/* 네이버 지역 SEO — 봉선동 영어학원 오시는 길 랜딩 */}
+      <Route path="/location" component={LocationPage} />
       
       {/* Curriculum routes - redirect to program pages */}
       <Route path="/curriculum/middle">
