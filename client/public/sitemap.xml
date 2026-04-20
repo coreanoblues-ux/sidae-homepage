@@ -53,4 +53,8 @@
   <url>
     <loc>https://www.sidae-edu.com/blog</loc>
     <lastmod>2026-04-20</lastmod>
-    <changefreq>weekly</change
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>
