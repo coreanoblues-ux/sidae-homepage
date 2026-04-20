@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSEO } from "@/hooks/useSEO";
 import { Link, useLocation } from "wouter";
 import { Star, Trophy, University, Presentation, Video, Phone, Calendar, Medal, Laptop, ChartLine, MapPin, Mail, NotebookPen, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,13 @@ const heroSlides = [
 ];
 
 export default function Landing() {
+  // SEO 메타태그 — 홈
+  useSEO({
+    title: "봉선동 영어학원 | 시대영재학원 — 내신·수능 영어 전문",
+    description: "봉선동 영어학원 시대영재학원. 강남영단기 1타·해커스 인기강사 출신 원장 직강. 광주 남구 봉선동 중고등 내신·수능 영어 전문.",
+    ogUrl: "https://www.sidae-edu.com/",
+  });
+
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [password, setPassword] = useState("");
   const { user, isAuthenticated, isLoading } = useAuth();

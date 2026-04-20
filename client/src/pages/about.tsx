@@ -2,8 +2,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { University, Trophy, Presentation, Calendar, Star, Award, Globe, Users } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 
 export default function About() {
+  // SEO 메타태그 — 학원 소개
+  useSEO({
+    title: "봉선동 영어학원 시대영재학원 — 강사진 소개",
+    description: "봉선동 영어학원 시대영재학원 강사 소개. 강남영단기 1타강사·해커스 50만뷰 인기강사 출신 원장이 직접 지도하는 광주 남구 영어학원.",
+    ogUrl: "https://www.sidae-edu.com/about",
+  });
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}

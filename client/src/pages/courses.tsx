@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Lock, Play, Clock, BookOpen, Users, Calendar } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 
 interface Course {
   id: string;
@@ -18,6 +19,13 @@ interface Course {
 }
 
 export default function Courses() {
+  // SEO 메타태그 — 수강 과정
+  useSEO({
+    title: "봉선동 영어학원 시대영재학원 — 수강 과정 안내",
+    description: "봉선동 영어학원 시대영재학원 수강 과정. 중등 내신·고등 수능·서술형 완벽 대비 커리큘럼. 광주 남구 봉선동 영어 전문.",
+    ogUrl: "https://www.sidae-edu.com/courses",
+  });
+
   const { user, isAuthenticated } = useAuth();
 
   const { data: courses = [], isLoading } = useQuery<Course[]>({

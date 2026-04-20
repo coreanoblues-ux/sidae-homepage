@@ -2,8 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Gallery } from "@/components/shared/Gallery";
 import { Card, CardContent } from "@/components/ui/card";
 import { Camera, Image, Users, Building } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 
 export default function GalleryPage() {
+  // SEO 메타태그 — 갤러리/후기
+  useSEO({
+    title: "봉선동 영어학원 후기 — 시대영재학원",
+    description: "봉선동 영어학원 시대영재학원 수강 후기 및 갤러리. 실제 학생들의 성적 향상 사례와 학원 생활을 확인하세요.",
+    ogUrl: "https://www.sidae-edu.com/gallery",
+  });
   // 데이터베이스에서 갤러리 이미지 불러오기 (visible=true인 것만)
   const { data: galleryImages = [], isLoading, error } = useQuery({
     queryKey: ['/api/gallery'],
