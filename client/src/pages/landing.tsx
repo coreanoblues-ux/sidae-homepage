@@ -175,38 +175,41 @@ export default function Landing() {
 
             {/* Animated slide text — key forces re-mount → fade-in replays */}
             <div key={currentSlide} className="fade-in">
-              {/* Badge — clean pill on light bg */}
-              <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-[#FF6B00] text-sm font-medium mb-8">
-                <Star className="w-3.5 h-3.5 mr-2 fill-[#FF6B00] text-[#FF6B00] flex-shrink-0" />
-                {currentSlide === 0 ? (
-                  <span>
-                    만점 강사의 검증된 커리
-                    <span
-                      onClick={handleSpecialClick}
-                      className="cursor-pointer hover:bg-orange-100 px-0.5 rounded transition-colors"
-                    >
-                      큘
+
+              {currentSlide === 0 ? (
+                /* ── 슬라이드 0: 커스텀 GIF 이미지 ── */
+                <div className="flex justify-center items-center">
+                  <img
+                    src="/images/hero_page.gif"
+                    alt="시대영재학원 히어로 슬라이드"
+                    className="max-w-full w-full rounded-2xl shadow-lg"
+                    style={{ maxHeight: '70vh', objectFit: 'contain' }}
+                    onClick={handleSpecialClick}
+                  />
+                </div>
+              ) : (
+                <>
+                  {/* Badge — clean pill on light bg */}
+                  <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-[#FF6B00] text-sm font-medium mb-8">
+                    <Star className="w-3.5 h-3.5 mr-2 fill-[#FF6B00] text-[#FF6B00] flex-shrink-0" />
+                    <span>{heroSlides[currentSlide].badge}</span>
+                  </div>
+
+                  {/* Main headline — DARK text, orange gradient highlight */}
+                  <h1 className="text-5xl lg:text-7xl font-black text-gray-900 mb-6 leading-tight tracking-tight">
+                    {heroSlides[currentSlide].headlineTop}
+                    <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">
+                      {heroSlides[currentSlide].headlineHighlight}
                     </span>
-                    럼
-                  </span>
-                ) : (
-                  <span>{heroSlides[currentSlide].badge}</span>
-                )}
-              </div>
+                  </h1>
 
-              {/* Main headline — DARK text, orange gradient highlight */}
-              <h1 className="text-5xl lg:text-7xl font-black text-gray-900 mb-6 leading-tight tracking-tight">
-                {heroSlides[currentSlide].headlineTop}
-                <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">
-                  {heroSlides[currentSlide].headlineHighlight}
-                </span>
-              </h1>
-
-              {/* Subtitle — soft gray */}
-              <p className="text-lg lg:text-xl text-gray-500 mb-2 max-w-2xl mx-auto leading-relaxed">
-                {heroSlides[currentSlide].sub}
-              </p>
+                  {/* Subtitle — soft gray */}
+                  <p className="text-lg lg:text-xl text-gray-500 mb-2 max-w-2xl mx-auto leading-relaxed">
+                    {heroSlides[currentSlide].sub}
+                  </p>
+                </>
+              )}
             </div>
 
             {/* ── CTA Buttons ── */}
