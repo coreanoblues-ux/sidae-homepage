@@ -161,15 +161,14 @@ export default function Landing() {
 
       {/* ═══════════════════════════════════════════
           HERO SECTION — Minimal Bright 슬라이드쇼
+          h-screen 고정: 모든 슬라이드 동일 높이
       ═══════════════════════════════════════════ */}
       <section
-        className="relative min-h-screen overflow-hidden"
+        className="relative h-screen overflow-hidden"
         style={{ background: 'linear-gradient(160deg, #F0F0F2 0%, #EBEBED 50%, #F0F0F2 100%)' }}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
       >
 
-        {/* ── 슬라이드 0: 풀스크린 GIF (경계선 없이, 화면 꽉 채움) ── */}
+        {/* ── 슬라이드 0: 풀스크린 GIF (창 크기에 100% 반응) ── */}
         {currentSlide === 0 && (
           <div
             className="absolute inset-0 z-10 cursor-pointer fade-in"
@@ -184,102 +183,108 @@ export default function Landing() {
           </div>
         )}
 
-        {/* ── 슬라이드 1-3: 텍스트 콘텐츠 ── */}
+        {/* ── 슬라이드 1-3: 텍스트 콘텐츠 (h-screen 내부, 세로 중앙 정렬) ── */}
         {currentSlide !== 0 && (
-          <div className="container mx-auto px-4 py-24 lg:py-32 relative z-10">
-            <div className="max-w-4xl mx-auto text-center">
+          <div
+            className="h-full flex items-center relative z-10"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
+            <div className="container mx-auto px-4 py-6 w-full">
+              <div className="max-w-4xl mx-auto text-center">
 
-              <div key={currentSlide} className="fade-in">
-                {/* Badge — clean pill on light bg */}
-                <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-[#FF6B00] text-sm font-medium mb-8">
-                  <Star className="w-3.5 h-3.5 mr-2 fill-[#FF6B00] text-[#FF6B00] flex-shrink-0" />
-                  <span>{heroSlides[currentSlide].badge}</span>
+                <div key={currentSlide} className="fade-in">
+                  {/* Badge */}
+                  <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-[#FF6B00] text-sm font-medium mb-5">
+                    <Star className="w-3.5 h-3.5 mr-2 fill-[#FF6B00] text-[#FF6B00] flex-shrink-0" />
+                    <span>{heroSlides[currentSlide].badge}</span>
+                  </div>
+
+                  {/* Main headline */}
+                  <h1 className="text-4xl lg:text-6xl font-black text-gray-900 mb-4 leading-tight tracking-tight">
+                    {heroSlides[currentSlide].headlineTop}
+                    <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">
+                      {heroSlides[currentSlide].headlineHighlight}
+                    </span>
+                  </h1>
+
+                  {/* Subtitle */}
+                  <p className="text-base lg:text-lg text-gray-500 mb-2 max-w-2xl mx-auto leading-relaxed">
+                    {heroSlides[currentSlide].sub}
+                  </p>
                 </div>
 
-                {/* Main headline — DARK text, orange gradient highlight */}
-                <h1 className="text-5xl lg:text-7xl font-black text-gray-900 mb-6 leading-tight tracking-tight">
-                  {heroSlides[currentSlide].headlineTop}
-                  <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">
-                    {heroSlides[currentSlide].headlineHighlight}
-                  </span>
-                </h1>
+                {/* CTA Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6 mb-6">
+                  <Button
+                    size="lg"
+                    className="px-8 py-4 bg-[#FF6B00] hover:bg-orange-600 text-white font-bold text-lg shadow-lg shadow-orange-200 transition-all hover:scale-105 border-0"
+                    onClick={onClickCTA}
+                    data-testid="button-cta-online-lecture"
+                  >
+                    <Video className="mr-2 w-5 h-5" />
+                    시대영재 온라인 강의 듣기
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="px-8 py-4 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 font-semibold text-lg transition-all"
+                    asChild
+                  >
+                    <a href="tel:062-462-0990">
+                      <Phone className="mr-2 w-5 h-5" />
+                      062-462-0990
+                    </a>
+                  </Button>
+                </div>
 
-                {/* Subtitle — soft gray */}
-                <p className="text-lg lg:text-xl text-gray-500 mb-2 max-w-2xl mx-auto leading-relaxed">
-                  {heroSlides[currentSlide].sub}
-                </p>
-              </div>
+                {/* Stats row */}
+                <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto mb-5 py-4 border-y border-gray-200">
+                  <div className="text-center">
+                    <p className="text-2xl lg:text-3xl font-black text-[#FF6B00]">990점</p>
+                    <p className="text-xs text-gray-400 mt-1 tracking-wide uppercase">TOEIC 만점</p>
+                  </div>
+                  <div className="text-center border-x border-gray-200">
+                    <p className="text-2xl lg:text-3xl font-black text-[#FF6B00]">50만+</p>
+                    <p className="text-xs text-gray-400 mt-1 tracking-wide uppercase">(전)해커스인강</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl lg:text-3xl font-black text-[#FF6B00]">1타</p>
+                    <p className="text-xs text-gray-400 mt-1 tracking-wide uppercase">(전)강남영단기</p>
+                  </div>
+                </div>
 
-              {/* ── CTA Buttons ── */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10 mb-12">
-                <Button
-                  size="lg"
-                  className="px-8 py-4 bg-[#FF6B00] hover:bg-orange-600 text-white font-bold text-lg shadow-lg shadow-orange-200 transition-all hover:scale-105 border-0"
-                  onClick={onClickCTA}
-                  data-testid="button-cta-online-lecture"
-                >
-                  <Video className="mr-2 w-5 h-5" />
-                  시대영재 온라인 강의 듣기
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="px-8 py-4 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 font-semibold text-lg transition-all"
-                  asChild
-                >
-                  <a href="tel:062-462-0990">
-                    <Phone className="mr-2 w-5 h-5" />
-                    062-462-0990
+                {/* 레벨테스트 CTA */}
+                <div className="mb-5">
+                  <a
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSd_c2YdUxewRPDwW3I6FAnngfEVysh5oYu8CwctR14ne5RnBg/viewform"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#FF6B00] hover:bg-orange-600 text-white text-lg font-black rounded-2xl shadow-xl shadow-orange-200 transition-all hover:scale-105 hover:shadow-orange-300"
+                    data-testid="button-level-test-apply"
+                  >
+                    <NotebookPen className="w-5 h-5 flex-shrink-0" />
+                    레벨테스트 / 입학대기 신청
                   </a>
-                </Button>
-              </div>
-
-              {/* ── Stats row ── */}
-              <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto mb-10 py-6 border-y border-gray-200">
-                <div className="text-center">
-                  <p className="text-2xl lg:text-3xl font-black text-[#FF6B00]">990점</p>
-                  <p className="text-xs text-gray-400 mt-1 tracking-wide uppercase">TOEIC 만점</p>
+                  <p className="text-sm text-gray-400 mt-2">온라인으로 간편하게 신청 · 영업일 1일 이내 연락</p>
                 </div>
-                <div className="text-center border-x border-gray-200">
-                  <p className="text-2xl lg:text-3xl font-black text-[#FF6B00]">50만+</p>
-                  <p className="text-xs text-gray-400 mt-1 tracking-wide uppercase">(전)해커스인강</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl lg:text-3xl font-black text-[#FF6B00]">1타</p>
-                  <p className="text-xs text-gray-400 mt-1 tracking-wide uppercase">(전)강남영단기</p>
-                </div>
-              </div>
 
-              {/* ── 레벨테스트 / 입학대기 신청 CTA ── */}
-              <div className="mb-10">
-                <a
-                  href="https://docs.google.com/forms/d/e/1FAIpQLSd_c2YdUxewRPDwW3I6FAnngfEVysh5oYu8CwctR14ne5RnBg/viewform"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-[#FF6B00] hover:bg-orange-600 text-white text-xl font-black rounded-2xl shadow-xl shadow-orange-200 transition-all hover:scale-105 hover:shadow-orange-300"
-                  data-testid="button-level-test-apply"
-                >
-                  <NotebookPen className="w-6 h-6 flex-shrink-0" />
-                  레벨테스트 / 입학대기 신청
-                </a>
-                <p className="text-sm text-gray-400 mt-3">온라인으로 간편하게 신청 · 영업일 1일 이내 연락</p>
-              </div>
-
-              {/* ── Slide indicator dots ── */}
-              <div className="flex items-center justify-center gap-2">
-                {heroSlides.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentSlide(i)}
-                    className={`rounded-full transition-all duration-500 ${
-                      i === currentSlide
-                        ? 'w-8 h-2.5 bg-[#FF6B00]'
-                        : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
-                    }`}
-                    aria-label={`슬라이드 ${i + 1}`}
-                  />
-                ))}
+                {/* Slide indicator dots */}
+                <div className="flex items-center justify-center gap-2">
+                  {heroSlides.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentSlide(i)}
+                      className={`rounded-full transition-all duration-500 ${
+                        i === currentSlide
+                          ? 'w-8 h-2.5 bg-[#FF6B00]'
+                          : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
+                      }`}
+                      aria-label={`슬라이드 ${i + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -303,7 +308,7 @@ export default function Landing() {
           </div>
         )}
 
-        {/* ── Prev / Next arrows — clean on light bg ── */}
+        {/* ── Prev / Next arrows ── */}
         <button
           onClick={() => setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length)}
           className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-500 hover:bg-orange-50 hover:border-orange-200 hover:text-[#FF6B00] flex items-center justify-center transition-all shadow-sm"
