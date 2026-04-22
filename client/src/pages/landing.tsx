@@ -168,17 +168,17 @@ export default function Landing() {
         style={{ background: 'linear-gradient(160deg, #F0F0F2 0%, #EBEBED 50%, #F0F0F2 100%)' }}
       >
 
-        {/* ── 슬라이드 0: 풀스크린 GIF (창 크기에 100% 반응) ── */}
+        {/* ── 슬라이드 0: GIF — 잘림 없이 창 크기에 반응 ── */}
         {currentSlide === 0 && (
           <div
-            className="absolute inset-0 z-10 cursor-pointer fade-in"
+            className="absolute inset-0 z-10 cursor-pointer fade-in flex items-center justify-center"
             onClick={handleSpecialClick}
           >
             <img
               src="/images/real_1.gif"
               alt="시대영재학원 히어로 슬라이드"
-              className="w-full h-full object-cover"
-              style={{ display: 'block' }}
+              className="max-w-full max-h-full w-auto h-auto"
+              style={{ display: 'block', objectFit: 'contain' }}
             />
           </div>
         )}
