@@ -13,24 +13,28 @@ import { useAuth } from "@/hooks/useAuth";
 // Hero slideshow data
 const heroSlides = [
   {
-    badge: null, // slide 0 uses special click badge
-    headlineTop: "중고등부",
-    headlineHighlight: "입시영어 전문",
-    sub: "'(전) 영단기 현강 대표강사, (전) 해커스 인강' 의 정우석 원장과 함께 하는 시대영재학원",
+    gif: "/images/real_1.gif",   // slide 0: GIF (관리자 클릭)
+    badge: null,
+    headlineTop: "",
+    headlineHighlight: "",
+    sub: "",
   },
   {
-    badge: "TOEIC 990점 만점 · 캐나다 명문 Bishop's University 졸업 원장 직강",
-    headlineTop: "검증된 실력으로",
-    headlineHighlight: "직접 가르칩니다",
-    sub: "(전)강남영단기 현강 1타강사 · (전)해커스 인강 50만뷰+ 인기강사의 노하우를 그대로 전달합니다",
+    gif: "/images/Hero_2.gif",   // slide 1: GIF
+    badge: null,
+    headlineTop: "",
+    headlineHighlight: "",
+    sub: "",
   },
   {
+    gif: null,
     badge: "실제 합격생 후기 기반",
     headlineTop: "수능 영어 1등급,",
     headlineHighlight: "이제 우리 아이 차례",
     sub: "내신 · 수능 완벽 대응 커리큘럼",
   },
   {
+    gif: null,
     badge: "검증된 강의력 · 독보적 커리큘럼",
     headlineTop: "일반고 최상위권의 선택,",
     headlineHighlight: "영재고·상산고가 다시 찾는",
@@ -168,15 +172,15 @@ export default function Landing() {
         <div className="flex flex-col items-center justify-center min-h-full px-4 py-8 text-center relative z-10">
           <div className="w-full max-w-4xl mx-auto">
 
-            {/* ── 슬라이드 0: GIF (상단 영역) ── */}
-            {currentSlide === 0 && (
+            {/* ── GIF 슬라이드 (gif 속성이 있는 슬라이드) ── */}
+            {heroSlides[currentSlide].gif && (
               <div
-                key="slide-0"
+                key={`gif-${currentSlide}`}
                 className="fade-in cursor-pointer mb-5"
-                onClick={handleSpecialClick}
+                onClick={currentSlide === 0 ? handleSpecialClick : undefined}
               >
                 <img
-                  src="/images/real_1.gif"
+                  src={heroSlides[currentSlide].gif!}
                   alt="시대영재학원 히어로 슬라이드"
                   className="mx-auto w-auto h-auto max-w-full"
                   style={{ maxHeight: '38vh' }}
@@ -184,8 +188,8 @@ export default function Landing() {
               </div>
             )}
 
-            {/* ── 슬라이드 1-3: 텍스트 (상단 영역) ── */}
-            {currentSlide !== 0 && (
+            {/* ── 텍스트 슬라이드 (gif 속성이 없는 슬라이드) ── */}
+            {!heroSlides[currentSlide].gif && (
               <div key={currentSlide} className="fade-in mb-5">
                 <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-[#FF6B00] text-sm font-medium mb-4">
                   <Star className="w-3.5 h-3.5 mr-2 fill-[#FF6B00] text-[#FF6B00] flex-shrink-0" />
