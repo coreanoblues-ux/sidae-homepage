@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 // Hero slideshow data
 const heroSlides = [
   {
-    gif: "/images/real_1.gif",   // slide 0: GIF (관리자 클릭)
+    gif: "/images/Hero_1.gif",   // slide 0: GIF (관리자 클릭)
     badge: null,
     headlineTop: "",
     headlineHighlight: "",
