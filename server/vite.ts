@@ -2,15 +2,13 @@ import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
-import viteConfig from "../vite.config";
-import { nanoid } from "nanoid";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const viteLogger = createLogger();
+// 🔒 vite, vite.config, nanoid 모듈은 dev에서만 사용 → lazy import로 프로덕션 번들에서 제외
+// (vite.config.ts가 esbuild에 번들되면 Node < 20.11에서 import.meta.dirname undefined 크래시 위험)
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -24,6 +22,13 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
+  // 🔒 dev 전용: 프로덕션 번들에 포함되지 않도록 lazy import
+  const { createServer: createViteServer, createLogger } = await import("vite");
+  const { default: viteConfig } = await import("../vite.config");
+  const { nanoid } = await import("nanoid");
+
+  const viteLogger = createLogger();
+
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -35,7 +40,7 @@ export async function setupVite(app: Express, server: Server) {
     configFile: false,
     customLogger: {
       ...viteLogger,
-      error: (msg, options) => {
+      error: (msg: any, options: any) => {
         viteLogger.error(msg, options);
         process.exit(1);
       },
