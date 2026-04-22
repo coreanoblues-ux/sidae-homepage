@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createServer } from "node:http";
 import jwt from "jsonwebtoken";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -125,8 +126,20 @@ app.use("/uploads", express.static(UPLOAD_DIR, {
 
 const INDEX = path.join(__dirname, "dist/index.html");
 
+// 🚀 HTTP 서버를 즉시 시작 (Railway 헬스체크가 /health에 빠르게 도달하도록)
+// /health 라우트는 위에서 이미 등록됨 → DB/세션 초기화 전에 200 응답 가능
+const port = parseInt(process.env.PORT || '5000', 10);
+const server = createServer(app);
+server.listen({
+  port,
+  host: "0.0.0.0",
+  reusePort: true,
+}, () => {
+  log(`serving on port ${port}`);
+});
+
 (async () => {
-  const server = await registerRoutes(app);
+  await registerRoutes(app);
 
   // 🌱 시드 데이터 초기화 (배포 환경에서 프로그램 데이터 없을 때 자동 생성)
   await seedProgramsIfEmpty();
@@ -159,16 +172,5 @@ const INDEX = path.join(__dirname, "dist/index.html");
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  log("✅ 모든 라우트 등록 완료");
 })();
