@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 // Hero slideshow data
 const heroSlides = [
   {
-    gif: "/images/Hero_1.gif",   // slide 0: GIF (관리자 클릭)
+    gif: "/images/real_page1.gif",   // slide 0: GIF (관리자 클릭)
     badge: null,
     headlineTop: "",
     headlineHighlight: "",
@@ -183,7 +183,7 @@ export default function Landing() {
                   src={heroSlides[currentSlide].gif!}
                   alt="시대영재학원 히어로 슬라이드"
                   className="mx-auto w-auto h-auto max-w-full"
-                  style={{ maxHeight: '38vh' }}
+                  style={{ maxHeight: '44vh' }}
                 />
               </div>
             )}
