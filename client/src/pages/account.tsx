@@ -7,7 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { hardStudentLogout } from "@/lib/api";
-import { User, Calendar, CheckCircle, XCircle, Clock, LogOut, Edit, Shield, Award } from "lucide-react";
+import { User, Calendar, CheckCircle, XCircle, Clock, LogOut, Edit, Shield, Award, FileText } from "lucide-react";
+
+// ★ 구글폼 URL — 아래 주소를 실제 구글폼 공유 링크로 교체하세요
+const ESSAY_FORM_URL = "https://forms.gle/BKLBRr5e7ioVEb4D9";
 
 interface Approval {
   id: string;
@@ -324,15 +327,15 @@ export default function Account() {
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <Button variant="outline" className="h-auto p-4 justify-start" asChild data-testid="button-courses">
-                    <a href="/courses">
-                      <div className="text-left">
-                        <div className="font-semibold">강의 둘러보기</div>
-                        <div className="text-sm text-muted-foreground">
-                          {user.role === "VERIFIED" || user.role === "ADMIN" 
-                            ? "모든 강의 수강 가능" 
-                            : "강의 목록 확인"
-                          }
+                  <Button variant="outline" className="h-auto p-4 justify-start" asChild data-testid="button-essay-submit">
+                    <a href={ESSAY_FORM_URL} target="_blank" rel="noopener noreferrer">
+                      <div className="text-left flex items-start gap-3">
+                        <FileText className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                        <div>
+                          <div className="font-semibold">Essay 및 숙제 제출</div>
+                          <div className="text-sm text-muted-foreground">
+                            에세이 및 과제물을 제출하세요
+                          </div>
                         </div>
                       </div>
                     </a>
