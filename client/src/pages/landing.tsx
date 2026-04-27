@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { Link, useLocation } from "wouter";
-import { Star, Trophy, University, Presentation, Video, Phone, Calendar, Medal, Laptop, ChartLine, MapPin, Mail, NotebookPen, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Trophy, University, Presentation, Video, Phone, Calendar, Medal, Laptop, ChartLine, MapPin, Mail, NotebookPen, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,7 @@ export default function Landing() {
 
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [password, setPassword] = useState("");
+  const [expandedProgram, setExpandedProgram] = useState<'middle' | 'high' | 'gifted' | null>(null);
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -315,55 +316,237 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="card-hover border-border/60">
+          {/* 프로그램 카드 3개 */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-4">
+
+            {/* 중등부 */}
+            <Card
+              className={`border-2 transition-all duration-300 cursor-pointer ${expandedProgram === 'middle' ? 'border-primary shadow-lg bg-primary/5' : 'border-border/60 hover:border-primary/40 hover:shadow-md'}`}
+              onClick={() => setExpandedProgram(expandedProgram === 'middle' ? null : 'middle')}
+              data-testid="card-program-middle"
+            >
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
                   <Medal className="text-primary w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold text-card-foreground mb-4">중등부 프로그램</h3>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
+                <p className="text-muted-foreground mb-6 leading-relaxed">
                   탄탄한 문법 만들기와 정확하고 빠른 독해 습관 만들기로 고등학교 진학 완벽 준비
                 </p>
-                <Link href="/curriculum/middle" className="flex items-center text-sm text-primary font-semibold hover:underline" data-testid="link-program-middle">
-                  <span>중등부 커리큘럼 보기</span>
-                  <ChartLine className="ml-2 w-4 h-4" />
-                </Link>
+                <div className="flex items-center text-sm text-primary font-semibold">
+                  <span>{expandedProgram === 'middle' ? '닫기' : '상세보기'}</span>
+                  <ChevronDown className={`ml-2 w-4 h-4 transition-transform duration-300 ${expandedProgram === 'middle' ? 'rotate-180' : ''}`} />
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="card-hover border-border/60">
+            {/* 고등부 */}
+            <Card
+              className={`border-2 transition-all duration-300 cursor-pointer ${expandedProgram === 'high' ? 'border-primary shadow-lg bg-primary/5' : 'border-border/60 hover:border-primary/40 hover:shadow-md'}`}
+              onClick={() => setExpandedProgram(expandedProgram === 'high' ? null : 'high')}
+              data-testid="card-program-high"
+            >
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
                   <Laptop className="text-primary w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold text-card-foreground mb-4">고등부 프로그램</h3>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
+                <p className="text-muted-foreground mb-6 leading-relaxed">
                   (일반고/특목고) 서술형 문제 정복과 SYNTAX구문독해로 대학입시 완벽 대비
                 </p>
-                <Link href="/curriculum/high" className="flex items-center text-sm text-primary font-semibold hover:underline" data-testid="link-program-high">
-                  <span>고등부 커리큘럼 보기</span>
-                  <ChartLine className="ml-2 w-4 h-4" />
-                </Link>
+                <div className="flex items-center text-sm text-primary font-semibold">
+                  <span>{expandedProgram === 'high' ? '닫기' : '상세보기'}</span>
+                  <ChevronDown className={`ml-2 w-4 h-4 transition-transform duration-300 ${expandedProgram === 'high' ? 'rotate-180' : ''}`} />
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="card-hover border-border/60">
+            {/* 영재고 재학생 */}
+            <Card
+              className={`border-2 transition-all duration-300 cursor-pointer ${expandedProgram === 'gifted' ? 'border-primary shadow-lg bg-primary/5' : 'border-border/60 hover:border-primary/40 hover:shadow-md'}`}
+              onClick={() => setExpandedProgram(expandedProgram === 'gifted' ? null : 'gifted')}
+              data-testid="card-program-gifted"
+            >
               <CardContent className="p-8">
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                  <ChartLine className="text-primary w-8 h-8" />
+                  <Trophy className="text-primary w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-bold text-card-foreground mb-4">내신 & 수능 대비</h3>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  학교별 내신 및 수능지문에 대한 정독&스킬 강의로 실전 점수 향상 보장
+                <h3 className="text-xl font-bold text-card-foreground mb-4">영재고 재학생 프로그램</h3>
+                <p className="text-muted-foreground mb-6 leading-relaxed">
+                  광주 영재고 재학생을 위한 영어 전략 — 내신 1등급과 공인 성적 면제를 가장 빠른 경로로 해결합니다
                 </p>
-                <Link href="/program/exam-prep" className="flex items-center text-sm text-primary font-semibold hover:underline" data-testid="link-program-exam">
-                  <span>내신/수능 프로그램 보기</span>
-                  <ChartLine className="ml-2 w-4 h-4" />
-                </Link>
+                <div className="flex items-center text-sm text-primary font-semibold">
+                  <span>{expandedProgram === 'gifted' ? '닫기' : '상세보기'}</span>
+                  <ChevronDown className={`ml-2 w-4 h-4 transition-transform duration-300 ${expandedProgram === 'gifted' ? 'rotate-180' : ''}`} />
+                </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* ── 펼쳐지는 상세 내용 패널 ── */}
+          {expandedProgram && (
+            <div className="mt-6 rounded-2xl border border-primary/30 bg-background shadow-xl overflow-hidden">
+
+              {/* ── 중등부 상세 ── */}
+              {expandedProgram === 'middle' && (
+                <div className="p-8 lg:p-12">
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-black text-foreground mb-2">중학교 영어 프로그램</h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      중학교 시기는 영어 학습의 가장 중요한 기초를 다지는 시기입니다. 체계적인 문법 학습과 효과적인 독해 훈련을 통해 학생들의 영어 실력을 한 단계 끌어올립니다.
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-8 mb-10">
+                    <div>
+                      <h4 className="text-lg font-bold text-foreground mb-4">프로그램 특징</h4>
+                      <ul className="space-y-3 text-muted-foreground">
+                        <li className="flex items-start gap-2"><span className="text-primary mt-1 font-bold">●</span><span><strong className="text-foreground">단계별 문법 완성:</strong> 중학교 필수 문법을 체계적으로 정리하여 고등학교 서술형까지 연결되는 탄탄한 기초 완성</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary mt-1 font-bold">●</span><span><strong className="text-foreground">독해 실력 향상:</strong> 다양한 유형의 지문으로 독해 능력과 문제 해결 능력 배양</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary mt-1 font-bold">●</span><span><strong className="text-foreground">어휘력 강화:</strong> 중학교 필수 어휘부터 고등학교 심화 어휘까지 체계적 학습</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary mt-1 font-bold">●</span><span><strong className="text-foreground">내신 대비:</strong> 학교별 시험 유형 분석과 맞춤형 내신 대비</span></li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-foreground mb-4">수업 방식</h4>
+                      <p className="text-muted-foreground leading-relaxed mb-3">
+                        반당 10명 미만 소수 정예 클래스로 수준별 수업 진행. <strong className="text-foreground">월수 / 화목</strong> 메인 수업 이후 매주 <strong className="text-foreground">금·토요일</strong>에 확인 학습을 실시합니다.
+                      </p>
+                      <p className="text-muted-foreground leading-relaxed">
+                        듣기·모의고사 실전 문제풀이와 어휘 테스트를 병행하여, 고등학교 진학 후에도 확실한 성과를 이끌어냅니다.
+                      </p>
+                      <div className="mt-4 inline-flex items-center px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                        대상: 중학교 1~3학년
+                      </div>
+                    </div>
+                  </div>
+
+                  <h4 className="text-lg font-bold text-foreground mb-5">레벨별 커리큘럼</h4>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {[
+                      { level: 'Alpha', badge: 'Lv.1', desc: '중학 필수 어휘 1,800개 습득 및 문법 기초 입문. 주어·동사 찾기와 기초 문장 구성 연습.' },
+                      { level: 'Bravo', badge: 'Lv.2', desc: '핵심 문법 체화 및 독해 능력 배양. 중학 내신 수준 조건 영작 집중 훈련.' },
+                      { level: 'Charlie', badge: 'Lv.3', desc: '복잡한 문장 구조 분석 및 논리적 독해. 고교 수행평가 연계 논술형 영작 연습.' },
+                      { level: 'Delta', badge: 'Lv.4', desc: '고1~2 모의고사 기출 적응. 고등 내신형 서술형·통암기·지문 변형 영작 대비.' },
+                      { level: 'Master', badge: 'Lv.5', desc: '수능 1등급(90점 이상) 안정적 확보. 고난도 독해와 에세이 라이팅 완성.' },
+                    ].map(({ level, badge, desc }) => (
+                      <div key={level} className="rounded-xl border border-border bg-muted/40 p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{badge}</span>
+                          <span className="font-bold text-foreground">{level}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── 고등부 상세 ── */}
+              {expandedProgram === 'high' && (
+                <div className="p-8 lg:p-12">
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-black text-foreground mb-2">고등부 프로그램</h3>
+                    <p className="text-muted-foreground italic leading-relaxed">
+                      강남 1타의 압도적 강의력 × 시대영재 데이터 센터의 치밀한 분석 — 고등 영어, 전략이 결과를 바꿉니다. 내신 1등급부터 수능 만점까지 최단 거리 커리큘럼을 제시합니다.
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-8 mb-10">
+                    <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold mb-4">COURSE 01</div>
+                      <h4 className="text-lg font-bold text-foreground mb-1">고1~2 과정: 상위권 도약</h4>
+                      <p className="text-xs text-muted-foreground mb-4">내신 1등급의 본질은 완벽한 기본기와 학교별 데이터의 결합입니다.</p>
+                      <ul className="space-y-3 text-sm text-muted-foreground">
+                        <li className="flex items-start gap-2"><span className="text-primary mt-0.5 font-bold">▶</span><span><strong className="text-foreground">고등 필수 구문·어법·독해 완성</strong> — 수능까지 관통하는 어법 체계 정립</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary mt-0.5 font-bold">▶</span><span><strong className="text-foreground">내신 1등급 프로젝트</strong> — 인근 고교 최근 5개년 기출·부교재 변형 패턴 정밀 분석</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary mt-0.5 font-bold">▶</span><span><strong className="text-foreground">수능·모의고사 연계 심화</strong> — 논리적 추론 능력 배양, 고등 영어 전체 지형 파악</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary mt-0.5 font-bold">▶</span><span><strong className="text-foreground">킬러 문항 대비</strong> — 호흡이 긴 문장의 핵심을 빠르게 파악하는 상위권 전용 훈련</span></li>
+                      </ul>
+                    </div>
+                    <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold mb-4">COURSE 02</div>
+                      <h4 className="text-lg font-bold text-foreground mb-1">고3 과정: 수능 1등급 최종 병기</h4>
+                      <p className="text-xs text-muted-foreground mb-4">목표는 오직 하나, 흔들리지 않는 절대평가 1등급입니다.</p>
+                      <ul className="space-y-3 text-sm text-muted-foreground">
+                        <li className="flex items-start gap-2"><span className="text-primary mt-0.5 font-bold">▶</span><span><strong className="text-foreground">수능 영어 1등급 전략</strong> — 평가원 출제 의도 파악·오답 소거 독보적 풀이 노하우</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary mt-0.5 font-bold">▶</span><span><strong className="text-foreground">연계·비연계 심화</strong> — EBS 핵심 지문 분석 + 비연계 지문 적응력 극대화</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary mt-0.5 font-bold">▶</span><span><strong className="text-foreground">고급 구문·논리 독해</strong> — 추상·철학적 지문까지 문맥적 의미 완벽 파악</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary mt-0.5 font-bold">▶</span><span><strong className="text-foreground">실전 모의 훈련</strong> — 시간 배분·멘탈 관리·취약 유형 보완으로 실전 근육 완성</span></li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <h4 className="text-lg font-bold text-foreground mb-5">시대영재만의 독보적 경쟁력</h4>
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    {[
+                      { title: '검증된 강남 1타 직강', desc: '(전) 강남 영단기 전 타임 마감의 신화. 수만 명이 선택한 노하우로 대치동 현강 퀄리티를 그대로 전달합니다.' },
+                      { title: '데이터 기반 내신 관리', desc: '학원 자체 데이터 센터에서 추출한 학교별 빈출 어휘·선호 지문·서술형 특징을 바탕으로 가장 효율적인 시험 대비를 진행합니다.' },
+                      { title: '철저한 피드백 밀착 관리', desc: '매시간 성취도 평가와 개별 피드백으로 부족한 부분을 즉각 보완하는 책임 교육을 실천합니다.' },
+                    ].map(({ title, desc }) => (
+                      <div key={title} className="rounded-xl border border-border bg-muted/40 p-5">
+                        <p className="font-bold text-foreground mb-2">{title}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── 영재고 재학생 상세 ── */}
+              {expandedProgram === 'gifted' && (
+                <div className="p-8 lg:p-12">
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-black text-foreground mb-2">영재고 재학생 프로그램</h3>
+                    <p className="text-muted-foreground italic leading-relaxed mb-3">
+                      강남 영단기 전 타임 마감의 신화, 광주 영재고 영어를 압도하다 — (전) 영단기 강남 현강 마감 / 해커스 50만+ 뷰의 정우석 원장 직강
+                    </p>
+                    <p className="text-muted-foreground leading-relaxed">
+                      영재고 학생들에게 영어는 단순한 교과목이 아닙니다. 수학과 과학에 몰입할 시간을 벌어주는 <strong className="text-foreground">전략적 도구</strong>여야 합니다. 불필요한 시행착오 없이, 가장 빠르고 확실하게 내신 1등급과 공인 성적 면제 조건을 동시에 해결합니다.
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-8 mb-10">
+                    <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold mb-4">COURSE 01</div>
+                      <h4 className="text-lg font-bold text-foreground mb-1">950+ Master Class</h4>
+                      <p className="text-xs text-muted-foreground mb-4">목표는 단순 점수가 아닌, '영어 자유권' 획득입니다.</p>
+                      <ul className="space-y-3 text-sm text-muted-foreground">
+                        <li className="flex items-start gap-2"><span className="text-primary font-bold">●</span><span>대상: 교내 영어 과목 면제 조건을 조기에 충족하고, 대학 진학 및 글로벌 리더로서의 심화 학습을 원하는 학생</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary font-bold">●</span><span><strong className="text-foreground">면제 조건 조기 달성:</strong> 압도적 고득점으로 영어 과목 면제를 확정 지어 물리적 시간을 확보합니다.</span></li>
+                      </ul>
+                    </div>
+                    <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold mb-4">COURSE 02</div>
+                      <h4 className="text-lg font-bold text-foreground mb-1">750+ Speed Pass Class</h4>
+                      <p className="text-xs text-muted-foreground mb-4">가장 효율적인 경로로 졸업 요건을 끝냅니다.</p>
+                      <ul className="space-y-3 text-sm text-muted-foreground">
+                        <li className="flex items-start gap-2"><span className="text-primary font-bold">●</span><span>대상: 기초 졸업 요건(공인 성적)을 최단기간에 충족하고자 하는 재학생 및 예비 합격생</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary font-bold">●</span><span><strong className="text-foreground">Targeting Logic:</strong> 영재고 학생들의 취약 유형을 분석, 단기에 점수를 끌어올립니다.</span></li>
+                        <li className="flex items-start gap-2"><span className="text-primary font-bold">●</span><span><strong className="text-foreground">Essential Grammar & Vocab:</strong> 수능·공인 영어의 핵심 접점을 찾아 학습량을 최소화하고 효율을 극대화합니다.</span></li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <h4 className="text-lg font-bold text-foreground mb-5">시대영재학원만의 독보적 시스템</h4>
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    {[
+                      { title: '학교별 맞춤 정밀 타격', desc: '광주 영재고 출제 경향을 완벽 분석한 자체 제작 교재. 학교별 내신 지문과 수능 변형 문제를 넘나드는 정독&스킬 강의로 실전 점수 향상을 보장합니다.' },
+                      { title: '검증된 강남 1타 노하우', desc: '강남 해커스·영단기 등 메이저 학원에서 검증된 마감 강사의 강의력. 문제의 정답이 보이는 구조적 접근법을 전수합니다.' },
+                      { title: 'AI 기반 데이터 관리', desc: '매 수업 실전 모의 테스트와 AI 기반 오답 분석으로 학생의 현재 위치를 객관적으로 진단하고 부족한 1%를 채워나갑니다.' },
+                    ].map(({ title, desc }) => (
+                      <div key={title} className="rounded-xl border border-border bg-muted/40 p-5">
+                        <p className="font-bold text-foreground mb-2">{title}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+
         </div>
       </section>
 
