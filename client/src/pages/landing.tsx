@@ -196,6 +196,10 @@ export default function Landing() {
     },
   ];
 
+  // 메인 강의 프리뷰: 정우석(원장) 슬롯의 YouTube URL을 메인 영상으로 사용
+  // — 관리자 페이지에서 "정우석" 영상 URL만 바꾸면 메인 프리뷰가 자동 갱신됨
+  const mainPreviewEmbedUrl = getYouTubeEmbedUrl(videosBySlug["jeongwooseok"]);
+
   // Gallery images - 실제 시대영재 학원 이미지들
   const galleryImages = [
     "/uploads/IMG_6558_1758101099677.JPG",
@@ -653,40 +657,38 @@ export default function Landing() {
             </p>
           </div>
 
-          {/* 강사진 테이블 (4 rows) */}
-          <div className="bg-white dark:bg-card rounded-2xl shadow-xl border border-border/40 overflow-hidden max-w-6xl mx-auto">
+          {/* 강사진 테이블 (4 rows) — 사진 + 약력 2컬럼 */}
+          <div className="bg-white dark:bg-card rounded-2xl shadow-xl border border-border/40 overflow-hidden max-w-5xl mx-auto">
             {/* Header row (desktop only) */}
-            <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-muted/60 border-b border-border text-xs font-bold text-muted-foreground uppercase tracking-widest">
-              <div className="col-span-3">강사</div>
-              <div className="col-span-5">약력 · 경력</div>
-              <div className="col-span-4">강의 프리뷰</div>
+            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-muted/60 border-b border-border text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              <div className="col-span-4">강사</div>
+              <div className="col-span-8">약력 · 경력</div>
             </div>
 
             {instructors.map((ins, idx) => {
-              const embedUrl = getYouTubeEmbedUrl(videosBySlug[ins.slug]);
               const isLast = idx === instructors.length - 1;
               return (
                 <div
                   key={ins.slug}
-                  className={`grid grid-cols-1 lg:grid-cols-12 gap-6 px-6 py-7 items-center ${isLast ? "" : "border-b border-border"}`}
+                  className={`grid grid-cols-1 md:grid-cols-12 gap-6 px-6 py-7 items-center ${isLast ? "" : "border-b border-border"}`}
                   data-testid={`row-instructor-${ins.slug}`}
                 >
                   {/* Photo + Name */}
-                  <div className="lg:col-span-3 flex flex-col items-center text-center">
-                    <img
-                      src={ins.image}
-                      alt={`${ins.name} ${ins.role}`}
-                      className="w-28 h-28 lg:w-32 lg:h-32 rounded-2xl object-cover shadow-lg border-4 border-orange-100 dark:border-orange-900/30 bg-white"
-                      loading="lazy"
-                      width="128"
-                      height="128"
-                    />
+                  <div className="md:col-span-4 flex flex-col items-center text-center">
+                    <div className="w-36 h-44 lg:w-40 lg:h-48 rounded-2xl overflow-hidden shadow-lg border-4 border-orange-100 dark:border-orange-900/30 bg-gradient-to-b from-orange-50 to-white dark:from-orange-900/10 dark:to-card">
+                      <img
+                        src={ins.image}
+                        alt={`${ins.name} ${ins.role}`}
+                        className="w-full h-full object-contain"
+                        loading="lazy"
+                      />
+                    </div>
                     <h3 className="font-bold text-foreground text-lg mt-3">{ins.name}</h3>
                     <p className="text-sm text-primary font-semibold">{ins.role}</p>
                   </div>
 
                   {/* Credentials */}
-                  <div className="lg:col-span-5">
+                  <div className="md:col-span-8">
                     <ul className="space-y-2 text-sm lg:text-base text-foreground/90">
                       {ins.credentials.map((c, i) => (
                         <li key={i} className="flex items-start gap-2.5">
@@ -696,32 +698,37 @@ export default function Landing() {
                       ))}
                     </ul>
                   </div>
-
-                  {/* YouTube Preview */}
-                  <div className="lg:col-span-4">
-                    {embedUrl ? (
-                      <div className="aspect-video rounded-xl overflow-hidden bg-black shadow-lg">
-                        <iframe
-                          src={embedUrl}
-                          className="w-full h-full"
-                          loading="lazy"
-                          title={`${ins.name} 강의 영상`}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
-                        />
-                      </div>
-                    ) : (
-                      <div className="aspect-video rounded-xl bg-muted/50 flex items-center justify-center text-muted-foreground text-sm border border-dashed border-border">
-                        <div className="text-center">
-                          <Video className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                          <p className="text-xs">영상 준비 중</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </div>
               );
             })}
+          </div>
+
+          {/* 강의 프리뷰 (섹션 전체에 영상 1개) */}
+          <div className="max-w-4xl mx-auto mt-12">
+            <div className="text-center mb-5">
+              <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">Preview</p>
+              <h3 className="text-2xl lg:text-3xl font-black text-foreground">강의 프리뷰</h3>
+            </div>
+            {mainPreviewEmbedUrl ? (
+              <div className="aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-border/40">
+                <iframe
+                  src={mainPreviewEmbedUrl}
+                  className="w-full h-full"
+                  loading="lazy"
+                  title="시대영재학원 강의 프리뷰"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="aspect-video rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground border border-dashed border-border">
+                <div className="text-center">
+                  <Video className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                  <p className="text-sm">강의 영상 준비 중</p>
+                  <p className="text-xs mt-1 opacity-70">관리자 페이지에서 "정우석" 슬롯에 YouTube URL을 등록하면 표시됩니다.</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* CTA */}
