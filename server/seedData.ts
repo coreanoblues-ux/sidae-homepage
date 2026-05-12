@@ -119,19 +119,42 @@ export async function seedProgramsIfEmpty() {
   try {
     // 기존 프로그램이 있는지 확인
     const existingPrograms = await storage.getPrograms();
-    
+
     if (existingPrograms.length === 0) {
       console.log('🌱 초기 프로그램 데이터 생성 중...');
-      
+
       for (const program of defaultPrograms) {
         await storage.createProgram(program);
       }
-      
+
       console.log('✅ 초기 프로그램 데이터 생성 완료 (3개)');
     } else {
       console.log(`ℹ️  기존 프로그램 ${existingPrograms.length}개 존재 - 시드 데이터 생성 건너뜀`);
     }
   } catch (error) {
     console.error('❌ 시드 데이터 생성 실패:', error);
+  }
+}
+
+// 🎓 강사 영상 (about 페이지 강의 프리뷰)
+const defaultInstructorVideos = [
+  { slug: 'jeongwooseok',  name: '정우석', youtubeUrl: null, order: 1 },
+  { slug: 'kimmyounggeun', name: '김명근', youtubeUrl: null, order: 2 },
+  { slug: 'leehongseok',   name: '이홍석', youtubeUrl: null, order: 3 },
+  { slug: 'haserin',       name: '하세린', youtubeUrl: null, order: 4 },
+];
+
+export async function seedInstructorVideosIfEmpty() {
+  try {
+    for (const iv of defaultInstructorVideos) {
+      const existing = await storage.getInstructorVideoBySlug(iv.slug);
+      if (!existing) {
+        await storage.upsertInstructorVideoBySlug(iv);
+        console.log(`🌱 강사 영상 시드 추가: ${iv.name} (${iv.slug})`);
+      }
+    }
+    console.log('✅ 강사 영상 시드 점검 완료');
+  } catch (error) {
+    console.error('❌ 강사 영상 시드 실패:', error);
   }
 }

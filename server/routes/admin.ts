@@ -397,4 +397,53 @@ router.delete('/gallery/:id', adminGuard, async (req, res) => {
   }
 });
 
+// 🎓 강사 영상 (about 페이지 강의 프리뷰) - 관리자 조회
+router.get('/instructor-videos', adminGuard, async (_req, res) => {
+  try {
+    const list = await storage.getInstructorVideos();
+    res.json({ ok: true, items: list });
+  } catch (error) {
+    console.error('Error fetching instructor videos (admin):', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch instructor videos' });
+  }
+});
+
+// 🎓 강사 영상 - YouTube URL 업데이트 (slug 기준)
+const youtubeUrlSchema = z.object({
+  youtubeUrl: z.string()
+    .trim()
+    .max(500)
+    .refine(
+      (v) => v === '' || /^https?:\/\//i.test(v),
+      { message: '올바른 URL 형식이 아닙니다 (http:// 또는 https://로 시작)' }
+    )
+    .nullable()
+    .optional(),
+});
+
+router.put('/instructor-videos/:slug', adminGuard, async (req, res) => {
+  try {
+    const slug = String(req.params.slug || '').trim();
+    if (!slug) {
+      return res.status(400).json({ ok: false, message: 'slug 누락' });
+    }
+
+    const parsed = youtubeUrlSchema.parse(req.body);
+    // 빈 문자열이면 null로 저장 (영상 미설정 상태)
+    const newUrl = parsed.youtubeUrl == null || parsed.youtubeUrl === '' ? null : parsed.youtubeUrl;
+
+    const updated = await storage.updateInstructorVideoUrl(slug, newUrl);
+    if (!updated) {
+      return res.status(404).json({ ok: false, message: '해당 강사를 찾을 수 없습니다' });
+    }
+    res.json({ ok: true, item: updated });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ ok: false, errors: error.errors });
+    }
+    console.error('Error updating instructor video:', error);
+    res.status(500).json({ ok: false, message: 'Failed to update instructor video' });
+  }
+});
+
 export default router;

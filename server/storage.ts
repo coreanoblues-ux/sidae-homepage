@@ -9,6 +9,7 @@ import {
   galleryImages,
   programs,
   simpleVideos,
+  instructorVideos,
   type User,
   type UpsertUser,
   type Course,
@@ -26,6 +27,8 @@ import {
   type InsertProgram,
   type SimpleVideo,
   type InsertSimpleVideo,
+  type InstructorVideo,
+  type InsertInstructorVideo,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, sql, isNull } from "drizzle-orm";
@@ -83,6 +86,12 @@ export interface IStorage {
   updateSimpleVideo(id: string, video: Partial<InsertSimpleVideo>): Promise<SimpleVideo>;
   deleteSimpleVideo(id: string): Promise<void>;
   
+  // 🎓 강사 영상 (about 페이지 강의 프리뷰)
+  getInstructorVideos(): Promise<InstructorVideo[]>;
+  getInstructorVideoBySlug(slug: string): Promise<InstructorVideo | undefined>;
+  upsertInstructorVideoBySlug(data: InsertInstructorVideo): Promise<InstructorVideo>;
+  updateInstructorVideoUrl(slug: string, youtubeUrl: string | null): Promise<InstructorVideo | undefined>;
+
   // Program operations
   getPrograms(): Promise<Program[]>;
   getActivePrograms(): Promise<Program[]>;
@@ -467,6 +476,48 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSimpleVideo(id: string): Promise<void> {
     await db.delete(simpleVideos).where(eq(simpleVideos.id, id));
+  }
+
+  // 🎓 강사 영상 (about 페이지 강의 프리뷰)
+  async getInstructorVideos(): Promise<InstructorVideo[]> {
+    return await db
+      .select()
+      .from(instructorVideos)
+      .orderBy(asc(instructorVideos.order), asc(instructorVideos.createdAt));
+  }
+
+  async getInstructorVideoBySlug(slug: string): Promise<InstructorVideo | undefined> {
+    const [row] = await db
+      .select()
+      .from(instructorVideos)
+      .where(eq(instructorVideos.slug, slug));
+    return row;
+  }
+
+  async upsertInstructorVideoBySlug(data: InsertInstructorVideo): Promise<InstructorVideo> {
+    const [row] = await db
+      .insert(instructorVideos)
+      .values(data)
+      .onConflictDoUpdate({
+        target: instructorVideos.slug,
+        set: {
+          name: data.name,
+          youtubeUrl: data.youtubeUrl,
+          order: data.order,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return row;
+  }
+
+  async updateInstructorVideoUrl(slug: string, youtubeUrl: string | null): Promise<InstructorVideo | undefined> {
+    const [row] = await db
+      .update(instructorVideos)
+      .set({ youtubeUrl, updatedAt: new Date() })
+      .where(eq(instructorVideos.slug, slug))
+      .returning();
+    return row;
   }
 }
 

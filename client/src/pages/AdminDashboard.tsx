@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Edit, Plus, LogOut } from 'lucide-react';
+import { Trash2, Edit, Plus, LogOut, Youtube, Save, ExternalLink } from 'lucide-react';
 
 // 관리자 대시보드 탭 컴포넌트들
 const PendingMembers = () => {
@@ -767,6 +767,185 @@ const GalleryManager = () => {
   );
 };
 
+/* ===============================================================
+   강사 영상 관리 탭 — about 페이지 강의 프리뷰 유튜브 링크 편집
+   - 4명의 강사 (정우석 / 김명근 / 이홍석 / 하세린)는 시드 데이터로 보장
+   - URL만 수정 가능 (이름/약력은 코드에 고정)
+   =============================================================== */
+type InstructorVideoRow = {
+  id: string;
+  slug: string;
+  name: string;
+  youtubeUrl: string | null;
+  order: number;
+};
+
+function InstructorVideosTab() {
+  const [rows, setRows] = useState<InstructorVideoRow[]>([]);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [savingSlug, setSavingSlug] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Record<string, { type: 'ok' | 'err'; text: string }>>({});
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/instructor-videos', { credentials: 'include' });
+      const data = await res.json();
+      if (data.ok && Array.isArray(data.items)) {
+        setRows(data.items);
+        const init: Record<string, string> = {};
+        data.items.forEach((r: InstructorVideoRow) => (init[r.slug] = r.youtubeUrl || ''));
+        setDrafts(init);
+      } else if (res.status === 401) {
+        alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+        window.location.href = '/_superadmin';
+      }
+    } catch (e) {
+      console.error('Error loading instructor videos:', e);
+    }
+    setLoading(false);
+  };
+
+  React.useEffect(() => {
+    load();
+  }, []);
+
+  const save = async (slug: string) => {
+    setSavingSlug(slug);
+    setFeedback((f) => ({ ...f, [slug]: undefined as any }));
+    try {
+      const res = await fetch(`/api/admin/instructor-videos/${slug}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ youtubeUrl: drafts[slug] ?? '' }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setRows((rs) => rs.map((r) => (r.slug === slug ? data.item : r)));
+        setFeedback((f) => ({ ...f, [slug]: { type: 'ok', text: '저장되었습니다' } }));
+      } else {
+        const msg = data.message || (data.errors && data.errors[0]?.message) || '저장 실패';
+        setFeedback((f) => ({ ...f, [slug]: { type: 'err', text: msg } }));
+      }
+    } catch (e) {
+      console.error('Error saving instructor video:', e);
+      setFeedback((f) => ({ ...f, [slug]: { type: 'err', text: '네트워크 오류' } }));
+    }
+    setSavingSlug(null);
+    // 3초 후 피드백 메시지 자동 제거
+    setTimeout(() => setFeedback((f) => ({ ...f, [slug]: undefined as any })), 3000);
+  };
+
+  const clearUrl = (slug: string) => {
+    setDrafts((d) => ({ ...d, [slug]: '' }));
+  };
+
+  return (
+    <div className="space-y-4" data-testid="instructor-videos-tab">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold">강사 영상 (About 페이지 프리뷰)</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            홈페이지의 "강사진 소개 · 강의 프리뷰" 영역에 표시되는 YouTube 링크를 수정합니다.
+          </p>
+        </div>
+        <Button onClick={load} disabled={loading} variant="outline" size="sm">
+          {loading ? '로딩중...' : '새로고침'}
+        </Button>
+      </div>
+
+      <Card>
+        <CardContent className="pt-6 text-sm text-muted-foreground space-y-1">
+          <p>📌 지원 형식: <code>https://youtu.be/...</code>, <code>https://www.youtube.com/watch?v=...</code>, <code>https://www.youtube.com/embed/...</code>, <code>/shorts/</code></p>
+          <p>📌 영상을 제거하려면 입력란을 비우고 저장하세요. (홈페이지에는 "영상 준비 중"으로 표시)</p>
+        </CardContent>
+      </Card>
+
+      {loading && rows.length === 0 ? (
+        <p>로딩중...</p>
+      ) : (
+        <div className="grid gap-4">
+          {rows.map((row) => {
+            const draft = drafts[row.slug] ?? '';
+            const dirty = (row.youtubeUrl || '') !== draft;
+            const fb = feedback[row.slug];
+            return (
+              <Card key={row.slug} data-testid={`instructor-video-row-${row.slug}`}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Youtube className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-lg">{row.name}</p>
+                      <p className="text-xs text-muted-foreground">slug: {row.slug}</p>
+                    </div>
+                    {row.youtubeUrl && (
+                      <a
+                        href={row.youtubeUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        현재 영상 열기
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`url-${row.slug}`}>YouTube URL</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id={`url-${row.slug}`}
+                        type="url"
+                        placeholder="https://youtu.be/..."
+                        value={draft}
+                        onChange={(e) => setDrafts((d) => ({ ...d, [row.slug]: e.target.value }))}
+                        data-testid={`input-url-${row.slug}`}
+                      />
+                      <Button
+                        onClick={() => save(row.slug)}
+                        disabled={!dirty || savingSlug === row.slug}
+                        data-testid={`button-save-${row.slug}`}
+                      >
+                        <Save className="w-4 h-4 mr-1" />
+                        {savingSlug === row.slug ? '저장중' : '저장'}
+                      </Button>
+                      {draft && (
+                        <Button
+                          variant="outline"
+                          onClick={() => clearUrl(row.slug)}
+                          title="입력란 비우기"
+                          data-testid={`button-clear-${row.slug}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    {fb && (
+                      <p
+                        className={`text-sm ${
+                          fb.type === 'ok' ? 'text-emerald-600' : 'text-red-600'
+                        }`}
+                        data-testid={`feedback-${row.slug}`}
+                      >
+                        {fb.type === 'ok' ? '✅' : '⚠️'} {fb.text}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('pending');
 
@@ -860,14 +1039,26 @@ export default function AdminDashboard() {
               >
                 회원관리
               </button>
+              <button
+                onClick={() => setActiveTab('instructor-videos')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'instructor-videos'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+                data-testid="button-tab-instructor-videos"
+              >
+                강사 영상
+              </button>
             </nav>
           </div>
-          
+
           <div className="py-6">
             {activeTab === 'pending' && <PendingMembers />}
             {activeTab === 'videos' && <VideoManager />}
             {activeTab === 'gallery' && <GalleryManager />}
             {activeTab === 'members' && <ApprovedMembersTab />}
+            {activeTab === 'instructor-videos' && <InstructorVideosTab />}
           </div>
         </div>
       </div>

@@ -119,6 +119,17 @@ export const simpleVideos = pgTable("simple_videos", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// 강사 영상 테이블 (about 페이지의 강의 프리뷰 유튜브 링크 - 관리자 편집 가능)
+export const instructorVideos = pgTable("instructor_videos", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: varchar("slug").unique().notNull(), // jeongwooseok, kimmyounggeun, leehongseok, haserin
+  name: varchar("name").notNull(),          // 표시용 이름 (정우석, 김명근, ...)
+  youtubeUrl: varchar("youtube_url"),       // 유튜브 링크 (관리자가 자주 교체)
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // 프로그램 정보 테이블 (관리자가 편집 가능한 프로그램 소개 페이지)
 export const programs = pgTable("programs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -253,3 +264,16 @@ export const insertSimpleVideoSchema = createInsertSchema(simpleVideos).omit({
 });
 export type SimpleVideo = typeof simpleVideos.$inferSelect;
 export type InsertSimpleVideo = z.infer<typeof insertSimpleVideoSchema>;
+
+// 강사 영상 스키마와 타입
+export const insertInstructorVideoSchema = createInsertSchema(instructorVideos).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const updateInstructorVideoSchema = z.object({
+  youtubeUrl: z.string().url("올바른 URL 형식이 아닙니다").or(z.literal("")).nullable().optional(),
+});
+export type InstructorVideo = typeof instructorVideos.$inferSelect;
+export type InsertInstructorVideo = z.infer<typeof insertInstructorVideoSchema>;
+export type UpdateInstructorVideo = z.infer<typeof updateInstructorVideoSchema>;

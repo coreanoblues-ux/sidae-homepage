@@ -437,6 +437,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🎓 강사 영상 (about 페이지 프리뷰) - public read
+  app.get('/api/instructor-videos', async (_req, res) => {
+    try {
+      const list = await storage.getInstructorVideos();
+      res.json(list);
+    } catch (error) {
+      console.error("Error fetching instructor videos:", error);
+      res.status(500).json({ message: "Failed to fetch instructor videos" });
+    }
+  });
+
   // Protected routes
   app.get('/api/videos/:id/can-view', enhancedAuth, async (req: any, res) => {
     try {

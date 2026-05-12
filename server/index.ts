@@ -7,7 +7,7 @@ import { createServer } from "node:http";
 import jwt from "jsonwebtoken";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { seedProgramsIfEmpty } from "./seedData";
+import { seedProgramsIfEmpty, seedInstructorVideosIfEmpty } from "./seedData";
 import { getSession } from "./replitAuth";
 import passport from "passport";
 
@@ -143,6 +143,8 @@ server.listen({
 
   // 🌱 시드 데이터 초기화 (배포 환경에서 프로그램 데이터 없을 때 자동 생성)
   await seedProgramsIfEmpty();
+  // 🌱 강사 영상 4명 기본 행 보장 (slug: jeongwooseok / kimmyounggeun / leehongseok / haserin)
+  await seedInstructorVideosIfEmpty();
 
   // 🔒 보호 페이지 서버 가드 (관리자 로그인 필요)
   const PROTECTED = ["/admin", "/admin-dashboard"];
