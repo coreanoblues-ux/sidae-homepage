@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useSEO } from "@/hooks/useSEO";
 import { Link, useLocation } from "wouter";
 import { Star, Trophy, University, Presentation, Video, Phone, Calendar, Medal, Laptop, ChartLine, MapPin, Mail, NotebookPen, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
@@ -114,6 +115,86 @@ export default function Landing() {
       setLocation('/login'); // 비로그인/PENDING은 로그인으로
     }
   };
+
+  // ─────────────────────────────────────────────
+  // 강사진 데이터 (About 섹션 - 4인 테이블)
+  // ─────────────────────────────────────────────
+  type InstructorVideo = { id: number; slug: string; name: string; youtubeUrl: string | null; order: number };
+
+  const { data: instructorVideos = [] } = useQuery<InstructorVideo[]>({
+    queryKey: ["/api/instructor-videos"],
+  });
+
+  const videosBySlug: Record<string, string | null> = Object.fromEntries(
+    instructorVideos.map((v) => [v.slug, v.youtubeUrl])
+  );
+
+  // YouTube URL → embed URL 변환 (watch?v= / youtu.be / shorts / embed 모두 지원)
+  const getYouTubeEmbedUrl = (url: string | null | undefined): string | null => {
+    if (!url) return null;
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=)([^&]+)/,
+      /(?:youtu\.be\/)([^?&]+)/,
+      /(?:youtube\.com\/embed\/)([^?&]+)/,
+      /(?:youtube\.com\/shorts\/)([^?&]+)/,
+    ];
+    for (const p of patterns) {
+      const m = url.match(p);
+      if (m) return `https://www.youtube.com/embed/${m[1]}`;
+    }
+    return url;
+  };
+
+  const instructors: { slug: string; name: string; role: string; image: string; credentials: string[] }[] = [
+    {
+      slug: "jeongwooseok",
+      name: "정우석",
+      role: "원장",
+      image: "/images/정우석.jpg",
+      credentials: [
+        "캐나다 Bishop's University 학사 졸업",
+        "(전) 해커스 인강 50만뷰+ 인기강사",
+        "(전) 강남 영단기 1타강사",
+        "TOEIC 990 만점강사",
+      ],
+    },
+    {
+      slug: "kimmyounggeun",
+      name: "김명근",
+      role: "강사",
+      image: "/images/김명근.png",
+      credentials: [
+        "교육학 석사",
+        "정교사 자격증 보유",
+        "(전) K중학교 교사",
+        "저서: 빈*순*삽 근의 문법공식",
+      ],
+    },
+    {
+      slug: "leehongseok",
+      name: "이홍석",
+      role: "강사",
+      image: "/images/이홍석.png",
+      credentials: [
+        "서울대학교 학사 졸업",
+        "97년 Mensa(멘사) 만점",
+        "행정고시 1차 합격",
+      ],
+    },
+    {
+      slug: "haserin",
+      name: "하세린",
+      role: "강사",
+      image: "/images/하세린.png",
+      credentials: [
+        "이화여대 학사 졸업",
+        "영국 런던 LCF 저널리즘 석사",
+        "Harvard 교류프로그램 오프닝",
+        "목동·강남구청·서초 입시영어강의",
+        "법률사무소 김&장 변호사 비즈니스영어 레슨",
+      ],
+    },
+  ];
 
   // Gallery images - 실제 시대영재 학원 이미지들
   const galleryImages = [
@@ -551,130 +632,110 @@ export default function Landing() {
       </section>
 
       {/* ═══════════════════════════════════════════
-          ABOUT SECTION
+          ABOUT SECTION — 강사진 4인 테이블 (한눈에 보이게)
       ═══════════════════════════════════════════ */}
       <section id="about" className="py-20 geometric-shapes">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">About</p>
-              <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                <Presentation className="mr-2 w-4 h-4" />
-                원장 소개
-              </div>
-              <h2 className="text-3xl lg:text-4xl font-black text-foreground mb-6">
-                실력있는 원장과 탄탄한 강사진
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                (전)강남영단기 1타강사 출신 캐나다국적 원장과 서울대, 경희대, 광주교대 출신
-                교육학 석사 자격을 갖춘 최고의 강사진이 함께합니다.
-              </p>
+          {/* Section Header */}
+          <div className="text-center mb-12">
+            <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">About</p>
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              <Presentation className="mr-2 w-4 h-4" />
+              강사진 소개
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-black text-foreground mb-3">
+              검증된 강사진
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              (전)강남영단기 1타강사 출신 캐나다국적 원장과 함께
+              <br className="hidden md:block" />
+              서울대·이화여대·교육학 석사 출신 강사진이 직접 지도합니다.
+            </p>
+          </div>
 
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Medal className="text-primary w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">내신과 수능 두마리 토끼를 확실히 잡아 주는 영어 잘하는 학원</h4>
-                    <p className="text-muted-foreground mt-1">체계적인 커리큘럼으로 내신과 수능 모두 완벽 대비</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <University className="text-orange-600 dark:text-orange-400 w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">Bishop's University (캐나다)</h4>
-                    <p className="text-muted-foreground mt-1">우등졸업 (with honors), 현지 문화와 언어에 대한 깊은 이해</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Trophy className="text-yellow-600 dark:text-yellow-400 w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">TOEIC 990점 만점 달성</h4>
-                    <p className="text-muted-foreground mt-1">완벽한 영어 실력을 바탕으로 한 체계적인 시험 대비 전략</p>
-                    <img
-                      src="/uploads/IMG_6544_1758101075476.JPG"
-                      alt="TOEIC 990점 만점 성적표"
-                      className="mt-2 rounded-xl shadow-md max-w-48 object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Presentation className="text-green-600 dark:text-green-400 w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">(전)강남영단기 1타강사 & (전) 해커스 50만뷰+</h4>
-                    <p className="text-muted-foreground mt-1">현강 1타강사와 인터넷 50만뷰 돌파 인기강사의 검증된 강의력</p>
-                    <img
-                      src="/uploads/IMG_6559_1758101109393.JPG"
-                      alt="해커스 온라인 강의 화면"
-                      className="mt-2 rounded-xl shadow-md max-w-48 object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLSd_c2YdUxewRPDwW3I6FAnngfEVysh5oYu8CwctR14ne5RnBg/viewform"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center mt-8 px-7 py-3.5 bg-[#FF6B00] hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-200 transition-all hover:scale-105"
-                data-testid="button-about-apply"
-              >
-                <NotebookPen className="mr-2 w-5 h-5" />
-                레벨테스트 / 입학대기 신청
-              </a>
+          {/* 강사진 테이블 (4 rows) */}
+          <div className="bg-white dark:bg-card rounded-2xl shadow-xl border border-border/40 overflow-hidden max-w-6xl mx-auto">
+            {/* Header row (desktop only) */}
+            <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-muted/60 border-b border-border text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              <div className="col-span-3">강사</div>
+              <div className="col-span-5">약력 · 경력</div>
+              <div className="col-span-4">강의 프리뷰</div>
             </div>
 
-            <div className="relative">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Main team photo */}
-                <div className="col-span-1 relative">
-                  <img
-                    src="/images/team-photo.PNG"
-                    alt="시대영재 학원 강사진"
-                    className="rounded-2xl shadow-2xl object-cover w-full h-[400px] transform hover:scale-105 transition-transform duration-300"
-                    width="600"
-                    height="400"
-                    fetchPriority="high"
-                  />
-                  <div className="absolute -bottom-4 left-4 bg-white/95 dark:bg-card/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-border/40">
-                    <p className="text-sm font-bold text-foreground">검증된 강사진과 고등부 내신을 위한 학교별 데이터 전략 분석 센터</p>
-                    <p className="text-xs text-muted-foreground mt-1">캐나다 Bishop's University 졸업, TOEIC990 만점, (전)해커스, (전)강남영단기 1타 &nbsp;원장 정우석</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">서울대 사학과 졸업, 멘사 만점회원 &nbsp;팀장 이홍석</p>
-                  </div>
-                </div>
-
-                {/* Magazine cover */}
-                <div className="col-span-1 flex flex-col justify-center">
-                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-2xl p-6 transform rotate-2 hover:rotate-0 transition-transform duration-300 border border-orange-200/50 dark:border-orange-700/30">
+            {instructors.map((ins, idx) => {
+              const embedUrl = getYouTubeEmbedUrl(videosBySlug[ins.slug]);
+              const isLast = idx === instructors.length - 1;
+              return (
+                <div
+                  key={ins.slug}
+                  className={`grid grid-cols-1 lg:grid-cols-12 gap-6 px-6 py-7 items-center ${isLast ? "" : "border-b border-border"}`}
+                  data-testid={`row-instructor-${ins.slug}`}
+                >
+                  {/* Photo + Name */}
+                  <div className="lg:col-span-3 flex flex-col items-center text-center">
                     <img
-                      src="/images/magazine-cover.PNG"
-                      alt="1타강사 인증"
-                      className="rounded-xl shadow-lg object-cover w-full max-w-xs mx-auto"
-                      width="320"
-                      height="400"
+                      src={ins.image}
+                      alt={`${ins.name} ${ins.role}`}
+                      className="w-28 h-28 lg:w-32 lg:h-32 rounded-2xl object-cover shadow-lg border-4 border-orange-100 dark:border-orange-900/30 bg-white"
                       loading="lazy"
+                      width="128"
+                      height="128"
                     />
-                    <div className="text-center mt-4">
-                      <Badge variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-800/50 dark:text-orange-100 font-semibold">
-                        인증받은 1타강사
-                      </Badge>
-                    </div>
+                    <h3 className="font-bold text-foreground text-lg mt-3">{ins.name}</h3>
+                    <p className="text-sm text-primary font-semibold">{ins.role}</p>
+                  </div>
+
+                  {/* Credentials */}
+                  <div className="lg:col-span-5">
+                    <ul className="space-y-2 text-sm lg:text-base text-foreground/90">
+                      {ins.credentials.map((c, i) => (
+                        <li key={i} className="flex items-start gap-2.5">
+                          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
+                          <span className="leading-relaxed">{c}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* YouTube Preview */}
+                  <div className="lg:col-span-4">
+                    {embedUrl ? (
+                      <div className="aspect-video rounded-xl overflow-hidden bg-black shadow-lg">
+                        <iframe
+                          src={embedUrl}
+                          className="w-full h-full"
+                          loading="lazy"
+                          title={`${ins.name} 강의 영상`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        />
+                      </div>
+                    ) : (
+                      <div className="aspect-video rounded-xl bg-muted/50 flex items-center justify-center text-muted-foreground text-sm border border-dashed border-border">
+                        <div className="text-center">
+                          <Video className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                          <p className="text-xs">영상 준비 중</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            </div>
+              );
+            })}
+          </div>
+
+          {/* CTA */}
+          <div className="text-center mt-10">
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSd_c2YdUxewRPDwW3I6FAnngfEVysh5oYu8CwctR14ne5RnBg/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-7 py-3.5 bg-[#FF6B00] hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-200 transition-all hover:scale-105"
+              data-testid="button-about-apply"
+            >
+              <NotebookPen className="mr-2 w-5 h-5" />
+              레벨테스트 / 입학대기 신청
+            </a>
           </div>
         </div>
       </section>
