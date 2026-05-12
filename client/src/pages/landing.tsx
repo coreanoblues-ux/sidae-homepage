@@ -150,7 +150,7 @@ export default function Landing() {
       slug: "jeongwooseok",
       name: "정우석",
       role: "원장",
-      image: "/images/정우석.jpg",
+      image: "/images/정우석.jpg?v=2",
       credentials: [
         "캐나다 Bishop's University 학사 졸업",
         "(전) 해커스 인강 50만뷰+ 인기강사",
@@ -162,7 +162,7 @@ export default function Landing() {
       slug: "kimmyounggeun",
       name: "김명근",
       role: "강사",
-      image: "/images/김명근.png",
+      image: "/images/김명근.png?v=2",
       credentials: [
         "교육학 석사",
         "정교사 자격증 보유",
@@ -174,7 +174,7 @@ export default function Landing() {
       slug: "leehongseok",
       name: "이홍석",
       role: "강사",
-      image: "/images/이홍석.png",
+      image: "/images/이홍석.png?v=2",
       credentials: [
         "서울대학교 학사 졸업",
         "97년 Mensa(멘사) 만점",
@@ -185,7 +185,7 @@ export default function Landing() {
       slug: "haserin",
       name: "하세린",
       role: "강사",
-      image: "/images/하세린.png",
+      image: "/images/하세린.png?v=2",
       credentials: [
         "이화여대 학사 졸업",
         "영국 런던 LCF 저널리즘 석사",
@@ -657,78 +657,85 @@ export default function Landing() {
             </p>
           </div>
 
-          {/* 강사진 테이블 (4 rows) — 사진 + 약력 2컬럼 */}
-          <div className="bg-white dark:bg-card rounded-2xl shadow-xl border border-border/40 overflow-hidden max-w-5xl mx-auto">
-            {/* Header row (desktop only) */}
-            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-muted/60 border-b border-border text-xs font-bold text-muted-foreground uppercase tracking-widest">
-              <div className="col-span-4">강사</div>
-              <div className="col-span-8">약력 · 경력</div>
-            </div>
+          {/* 좌측 강사 테이블 / 우측 대표 강의 프리뷰 */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 max-w-7xl mx-auto items-start">
+            {/* 좌측: 강사진 테이블 (4 rows, 간격 좁힘) */}
+            <div className="lg:col-span-7">
+              <div className="bg-white dark:bg-card rounded-2xl shadow-xl border border-border/40 overflow-hidden">
+                {/* Header row (desktop only) */}
+                <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-muted/60 border-b border-border text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  <div className="col-span-4">강사</div>
+                  <div className="col-span-8">약력 · 경력</div>
+                </div>
 
-            {instructors.map((ins, idx) => {
-              const isLast = idx === instructors.length - 1;
-              return (
-                <div
-                  key={ins.slug}
-                  className={`grid grid-cols-1 md:grid-cols-12 gap-6 px-6 py-7 items-center ${isLast ? "" : "border-b border-border"}`}
-                  data-testid={`row-instructor-${ins.slug}`}
-                >
-                  {/* Photo + Name */}
-                  <div className="md:col-span-4 flex flex-col items-center text-center">
-                    <div className="w-36 h-44 lg:w-40 lg:h-48 rounded-2xl overflow-hidden shadow-lg border-4 border-orange-100 dark:border-orange-900/30 bg-gradient-to-b from-orange-50 to-white dark:from-orange-900/10 dark:to-card">
-                      <img
-                        src={ins.image}
-                        alt={`${ins.name} ${ins.role}`}
-                        className="w-full h-full object-contain"
-                        loading="lazy"
-                      />
+                {instructors.map((ins, idx) => {
+                  const isLast = idx === instructors.length - 1;
+                  return (
+                    <div
+                      key={ins.slug}
+                      className={`grid grid-cols-1 md:grid-cols-12 gap-4 px-5 py-4 items-center ${isLast ? "" : "border-b border-border"}`}
+                      data-testid={`row-instructor-${ins.slug}`}
+                    >
+                      {/* Photo + Name */}
+                      <div className="md:col-span-4 flex flex-col items-center text-center">
+                        <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl overflow-hidden shadow-md border-2 border-orange-100 dark:border-orange-900/30 bg-gradient-to-b from-orange-50 to-white dark:from-orange-900/10 dark:to-card">
+                          <img
+                            src={ins.image}
+                            alt={`${ins.name} ${ins.role}`}
+                            className="w-full h-full object-contain"
+                            loading="lazy"
+                          />
+                        </div>
+                        <h3 className="font-bold text-foreground text-base mt-2">{ins.name}</h3>
+                        <p className="text-xs text-primary font-semibold">{ins.role}</p>
+                      </div>
+
+                      {/* Credentials */}
+                      <div className="md:col-span-8">
+                        <ul className="space-y-1.5 text-sm text-foreground/90">
+                          {ins.credentials.map((c, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
+                              <span className="leading-snug">{c}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
-                    <h3 className="font-bold text-foreground text-lg mt-3">{ins.name}</h3>
-                    <p className="text-sm text-primary font-semibold">{ins.role}</p>
-                  </div>
-
-                  {/* Credentials */}
-                  <div className="md:col-span-8">
-                    <ul className="space-y-2 text-sm lg:text-base text-foreground/90">
-                      {ins.credentials.map((c, i) => (
-                        <li key={i} className="flex items-start gap-2.5">
-                          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
-                          <span className="leading-relaxed">{c}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* 강의 프리뷰 (섹션 전체에 영상 1개) */}
-          <div className="max-w-4xl mx-auto mt-12">
-            <div className="text-center mb-5">
-              <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">Preview</p>
-              <h3 className="text-2xl lg:text-3xl font-black text-foreground">강의 프리뷰</h3>
+                  );
+                })}
+              </div>
             </div>
-            {mainPreviewEmbedUrl ? (
-              <div className="aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-border/40">
-                <iframe
-                  src={mainPreviewEmbedUrl}
-                  className="w-full h-full"
-                  loading="lazy"
-                  title="시대영재학원 강의 프리뷰"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
-              </div>
-            ) : (
-              <div className="aspect-video rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground border border-dashed border-border">
-                <div className="text-center">
-                  <Video className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                  <p className="text-sm">강의 영상 준비 중</p>
-                  <p className="text-xs mt-1 opacity-70">관리자 페이지에서 "정우석" 슬롯에 YouTube URL을 등록하면 표시됩니다.</p>
+
+            {/* 우측: 대표 강의 프리뷰 (sticky) */}
+            <div className="lg:col-span-5">
+              <div className="lg:sticky lg:top-24">
+                <div className="text-center lg:text-left mb-4">
+                  <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-1">Preview</p>
+                  <h3 className="text-2xl lg:text-3xl font-black text-foreground">대표 강의 프리뷰</h3>
                 </div>
+                {mainPreviewEmbedUrl ? (
+                  <div className="aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl border border-border/40">
+                    <iframe
+                      src={mainPreviewEmbedUrl}
+                      className="w-full h-full"
+                      loading="lazy"
+                      title="시대영재학원 대표 강의 프리뷰"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-video rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground border border-dashed border-border">
+                    <div className="text-center px-4">
+                      <Video className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                      <p className="text-sm">강의 영상 준비 중</p>
+                      <p className="text-xs mt-1 opacity-70">관리자 페이지에서 "정우석" 슬롯에 YouTube URL을 등록하면 표시됩니다.</p>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* CTA */}
