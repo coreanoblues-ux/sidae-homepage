@@ -673,7 +673,7 @@ export default function Landing() {
                   return (
                     <div
                       key={ins.slug}
-                      className={`grid grid-cols-1 md:grid-cols-12 gap-4 px-5 py-4 items-center ${isLast ? "" : "border-b border-border"}`}
+                      className={`grid grid-cols-1 md:grid-cols-12 gap-4 px-5 py-2.5 items-center ${isLast ? "" : "border-b border-border"}`}
                       data-testid={`row-instructor-${ins.slug}`}
                     >
                       {/* Photo + Name */}
@@ -687,7 +687,6 @@ export default function Landing() {
                           />
                         </div>
                         <h3 className="font-bold text-foreground text-base mt-2">{ins.name}</h3>
-                        <p className="text-xs text-primary font-semibold">{ins.role}</p>
                       </div>
 
                       {/* Credentials */}
