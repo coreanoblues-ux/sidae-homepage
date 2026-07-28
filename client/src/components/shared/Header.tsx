@@ -379,21 +379,21 @@ export function Header() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <>
-                    <Button 
-                      variant="ghost" 
+                  <div className="hidden md:flex items-center space-x-3">
+                    <Button
+                      variant="ghost"
                       onClick={() => setShowLoginDialog(true)}
                       data-testid="button-login"
                     >
                       로그인
                     </Button>
-                    <Button 
+                    <Button
                       onClick={() => setShowSignupDialog(true)}
                       data-testid="button-signup"
                     >
                       회원가입
                     </Button>
-                  </>
+                  </div>
                 )}
               </>
             )}
@@ -687,6 +687,31 @@ export function Header() {
                   </button>
                 )
               ))}
+              {!isLoading && !isAuthenticated && (
+                <div className="pt-3 border-t border-border flex flex-col space-y-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setShowLoginDialog(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full justify-start"
+                    data-testid="button-login-mobile"
+                  >
+                    로그인
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowSignupDialog(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full justify-start"
+                    data-testid="button-signup-mobile"
+                  >
+                    회원가입
+                  </Button>
+                </div>
+              )}
               <div className="pt-3 border-t border-border">
                 <Button
                   variant="ghost"

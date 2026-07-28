@@ -86,6 +86,25 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
+
+  /* 브랜드 감성 태그라인 — 부드럽고 프로페셔널한 한글 세리프 렌더링 */
+  .tagline-serif {
+    font-family: 'Noto Serif KR', 'Nanum Myeongjo', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern", "liga";
+  }
+
+  .tagline-serif-emph {
+    font-family: 'Noto Serif KR', 'Nanum Myeongjo', Georgia, serif;
+    font-weight: 700;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 }
 
 @keyframes fadeInUp {
