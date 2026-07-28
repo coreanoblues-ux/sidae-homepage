@@ -137,7 +137,7 @@ export function PopupOverlay() {
         {shown.map((p) => (
           <div
             key={p.id}
-            className="pointer-events-auto bg-background border border-border shadow-2xl rounded-lg overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300"
+            className="popup-card-enter pointer-events-auto bg-background border border-border shadow-2xl rounded-lg overflow-hidden"
             data-testid={`popup-card-${p.id}`}
             role="dialog"
             aria-labelledby={`popup-title-${p.id}`}

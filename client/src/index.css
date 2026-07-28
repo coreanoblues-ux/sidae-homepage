@@ -117,6 +117,22 @@
   }
 }
 
+/* 팝업 카드 진입 애니메이션 — tailwindcss-animate 의 animate-in 이
+   fill-mode:forwards 로 opacity 0 에 stuck 되는 버그 회피용 자체 정의 */
+@keyframes popupCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.popup-card-enter {
+  animation: popupCardEnter 0.3s ease-out both;
+}
+
 /* Background Patterns - orange tones */
 .pattern-bg {
   position: relative;
