@@ -437,6 +437,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 팝업 공지 (public read - 활성 팝업만)
+  app.get('/api/popups', async (_req, res) => {
+    try {
+      const list = await storage.getActivePopups();
+      res.json(list);
+    } catch (error) {
+      console.error("Error fetching popups:", error);
+      res.status(500).json({ message: "Failed to fetch popups" });
+    }
+  });
+
   // 🎓 강사 영상 (about 페이지 프리뷰) - public read
   app.get('/api/instructor-videos', async (_req, res) => {
     try {

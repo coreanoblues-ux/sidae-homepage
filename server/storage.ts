@@ -8,6 +8,7 @@ import {
   approvals,
   galleryImages,
   programs,
+  popups,
   simpleVideos,
   instructorVideos,
   type User,
@@ -25,6 +26,8 @@ import {
   type InsertGalleryImage,
   type Program,
   type InsertProgram,
+  type Popup,
+  type InsertPopup,
   type SimpleVideo,
   type InsertSimpleVideo,
   type InstructorVideo,
@@ -100,6 +103,15 @@ export interface IStorage {
   createProgram(program: InsertProgram): Promise<Program>;
   updateProgram(id: string, program: Partial<InsertProgram>): Promise<Program>;
   deleteProgram(id: string): Promise<void>;
+
+  // Popup operations
+  getPopups(): Promise<Popup[]>;
+  getActivePopups(): Promise<Popup[]>;
+  getPopup(id: string): Promise<Popup | undefined>;
+  createPopup(popup: InsertPopup): Promise<Popup>;
+  updatePopup(id: string, popup: Partial<InsertPopup>): Promise<Popup>;
+  deletePopup(id: string): Promise<void>;
+  togglePopupActive(id: string): Promise<Popup>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -429,6 +441,55 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProgram(id: string): Promise<void> {
     await db.delete(programs).where(eq(programs.id, id));
+  }
+
+  // Popup operations
+  async getPopups(): Promise<Popup[]> {
+    return await db.select().from(popups).orderBy(asc(popups.order), desc(popups.createdAt));
+  }
+
+  async getActivePopups(): Promise<Popup[]> {
+    return await db
+      .select()
+      .from(popups)
+      .where(eq(popups.isActive, true))
+      .orderBy(asc(popups.order), desc(popups.createdAt));
+  }
+
+  async getPopup(id: string): Promise<Popup | undefined> {
+    const [popup] = await db.select().from(popups).where(eq(popups.id, id));
+    return popup;
+  }
+
+  async createPopup(popup: InsertPopup): Promise<Popup> {
+    const [newPopup] = await db.insert(popups).values(popup).returning();
+    return newPopup;
+  }
+
+  async updatePopup(id: string, popup: Partial<InsertPopup>): Promise<Popup> {
+    const [updatedPopup] = await db
+      .update(popups)
+      .set({ ...popup, updatedAt: new Date() })
+      .where(eq(popups.id, id))
+      .returning();
+    return updatedPopup;
+  }
+
+  async deletePopup(id: string): Promise<void> {
+    await db.delete(popups).where(eq(popups.id, id));
+  }
+
+  async togglePopupActive(id: string): Promise<Popup> {
+    const [current] = await db.select().from(popups).where(eq(popups.id, id));
+    if (!current) {
+      throw new Error("Popup not found");
+    }
+    const [updated] = await db
+      .update(popups)
+      .set({ isActive: !current.isActive, updatedAt: new Date() })
+      .where(eq(popups.id, id))
+      .returning();
+    return updated;
   }
 
   // 🎯 Simple Video operations 구현 (사용자 가이드대로)

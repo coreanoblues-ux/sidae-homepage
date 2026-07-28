@@ -946,6 +946,380 @@ function InstructorVideosTab() {
   );
 }
 
+/* ===============================================================
+   팝업 관리 탭 — 랜딩 페이지에 띄우는 공지 팝업
+   - 여러 개 동시 표시 가능 (활성 상태만 노출)
+   - 이미지 URL + 링크 버튼 지원
+   - 개별 활성/비활성 토글
+   =============================================================== */
+type PopupRow = {
+  id: string;
+  title: string;
+  content: string | null;
+  imageUrl: string | null;
+  linkUrl: string | null;
+  linkLabel: string | null;
+  isActive: boolean;
+  order: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+const emptyPopupForm = {
+  title: '',
+  content: '',
+  imageUrl: '',
+  linkUrl: '',
+  linkLabel: '',
+  isActive: true,
+  order: 0,
+};
+
+const PopupManager = () => {
+  const [popups, setPopups] = useState<PopupRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<PopupRow | null>(null);
+  const [formData, setFormData] = useState({ ...emptyPopupForm });
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/popups', { credentials: 'include' });
+      const data = await res.json();
+      if (data.ok) {
+        setPopups(data.items || []);
+      } else if (res.status === 401) {
+        alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+        window.location.href = '/_superadmin';
+      }
+    } catch (e) {
+      console.error('Error loading popups:', e);
+    }
+    setLoading(false);
+  };
+
+  React.useEffect(() => {
+    load();
+  }, []);
+
+  const openAdd = () => {
+    setEditing(null);
+    setFormData({ ...emptyPopupForm });
+    setDialogOpen(true);
+  };
+
+  const openEdit = (p: PopupRow) => {
+    setEditing(p);
+    setFormData({
+      title: p.title || '',
+      content: p.content || '',
+      imageUrl: p.imageUrl || '',
+      linkUrl: p.linkUrl || '',
+      linkLabel: p.linkLabel || '',
+      isActive: p.isActive,
+      order: p.order || 0,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title.trim()) {
+      alert('제목은 필수입니다.');
+      return;
+    }
+
+    const payload = {
+      title: formData.title.trim(),
+      content: formData.content.trim() || null,
+      imageUrl: formData.imageUrl.trim() || null,
+      linkUrl: formData.linkUrl.trim() || null,
+      linkLabel: formData.linkLabel.trim() || null,
+      isActive: formData.isActive,
+      order: Number(formData.order) || 0,
+    };
+
+    try {
+      const url = editing ? `/api/admin/popups/${editing.id}` : '/api/admin/popups';
+      const method = editing ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setDialogOpen(false);
+        setEditing(null);
+        setFormData({ ...emptyPopupForm });
+        load();
+      } else {
+        const msg =
+          data.message ||
+          (data.errors && data.errors[0]?.message) ||
+          '저장 실패';
+        alert('❌ ' + msg);
+      }
+    } catch (err) {
+      console.error('Error saving popup:', err);
+      alert('네트워크 오류가 발생했습니다.');
+    }
+  };
+
+  const handleToggle = async (p: PopupRow) => {
+    try {
+      const res = await fetch(`/api/admin/popups/${p.id}/toggle`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.ok) {
+        load();
+      }
+    } catch (e) {
+      console.error('Error toggling popup:', e);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('이 팝업을 삭제하시겠습니까?')) return;
+    try {
+      const res = await fetch(`/api/admin/popups/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.ok) {
+        load();
+      }
+    } catch (e) {
+      console.error('Error deleting popup:', e);
+    }
+  };
+
+  return (
+    <div className="space-y-4" data-testid="popup-manager">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold">팝업 관리</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            메인 홈페이지에 뜨는 팝업 창을 관리합니다. 활성 상태인 팝업만 방문자에게 노출됩니다.
+          </p>
+        </div>
+        <div className="space-x-2">
+          <Button onClick={load} disabled={loading} variant="outline" size="sm">
+            {loading ? '로딩중...' : '새로고침'}
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openAdd} data-testid="button-add-popup">
+                <Plus className="w-4 h-4 mr-2" />
+                팝업 추가
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>{editing ? '팝업 수정' : '팝업 추가'}</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="popup-title">제목 *</Label>
+                  <Input
+                    id="popup-title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    required
+                    placeholder="예: 여름 특강 신청 안내"
+                    data-testid="input-popup-title"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="popup-content">본문</Label>
+                  <Textarea
+                    id="popup-content"
+                    value={formData.content}
+                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    rows={4}
+                    placeholder="팝업 본문 내용을 입력하세요. (선택)"
+                    data-testid="input-popup-content"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="popup-image">이미지 URL</Label>
+                  <Input
+                    id="popup-image"
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    placeholder="/images/popup-example.png 또는 https://..."
+                    data-testid="input-popup-image"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    비워두면 이미지 없이 텍스트만 표시됩니다.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="popup-link-url">링크 URL</Label>
+                    <Input
+                      id="popup-link-url"
+                      type="text"
+                      value={formData.linkUrl}
+                      onChange={(e) => setFormData({ ...formData, linkUrl: e.target.value })}
+                      placeholder="/courses 또는 https://..."
+                      data-testid="input-popup-link-url"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="popup-link-label">버튼 라벨</Label>
+                    <Input
+                      id="popup-link-label"
+                      value={formData.linkLabel}
+                      onChange={(e) => setFormData({ ...formData, linkLabel: e.target.value })}
+                      placeholder="자세히 보기"
+                      data-testid="input-popup-link-label"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="popup-order">순서</Label>
+                    <Input
+                      id="popup-order"
+                      type="number"
+                      value={formData.order}
+                      onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) })}
+                      placeholder="0"
+                      data-testid="input-popup-order"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">낮을수록 먼저 표시</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="popup-active">활성 상태</Label>
+                    <Select
+                      value={formData.isActive ? 'yes' : 'no'}
+                      onValueChange={(v) => setFormData({ ...formData, isActive: v === 'yes' })}
+                    >
+                      <SelectTrigger id="popup-active" data-testid="select-popup-active">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="yes">활성 (노출)</SelectItem>
+                        <SelectItem value="no">비활성 (숨김)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setDialogOpen(false)}
+                  >
+                    취소
+                  </Button>
+                  <Button type="submit" data-testid="button-save-popup">
+                    <Save className="w-4 h-4 mr-1" />
+                    {editing ? '수정' : '추가'}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {loading && popups.length === 0 ? (
+        <p>로딩중...</p>
+      ) : popups.length === 0 ? (
+        <Card>
+          <CardContent className="pt-6 text-center text-muted-foreground">
+            등록된 팝업이 없습니다. "팝업 추가" 버튼으로 새 팝업을 만드세요.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-3">
+          {popups.map((p) => (
+            <Card key={p.id} data-testid={`popup-row-${p.id}`}>
+              <CardContent className="pt-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          p.isActive ? 'bg-emerald-500' : 'bg-gray-400'
+                        }`}
+                      />
+                      <p className="font-semibold truncate">{p.title}</p>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded ${
+                          p.isActive
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        {p.isActive ? '활성' : '비활성'}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        순서 {p.order}
+                      </span>
+                    </div>
+                    {p.content && (
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-1">
+                        {p.content}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                      {p.imageUrl && (
+                        <span className="inline-flex items-center gap-1">
+                          🖼️ 이미지 있음
+                        </span>
+                      )}
+                      {p.linkUrl && (
+                        <span className="inline-flex items-center gap-1">
+                          🔗 {p.linkLabel || '링크'} → {p.linkUrl}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1 shrink-0">
+                    <Button
+                      size="sm"
+                      variant={p.isActive ? 'outline' : 'default'}
+                      onClick={() => handleToggle(p)}
+                      data-testid={`button-toggle-popup-${p.id}`}
+                    >
+                      {p.isActive ? '숨기기' : '노출'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openEdit(p)}
+                      data-testid={`button-edit-popup-${p.id}`}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(p.id)}
+                      data-testid={`button-delete-popup-${p.id}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('pending');
 
@@ -1050,6 +1424,17 @@ export default function AdminDashboard() {
               >
                 강사 영상
               </button>
+              <button
+                onClick={() => setActiveTab('popups')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'popups'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+                data-testid="button-tab-popups"
+              >
+                팝업 관리
+              </button>
             </nav>
           </div>
 
@@ -1059,6 +1444,7 @@ export default function AdminDashboard() {
             {activeTab === 'gallery' && <GalleryManager />}
             {activeTab === 'members' && <ApprovedMembersTab />}
             {activeTab === 'instructor-videos' && <InstructorVideosTab />}
+            {activeTab === 'popups' && <PopupManager />}
           </div>
         </div>
       </div>

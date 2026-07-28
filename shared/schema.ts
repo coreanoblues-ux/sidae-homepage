@@ -130,6 +130,20 @@ export const instructorVideos = pgTable("instructor_videos", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// 팝업 공지 테이블 (관리자가 랜딩 페이지에 띄우는 팝업 창)
+export const popups = pgTable("popups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),           // 팝업 제목
+  content: text("content"),                     // 본문 (선택, 여러 줄 텍스트)
+  imageUrl: varchar("image_url"),               // 이미지 URL (선택)
+  linkUrl: varchar("link_url"),                 // 링크 버튼 이동 URL (선택)
+  linkLabel: varchar("link_label"),             // 링크 버튼 라벨 (예: "자세히 보기")
+  isActive: boolean("is_active").default(true).notNull(), // 활성/비활성 스위치
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // 프로그램 정보 테이블 (관리자가 편집 가능한 프로그램 소개 페이지)
 export const programs = pgTable("programs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -238,6 +252,12 @@ export const insertProgramSchema = createInsertSchema(programs).omit({
   updatedAt: true,
 });
 
+export const insertPopupSchema = createInsertSchema(popups).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -254,6 +274,8 @@ export type GalleryImage = typeof galleryImages.$inferSelect;
 export type InsertGalleryImage = z.infer<typeof insertGalleryImageSchema>;
 export type Program = typeof programs.$inferSelect;
 export type InsertProgram = z.infer<typeof insertProgramSchema>;
+export type Popup = typeof popups.$inferSelect;
+export type InsertPopup = z.infer<typeof insertPopupSchema>;
 export type Approval = typeof approvals.$inferSelect;
 
 // 🎯 SimpleVideo 스키마와 타입 (사용자 가이드대로)

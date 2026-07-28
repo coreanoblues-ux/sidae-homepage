@@ -8,7 +8,7 @@ export default function About() {
   // SEO 메타태그 — 학원 소개
   useSEO({
     title: "봉선동 영어학원 시대영재 × 페이지원 영어학원 — 원장 & 강사진 소개",
-    description: "우리가 가르치는 것은 단지 한 페이지가 아닙니다. 아이가 살아갈 더 나은 내일입니다. 시대영재 × 페이지원 영어학원 강사 소개 — 강남영단기 1타강사·해커스 50만뷰 인기강사 출신 원장 직강. 광주 남구 봉선동 영어학원.",
+    description: "우리가 가르치는 것은 단지 영어 학습이 아닙니다. 아이가 살아갈 더 나은 내일의 한 페이지입니다. 시대영재 × 페이지원 영어학원 강사 소개 — 강남영단기 1타강사·해커스 50만뷰 인기강사 출신 원장 직강. 광주 남구 봉선동 영어학원.",
     ogUrl: "https://www.sidae-edu.com/about",
   });
 
@@ -27,9 +27,9 @@ export default function About() {
                 시대영재 × 페이지원<br />영어학원 원장
               </h1>
               <p className="tagline-serif text-lg lg:text-xl text-orange-100 mb-6 leading-relaxed">
-                우리가 가르치는 것은 단지 한 페이지가 아닙니다.
+                우리가 가르치는 것은 단지 영어 학습이 아닙니다.
                 <br />
-                <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-300">아이가 살아갈 더 나은 내일</span>입니다.
+                <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-300">아이가 살아갈 더 나은 내일의 한 페이지</span>입니다.
               </p>
               <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
                 강남영단기 1타강사, 해커스 50만뷰+ 인기강사, TOEIC 990점<br />

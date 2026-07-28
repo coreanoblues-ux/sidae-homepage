@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { storage } from '../storage';
 import { insertSimpleVideoSchema } from '../shared/schema';
+import { insertPopupSchema } from '@shared/schema';
 import { z } from 'zod';
 import { normalizeVideo, VIDEO_ERROR_MESSAGES } from '../utils/videos';
 import { cookieOpts } from '../auth/cookie';
@@ -443,6 +444,69 @@ router.put('/instructor-videos/:slug', adminGuard, async (req, res) => {
     }
     console.error('Error updating instructor video:', error);
     res.status(500).json({ ok: false, message: 'Failed to update instructor video' });
+  }
+});
+
+// 팝업 관리 - 전체 목록 (활성/비활성 모두)
+router.get('/popups', adminGuard, async (_req, res) => {
+  try {
+    const items = await storage.getPopups();
+    res.json({ ok: true, items });
+  } catch (error) {
+    console.error('Error fetching popups:', error);
+    res.status(500).json({ ok: false, message: 'Failed to fetch popups' });
+  }
+});
+
+// 팝업 관리 - 새 팝업 생성
+router.post('/popups', adminGuard, async (req, res) => {
+  try {
+    const data = insertPopupSchema.parse(req.body);
+    const item = await storage.createPopup(data);
+    res.json({ ok: true, item });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ ok: false, code: 'VALIDATION_ERROR', errors: error.errors });
+    }
+    console.error('Error creating popup:', error);
+    res.status(500).json({ ok: false, message: 'Failed to create popup' });
+  }
+});
+
+// 팝업 관리 - 수정
+router.put('/popups/:id', adminGuard, async (req, res) => {
+  try {
+    const data = insertPopupSchema.partial().parse(req.body);
+    const item = await storage.updatePopup(req.params.id, data);
+    res.json({ ok: true, item });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ ok: false, code: 'VALIDATION_ERROR', errors: error.errors });
+    }
+    console.error('Error updating popup:', error);
+    res.status(500).json({ ok: false, message: 'Failed to update popup' });
+  }
+});
+
+// 팝업 관리 - 활성/비활성 토글
+router.post('/popups/:id/toggle', adminGuard, async (req, res) => {
+  try {
+    const item = await storage.togglePopupActive(req.params.id);
+    res.json({ ok: true, item });
+  } catch (error) {
+    console.error('Error toggling popup:', error);
+    res.status(500).json({ ok: false, message: 'Failed to toggle popup' });
+  }
+});
+
+// 팝업 관리 - 삭제
+router.delete('/popups/:id', adminGuard, async (req, res) => {
+  try {
+    await storage.deletePopup(req.params.id);
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error deleting popup:', error);
+    res.status(500).json({ ok: false, message: 'Failed to delete popup' });
   }
 });
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gallery } from "@/components/shared/Gallery";
+import { PopupOverlay } from "@/components/shared/PopupOverlay";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,8 +47,8 @@ const heroSlides = [
 export default function Landing() {
   // SEO 메타태그 — 홈
   useSEO({
-    title: "봉선동 영어학원 | 시대영재 X 페이지원 영어학원 — 우리가 가르치는 것은 단지 한 페이지가 아닙니다",
-    description: "우리가 가르치는 것은 단지 한 페이지가 아닙니다. 아이가 살아갈 더 나은 내일입니다. 시대영재 X 페이지원 영어학원 — 강남영단기 1타·해커스 인기강사 출신 원장 직강. 광주 남구 봉선동 중고등 내신·수능 영어 전문.",
+    title: "봉선동 영어학원 | 시대영재 X 페이지원 영어학원 — 우리가 가르치는 것은 단지 영어 학습이 아닙니다",
+    description: "우리가 가르치는 것은 단지 영어 학습이 아닙니다. 아이가 살아갈 더 나은 내일의 한 페이지입니다. 시대영재 X 페이지원 영어학원 — 강남영단기 1타·해커스 인기강사 출신 원장 직강. 광주 남구 봉선동 중고등 내신·수능 영어 전문.",
     ogUrl: "https://www.sidae-edu.com/",
   });
 
@@ -213,6 +214,9 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen">
+      {/* 관리자가 관리하는 팝업 창 (활성 팝업이 있으면 자동 노출) */}
+      <PopupOverlay />
+
       {/* Password Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <DialogContent className="sm:max-w-md">
@@ -264,10 +268,10 @@ export default function Landing() {
                 시대영재 × 페이지원 영어학원
               </p>
               <p className="tagline-serif text-base sm:text-lg lg:text-xl text-gray-800 leading-relaxed">
-                우리가 가르치는 것은 단지 한 페이지가 아닙니다.
+                우리가 가르치는 것은 단지 영어 학습이 아닙니다.
                 <br />
                 <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">
-                  아이가 살아갈 더 나은 내일
+                  아이가 살아갈 더 나은 내일의 한 페이지
                 </span>
                 입니다.
               </p>
@@ -666,7 +670,7 @@ export default function Landing() {
               검증된 강사진
             </h2>
             <p className="tagline-serif text-base md:text-lg text-primary/90 max-w-3xl mx-auto leading-relaxed mb-3">
-              우리가 가르치는 것은 단지 한 페이지가 아닙니다. <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">아이가 살아갈 더 나은 내일</span>입니다.
+              우리가 가르치는 것은 단지 영어 학습이 아닙니다. <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">아이가 살아갈 더 나은 내일의 한 페이지</span>입니다.
             </p>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               (전)강남영단기 1타강사 출신 캐나다국적 원장과 함께
@@ -981,7 +985,7 @@ export default function Landing() {
                 <p className="text-sm text-secondary-foreground/70 mt-2">광주광역시 남구 봉선중앙로16, 2층</p>
               </div>
               <p className="tagline-serif text-base md:text-lg text-primary/90 mb-2 leading-relaxed">
-                우리가 가르치는 것은 단지 한 페이지가 아닙니다. <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">아이가 살아갈 더 나은 내일</span>입니다.
+                우리가 가르치는 것은 단지 영어 학습이 아닙니다. <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">아이가 살아갈 더 나은 내일의 한 페이지</span>입니다.
               </p>
               <p className="text-secondary-foreground/75 mb-4 leading-relaxed">
                 실력 있는 강사가 실력 있는 학생을 만든다는 믿음, 시대영재 × 페이지원의 시작입니다.
