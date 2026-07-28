@@ -130,7 +130,7 @@ export function PopupOverlay() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] pointer-events-none flex items-start justify-center pt-16 sm:pt-24 px-4"
+      className="fixed inset-0 z-[60] pointer-events-none flex items-start justify-start pt-16 sm:pt-20 pl-4 sm:pl-6 lg:pl-8 pr-4"
       data-testid="popup-overlay"
     >
       <div className="flex flex-col gap-4 w-full max-w-md">
