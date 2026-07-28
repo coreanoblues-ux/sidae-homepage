@@ -143,46 +143,46 @@ export function PopupOverlay() {
             aria-labelledby={`popup-title-${p.id}`}
           >
             {p.imageUrl && (
-              <div className="w-full bg-muted">
+              <div className="w-full bg-muted flex items-center justify-center">
                 <img
                   src={p.imageUrl}
                   alt={p.title}
-                  className="w-full h-auto max-h-64 object-cover"
+                  className="w-full h-auto max-h-[70vh] object-contain"
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).style.display = "none";
                   }}
                 />
               </div>
             )}
-            <div className="p-5">
-              <div className="flex items-start justify-between gap-3 mb-2">
+            <div className="px-3 py-2">
+              <div className="flex items-start justify-between gap-2 mb-1">
                 <h3
                   id={`popup-title-${p.id}`}
-                  className="text-lg font-bold text-foreground flex-1"
+                  className="text-base font-bold text-foreground flex-1 leading-tight"
                   data-testid={`popup-title-${p.id}`}
                 >
                   {p.title}
                 </h3>
                 <button
                   onClick={() => closeOnce(p.id)}
-                  className="text-muted-foreground hover:text-foreground p-1 -m-1 rounded"
+                  className="text-muted-foreground hover:text-foreground p-0.5 -m-0.5 rounded"
                   aria-label="닫기"
                   data-testid={`popup-close-${p.id}`}
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
               {p.content && (
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap mb-4">
+                <p className="text-xs text-muted-foreground whitespace-pre-wrap mb-2 leading-snug">
                   {p.content}
                 </p>
               )}
               {p.linkUrl && (
-                <div className="mb-4">
+                <div className="mb-2">
                   <Button
                     asChild
                     size="sm"
-                    className="w-full"
+                    className="w-full h-8 text-sm"
                     data-testid={`popup-link-${p.id}`}
                   >
                     <a
@@ -190,12 +190,12 @@ export function PopupOverlay() {
                       target={/^https?:\/\//i.test(p.linkUrl) ? "_blank" : undefined}
                       rel={/^https?:\/\//i.test(p.linkUrl) ? "noreferrer" : undefined}
                     >
-                      {p.linkLabel || "자세히 보기"}
+                      {p.linkLabel || "신청하기"}
                     </a>
                   </Button>
                 </div>
               )}
-              <div className="flex justify-between items-center pt-2 border-t border-border/60">
+              <div className="flex justify-between items-center pt-1.5 border-t border-border/60">
                 <button
                   onClick={() => hideForToday(p)}
                   className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
