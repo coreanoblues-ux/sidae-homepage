@@ -981,7 +981,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold" data-testid="text-dashboard-title">관리자 대시보드</h1>
-              <p className="text-muted-foreground">시대영재 학원 관리자 페이지</p>
+              <p className="text-muted-foreground">시대영재 × 페이지원 영어학원 관리자 페이지</p>
             </div>
             <Button 
               variant="outline"

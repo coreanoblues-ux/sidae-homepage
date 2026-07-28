@@ -1,6 +1,6 @@
 /**
  * /location — 봉선동 영어학원 네이버 지역 SEO 전용 랜딩 페이지
- * 시대영재학원 (sidae-edu.com)
+ * 시대영재 × 페이지원 영어학원 (sidae-edu.com)
  *
  * 목적: 네이버 "봉선동 영어학원" 지역 검색 상위 노출
  *  - H1 / 주소 / tel 링크 / 네이버 지도 iframe
@@ -16,12 +16,12 @@ import { useSEO } from "@/hooks/useSEO";
 
 // ───── 학원 고정 정보 ─────
 const ACADEMY = {
-  name: "시대영재학원",
-  alternateName: "봉선동 영어학원 시대영재학원",
+  name: "시대영재 × 페이지원 영어학원",
+  alternateName: "봉선동 영어학원 시대영재 × 페이지원 영어학원",
   // 도로명 + 상세주소 (시/도 포함 정규화 형태)
   streetAddress: "봉선중앙로 16, 2층",
   addressLocality: "광주광역시 남구",
-  fullAddress: "광주광역시 남구 봉선중앙로 16, 2층 시대영재학원",
+  fullAddress: "광주광역시 남구 봉선중앙로 16, 2층 시대영재 × 페이지원 영어학원",
   telephone: "062-462-0990",
   telephoneAlt: "062-456-0990",
   url: "https://www.sidae-edu.com/location",
@@ -41,12 +41,12 @@ const ACADEMY = {
 export default function Location() {
   // ───── SEO 메타태그 ─────
   useSEO({
-    title: "봉선동 영어학원 시대영재학원 — 오시는 길 · 위치 · 약도",
+    title: "봉선동 영어학원 시대영재 × 페이지원 영어학원 — 오시는 길 · 위치 · 약도",
     description:
-      "봉선동 영어학원 시대영재학원 오시는 길. 광주광역시 남구 봉선중앙로 16, 2층. 봉선중·봉선고 근방, 봉선동 아파트 단지에서 도보 가능. 전화 062-462-0990.",
+      "봉선동 입시 영어의 더 큰 한 페이지를 엽니다. 시대영재 × 페이지원 영어학원 오시는 길 — 광주광역시 남구 봉선중앙로 16, 2층. 봉선중·봉선고 근방, 봉선동 아파트 단지에서 도보 가능. 전화 062-462-0990.",
     keywords:
-      "봉선동 영어학원, 봉선동 학원, 봉선동 영어, 시대영재학원 오시는 길, 시대영재학원 위치, 광주 남구 영어학원, 봉선중 근처 영어학원, 봉선고 근처 영어학원, 봉선동 영어 과외, 봉선동 수능영어",
-    ogTitle: "봉선동 영어학원 시대영재학원 — 오시는 길",
+      "봉선동 영어학원, 봉선동 학원, 봉선동 영어, 시대영재, 시대영재학원 오시는 길, 페이지원, 페이지원영어학원, 페이지원 영어학원 오시는 길, 시대영재 페이지원, 광주 남구 영어학원, 봉선중 근처 영어학원, 봉선고 근처 영어학원, 봉선동 영어 과외, 봉선동 수능영어",
+    ogTitle: "봉선동 영어학원 시대영재 × 페이지원 영어학원 — 오시는 길",
     ogDescription:
       "광주광역시 남구 봉선중앙로 16, 2층. 봉선중학교·봉선고등학교 인근. 전화 062-462-0990.",
     ogUrl: ACADEMY.url,
@@ -147,7 +147,7 @@ export default function Location() {
   //  - 정확한 "플레이스" 임베드가 필요하면 네이버 지도에서 본 학원 플레이스 ID를 받아
   //    src 를 https://map.naver.com/p/entry/place/{PLACE_ID} 로 교체하면 됩니다.
   const naverMapQuery = encodeURIComponent(
-    "광주광역시 남구 봉선중앙로 16 시대영재학원"
+    "광주광역시 남구 봉선중앙로 16 시대영재 페이지원 영어학원"
   );
   const naverMapIframeSrc = `https://map.naver.com/p/search/${naverMapQuery}`;
   const naverMapViewUrl = `https://map.naver.com/p/search/${naverMapQuery}`;
@@ -164,11 +164,14 @@ export default function Location() {
             오시는 길 · Location
           </div>
           <h1
-            className="text-3xl md:text-4xl lg:text-5xl font-black leading-tight mb-6"
+            className="text-3xl md:text-4xl lg:text-5xl font-black leading-tight mb-4"
             data-testid="heading-location"
           >
-            봉선동 영어학원 시대영재학원 — 오시는 길
+            봉선동 영어학원 시대영재 × 페이지원 영어학원<br className="hidden md:block" /> — 오시는 길
           </h1>
+          <p className="text-base md:text-lg font-serif italic text-orange-200 mb-4 leading-snug">
+            봉선동 입시 영어의 <span className="font-bold not-italic">더 큰 한 페이지</span>를 엽니다.
+          </p>
           <p className="text-lg lg:text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
             광주광역시 남구 봉선동 중심, 봉선중학교·봉선고등학교 인근에
             위치한 중·고등부 내신 수능 영어 전문 학원입니다.
@@ -195,7 +198,7 @@ export default function Location() {
                   봉선중앙로 16, 2층
                   <br />
                   <span className="font-semibold text-foreground">
-                    시대영재학원
+                    시대영재 × 페이지원 영어학원
                   </span>
                 </address>
               </CardContent>
@@ -259,7 +262,7 @@ export default function Location() {
           <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-border">
             <iframe
               src={naverMapIframeSrc}
-              title="봉선동 영어학원 시대영재학원 네이버 지도"
+              title="봉선동 영어학원 시대영재 × 페이지원 영어학원 네이버 지도"
               width="100%"
               height="480"
               style={{ border: 0 }}
@@ -295,7 +298,7 @@ export default function Location() {
 
           <div className="prose prose-lg max-w-none text-foreground space-y-6 leading-relaxed">
             <p data-testid="text-landmark-intro">
-              <strong>시대영재학원</strong>은 <strong>광주광역시 남구 봉선동</strong>의
+              <strong>시대영재 × 페이지원 영어학원</strong>은 <strong>광주광역시 남구 봉선동</strong>의
               교육 중심지인 봉선중앙로에 자리 잡은 <strong>봉선동 영어학원</strong>입니다.
               광주 남구 봉선동 일대의 중·고등학생 내신·수능 영어 교육을 전문으로
               하며, 도보·차량·대중교통 모두 접근이 편리한 위치에 있습니다.
@@ -382,7 +385,7 @@ export default function Location() {
             상담은 전화 한 통이면 충분합니다
           </h2>
           <p className="text-muted-foreground mb-8">
-            봉선동 영어학원 시대영재학원은 학생 한 명 한 명의 실력을 책임집니다.
+            봉선동 영어학원 시대영재 × 페이지원 영어학원은 학생 한 명 한 명의 실력을 책임집니다.
             지금 바로 문의해 보세요.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

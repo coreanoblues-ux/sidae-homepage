@@ -135,7 +135,7 @@ export default function CourseDetail() {
                 </span>
                 <span className="flex items-center">
                   <User className="w-4 h-4 mr-1" />
-                  시대영재 학원 원장
+                  시대영재 × 페이지원 영어학원 원장
                 </span>
               </div>
             </div>
@@ -221,7 +221,7 @@ export default function CourseDetail() {
                 
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">강사</span>
-                  <span className="font-semibold">시대영재 학원 원장</span>
+                  <span className="font-semibold">시대영재 × 페이지원 영어학원 원장</span>
                 </div>
                 
                 <div className="flex justify-between">
@@ -255,11 +255,11 @@ export default function CourseDetail() {
                 <div className="flex items-center space-x-4 mb-4">
                   <img
                     src="/images/IMG_6558_1758101099677.JPG"
-                    alt="시대영재 학원 원장"
+                    alt="시대영재 × 페이지원 영어학원 원장"
                     className="w-16 h-16 rounded-full object-cover"
                   />
                   <div>
-                    <h3 className="font-semibold text-foreground">시대영재 학원 원장</h3>
+                    <h3 className="font-semibold text-foreground">시대영재 × 페이지원 영어학원 원장</h3>
                     <p className="text-sm text-muted-foreground">토익 만점 강사</p>
                   </div>
                 </div>

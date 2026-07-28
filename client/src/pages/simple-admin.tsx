@@ -282,7 +282,7 @@ export default function SimpleAdmin() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">시대영재 학원</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">시대영재 × 페이지원 영어학원</h1>
             <p className="text-gray-600">관리자 로그인</p>
           </div>
           
@@ -321,7 +321,7 @@ export default function SimpleAdmin() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">시대영재 학원 관리자</h1>
+          <h1 className="text-2xl font-bold text-gray-900">시대영재 × 페이지원 영어학원 관리자</h1>
           <Button variant="outline" onClick={logout}>
             <LogOut className="w-4 h-4 mr-2" />
             로그아웃

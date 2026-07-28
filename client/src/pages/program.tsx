@@ -9,16 +9,16 @@ export default function ProgramPage() {
 
   // SEO 메타태그 — 프로그램별 (slug에 따라 동적 설정)
   const programTitles: Record<string, string> = {
-    "middle-school": "봉선동 영어학원 시대영재학원 — 중등 영어 과정",
-    "high-school":   "봉선동 영어학원 시대영재학원 — 고등 수능 영어 과정",
+    "middle-school": "봉선동 영어학원 시대영재 × 페이지원 영어학원 — 중등 영어 과정",
+    "high-school":   "봉선동 영어학원 시대영재 × 페이지원 영어학원 — 고등 수능 영어 과정",
   };
   const programDescs: Record<string, string> = {
-    "middle-school": "봉선동 영어학원 시대영재학원 중등 영어 과정. 탄탄한 문법·독해 기초부터 내신 완벽 대비까지. 광주 남구 봉선동.",
-    "high-school":   "봉선동 영어학원 시대영재학원 고등 수능 영어 과정. 서술형·SYNTAX 구문독해·수능 1등급 대비. 광주 남구 봉선동.",
+    "middle-school": "봉선동 입시 영어의 더 큰 한 페이지를 엽니다. 시대영재 × 페이지원 영어학원 중등 영어 과정 — 탄탄한 문법·독해 기초부터 내신 완벽 대비까지. 광주 남구 봉선동.",
+    "high-school":   "봉선동 입시 영어의 더 큰 한 페이지를 엽니다. 시대영재 × 페이지원 영어학원 고등 수능 영어 과정 — 서술형·SYNTAX 구문독해·수능 1등급 대비. 광주 남구 봉선동.",
   };
   useSEO({
-    title: programTitles[slug ?? ""] ?? "봉선동 영어학원 시대영재학원 — 프로그램 안내",
-    description: programDescs[slug ?? ""] ?? "봉선동 영어학원 시대영재학원 프로그램 안내. 광주 남구 봉선동 중고등 영어 전문.",
+    title: programTitles[slug ?? ""] ?? "봉선동 영어학원 시대영재 × 페이지원 영어학원 — 프로그램 안내",
+    description: programDescs[slug ?? ""] ?? "봉선동 입시 영어의 더 큰 한 페이지를 엽니다. 시대영재 × 페이지원 영어학원 프로그램 안내 — 광주 남구 봉선동 중고등 영어 전문.",
     ogUrl: `https://www.sidae-edu.com/program/${slug}`,
   });
 

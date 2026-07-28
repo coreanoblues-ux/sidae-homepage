@@ -1,6 +1,6 @@
 /**
  * useSEO - 네이버/구글 검색 최적화를 위한 동적 메타태그 훅
- * 시대영재학원 (sidae-edu.com)
+ * 시대영재 X 페이지원 영어학원 (sidae-edu.com)
  */
 
 interface SEOProps {
@@ -15,7 +15,7 @@ interface SEOProps {
 
 const DEFAULT_OG_IMAGE = "https://www.sidae-edu.com/images/og-image.png";
 const DEFAULT_KEYWORDS =
-  "봉선동 영어학원, 광주 영어학원, 시대영재학원, 봉선동 수능영어, 봉선동 고등영어, 남구 영어학원, 봉선동 영어, 광주 남구 영어학원";
+  "봉선동 영어학원, 광주 영어학원, 시대영재, 시대영재학원, 페이지원, 페이지원영어학원, 페이지원 영어학원, 시대영재 페이지원, 봉선동 수능영어, 봉선동 고등영어, 남구 영어학원, 봉선동 영어, 광주 남구 영어학원";
 
 export function useSEO({
   title,
@@ -45,7 +45,7 @@ export function useSEO({
   setMeta("property", "og:description", ogDescription ?? description);
   setMeta("property", "og:image", ogImage ?? DEFAULT_OG_IMAGE);
   setMeta("property", "og:url", ogUrl ?? window.location.href);
-  setMeta("property", "og:site_name", "시대영재학원");
+  setMeta("property", "og:site_name", "시대영재 X 페이지원 영어학원");
   setMeta("property", "og:locale", "ko_KR");
 }
 

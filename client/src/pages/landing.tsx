@@ -46,8 +46,8 @@ const heroSlides = [
 export default function Landing() {
   // SEO 메타태그 — 홈
   useSEO({
-    title: "봉선동 영어학원 | 시대영재학원 — 내신·수능 영어 전문",
-    description: "봉선동 영어학원 시대영재학원. 강남영단기 1타·해커스 인기강사 출신 원장 직강. 광주 남구 봉선동 중고등 내신·수능 영어 전문.",
+    title: "봉선동 영어학원 | 시대영재 X 페이지원 영어학원 — 봉선동 입시 영어의 더 큰 한 페이지",
+    description: "봉선동 입시 영어의 더 큰 한 페이지를 엽니다. 시대영재 X 페이지원 영어학원 — 강남영단기 1타·해커스 인기강사 출신 원장 직강. 광주 남구 봉선동 중고등 내신·수능 영어 전문.",
     ogUrl: "https://www.sidae-edu.com/",
   });
 
@@ -258,6 +258,22 @@ export default function Landing() {
         <div className="flex flex-col items-center justify-center min-h-full px-4 py-8 text-center relative z-10">
           <div className="w-full max-w-4xl mx-auto">
 
+            {/* ── 브랜드 감성 태그라인 (모든 슬라이드 상단 공통) ── */}
+            <div className="mb-4 sm:mb-5">
+              <p className="text-[11px] sm:text-xs font-semibold text-[#FF6B00] uppercase tracking-[0.25em] mb-1.5">
+                시대영재 × 페이지원 영어학원
+              </p>
+              <p className="text-base sm:text-xl lg:text-2xl font-serif italic text-gray-700 leading-snug">
+                봉선동 입시 영어의
+                <span className="hidden sm:inline"> </span>
+                <br className="sm:hidden" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500 font-bold not-italic">
+                  더 큰 한 페이지
+                </span>
+                를 엽니다.
+              </p>
+            </div>
+
             {/* ── GIF 슬라이드 (gif 속성이 있는 슬라이드) ── */}
             {heroSlides[currentSlide].gif && (
               <div
@@ -267,7 +283,7 @@ export default function Landing() {
               >
                 <img
                   src={heroSlides[currentSlide].gif!}
-                  alt="시대영재학원 히어로 슬라이드"
+                  alt="시대영재 × 페이지원 영어학원 히어로 슬라이드"
                   className="mx-auto w-auto h-auto max-w-full"
                   style={{ maxHeight: '44vh' }}
                 />
@@ -394,7 +410,7 @@ export default function Landing() {
           <div className="text-center mb-16">
             <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">Programs</p>
             <h2 className="text-3xl lg:text-4xl font-black text-foreground mb-4">
-              왜 시대영재 학원인가?
+              왜 시대영재 × 페이지원 영어학원인가?
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               중고등부 입시영어에 특화된 차별화된 커리큘럼으로 확실한 성적 향상을 보장합니다.
@@ -533,7 +549,7 @@ export default function Landing() {
                   <div className="mb-8">
                     <h3 className="text-2xl font-black text-foreground mb-2">고등부 프로그램</h3>
                     <p className="text-muted-foreground italic leading-relaxed">
-                      강남 1타의 압도적 강의력 × 시대영재 데이터 센터의 치밀한 분석 — 고등 영어, 전략이 결과를 바꿉니다. 내신 1등급부터 수능 만점까지 최단 거리 커리큘럼을 제시합니다.
+                      강남 1타의 압도적 강의력 × 시대영재 × 페이지원 데이터 센터의 치밀한 분석 — 고등 영어, 전략이 결과를 바꿉니다. 내신 1등급부터 수능 만점까지 최단 거리 커리큘럼을 제시합니다.
                     </p>
                   </div>
 
@@ -562,7 +578,7 @@ export default function Landing() {
                     </div>
                   </div>
 
-                  <h4 className="text-lg font-bold text-foreground mb-5">시대영재만의 독보적 경쟁력</h4>
+                  <h4 className="text-lg font-bold text-foreground mb-5">시대영재 × 페이지원만의 독보적 경쟁력</h4>
                   <div className="grid sm:grid-cols-3 gap-4">
                     {[
                       { title: '검증된 강남 1타 직강', desc: '(전) 강남 영단기 전 타임 마감의 신화. 수만 명이 선택한 노하우로 대치동 현강 퀄리티를 그대로 전달합니다.' },
@@ -613,7 +629,7 @@ export default function Landing() {
                     </div>
                   </div>
 
-                  <h4 className="text-lg font-bold text-foreground mb-5">시대영재학원만의 독보적 시스템</h4>
+                  <h4 className="text-lg font-bold text-foreground mb-5">시대영재 × 페이지원 영어학원만의 독보적 시스템</h4>
                   <div className="grid sm:grid-cols-3 gap-4">
                     {[
                       { title: '학교별 맞춤 정밀 타격', desc: '광주 영재고 출제 경향을 완벽 분석한 자체 제작 교재. 학교별 내신 지문과 수능 변형 문제를 넘나드는 정독&스킬 강의로 실전 점수 향상을 보장합니다.' },
@@ -645,11 +661,14 @@ export default function Landing() {
             <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">About</p>
             <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
               <Presentation className="mr-2 w-4 h-4" />
-              강사진 소개
+              시대영재 × 페이지원 · 강사진 소개
             </div>
             <h2 className="text-3xl lg:text-4xl font-black text-foreground mb-3">
               검증된 강사진
             </h2>
+            <p className="text-base md:text-lg font-serif italic text-primary/90 max-w-3xl mx-auto leading-relaxed mb-3">
+              봉선동 입시 영어의 <span className="font-bold not-italic">더 큰 한 페이지</span>를 엽니다.
+            </p>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               (전)강남영단기 1타강사 출신 캐나다국적 원장과 함께
               <br className="hidden md:block" />
@@ -719,7 +738,7 @@ export default function Landing() {
                       src={mainPreviewEmbedUrl}
                       className="w-full h-full"
                       loading="lazy"
-                      title="시대영재학원 대표 강의 프리뷰"
+                      title="시대영재 × 페이지원 영어학원 대표 강의 프리뷰"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     />
@@ -764,7 +783,7 @@ export default function Landing() {
               학원 갤러리
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              시대영재 학원의 교육 환경과 수업 현장을 확인해보세요.
+              시대영재 × 페이지원 영어학원의 교육 환경과 수업 현장을 확인해보세요.
             </p>
           </div>
 
@@ -783,7 +802,7 @@ export default function Landing() {
               수강생 후기
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              시대영재 학원에서 실제로 성과를 얻은 수강생들의 생생한 후기를 확인해보세요.
+              시대영재 × 페이지원 영어학원에서 실제로 성과를 얻은 수강생들의 생생한 후기를 확인해보세요.
             </p>
           </div>
 
@@ -923,7 +942,7 @@ export default function Landing() {
               {/* 구글 지도 */}
               <div className="w-full">
                 <iframe
-                  src={`https://maps.google.com/maps?width=600&height=400&hl=ko&q=${encodeURIComponent('광주광역시 남구 봉선중앙로16 시대영재학원')}&ie=UTF8&t=&z=17&iwloc=B&output=embed`}
+                  src={`https://maps.google.com/maps?width=600&height=400&hl=ko&q=${encodeURIComponent('광주광역시 남구 봉선중앙로16 시대영재 페이지원 영어학원')}&ie=UTF8&t=&z=17&iwloc=B&output=embed`}
                   width="100%"
                   height="400"
                   style={{border: 0, borderRadius: '16px'}}
@@ -931,7 +950,7 @@ export default function Landing() {
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   className="shadow-lg"
-                  title="시대영재학원 위치"
+                  title="시대영재 × 페이지원 영어학원 위치"
                 />
               </div>
             </div>
@@ -947,15 +966,26 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="lg:col-span-2">
               <div className="mb-4">
-                <img
-                  src="/images/logo-footer.png"
-                  alt="시대영재 학원"
-                  className="h-10 w-auto object-contain"
-                />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <img
+                    src="/images/logo-footer.png"
+                    alt="시대영재 학원"
+                    className="h-9 sm:h-10 w-auto object-contain"
+                  />
+                  <span className="text-lg font-black text-secondary-foreground/60 select-none" aria-hidden="true">×</span>
+                  <img
+                    src="/images/pageone-logo.png"
+                    alt="페이지원 영어학원"
+                    className="h-9 sm:h-10 w-auto object-contain rounded-md"
+                  />
+                </div>
                 <p className="text-sm text-secondary-foreground/70 mt-2">광주광역시 남구 봉선중앙로16, 2층</p>
               </div>
+              <p className="text-base md:text-lg font-serif italic text-primary/90 mb-2 leading-relaxed">
+                봉선동 입시 영어의 <span className="font-bold not-italic">더 큰 한 페이지</span>를 엽니다.
+              </p>
               <p className="text-secondary-foreground/75 mb-4 leading-relaxed">
-                실력 있는 강사가 실력 있는 학생을 만든다는 믿음, 시대영재의 시작입니다.
+                실력 있는 강사가 실력 있는 학생을 만든다는 믿음, 시대영재 × 페이지원의 시작입니다.
               </p>
             </div>
 
@@ -982,7 +1012,7 @@ export default function Landing() {
 
           <div className="border-t border-secondary-foreground/15 mt-12 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center text-sm text-secondary-foreground/55">
-              <p>&copy; 2024 시대영재 학원. All rights reserved.</p>
+              <p>&copy; 2026 시대영재 × 페이지원 영어학원. All rights reserved.</p>
               <div className="flex space-x-6 mt-4 md:mt-0">
                 <a href="#" className="hover:text-primary transition-colors">이용약관</a>
                 <a href="#" className="hover:text-primary transition-colors">개인정보처리방침</a>

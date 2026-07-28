@@ -1,4 +1,4 @@
-# robots.txt - 시대영재학원 (sidae-edu.com)
+# robots.txt - 시대영재 × 페이지원 영어학원 (sidae-edu.com)
 # 광주광역시 남구 봉선동 중고등 영어 전문 입시학원
 
 # 네이버 크롤러 (Yeti) - 명시적 허용

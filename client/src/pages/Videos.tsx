@@ -175,7 +175,7 @@ const Videos = () => {
               학습 동영상
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              시대영재 학원의 온라인 학습 콘텐츠를 만나보세요
+              시대영재 × 페이지원 영어학원의 온라인 학습 콘텐츠를 만나보세요
             </p>
           </div>
 

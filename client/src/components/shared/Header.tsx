@@ -275,11 +275,19 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-background/80 navbar-blur border-b border-border">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3">
             <img
               src="/images/logo-transparent.png"
               alt="시대영재 학원"
-              className="h-10 w-auto object-contain"
+              className="h-9 sm:h-10 w-auto object-contain"
+            />
+            <span className="text-lg sm:text-xl font-black text-muted-foreground select-none" aria-hidden="true">
+              ×
+            </span>
+            <img
+              src="/images/pageone-logo.png"
+              alt="페이지원 영어학원"
+              className="h-9 sm:h-10 w-auto object-contain rounded-md"
             />
           </Link>
 

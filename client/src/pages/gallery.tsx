@@ -7,8 +7,8 @@ import { useSEO } from "@/hooks/useSEO";
 export default function GalleryPage() {
   // SEO 메타태그 — 갤러리/후기
   useSEO({
-    title: "봉선동 영어학원 후기 — 시대영재학원",
-    description: "봉선동 영어학원 시대영재학원 수강 후기 및 갤러리. 실제 학생들의 성적 향상 사례와 학원 생활을 확인하세요.",
+    title: "봉선동 영어학원 후기 — 시대영재 × 페이지원 영어학원",
+    description: "봉선동 입시 영어의 더 큰 한 페이지를 엽니다. 시대영재 × 페이지원 영어학원 수강 후기 및 갤러리 — 실제 학생들의 성적 향상 사례와 학원 생활을 확인하세요.",
     ogUrl: "https://www.sidae-edu.com/gallery",
   });
   // 데이터베이스에서 갤러리 이미지 불러오기 (visible=true인 것만)
@@ -61,7 +61,7 @@ export default function GalleryPage() {
               학원 갤러리
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              시대영재 학원의 교육 환경과 수업 현장을 확인해보세요.
+              시대영재 × 페이지원 영어학원의 교육 환경과 수업 현장을 확인해보세요.
               원장님의 모습과 학원의 시설, 수업 분위기를 생생하게 만나보실 수 있습니다.
             </p>
             
@@ -71,7 +71,7 @@ export default function GalleryPage() {
                   <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h3 className="font-semibold text-foreground">원장 & 강의</h3>
-                <p className="text-sm text-muted-foreground">시대영재 학원 원장의 강의 모습</p>
+                <p className="text-sm text-muted-foreground">시대영재 × 페이지원 영어학원 원장의 강의 모습</p>
               </div>
               
               <div className="text-center">

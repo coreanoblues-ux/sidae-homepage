@@ -140,7 +140,7 @@ export default function Login() {
             {isSignup ? "회원가입" : "로그인"}
           </CardTitle>
           <p className="text-muted-foreground">
-            {isSignup ? "시대영재 학원에 가입하세요" : "시대영재 학원에 로그인하세요"}
+            {isSignup ? "시대영재 × 페이지원 영어학원에 가입하세요" : "시대영재 × 페이지원 영어학원에 로그인하세요"}
           </p>
         </CardHeader>
         

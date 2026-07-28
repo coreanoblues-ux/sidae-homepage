@@ -215,7 +215,7 @@ export default function AdminPage() {
             관리자 대시보드
           </h1>
           <p className="text-muted-foreground">
-            시대영재 학원 관리 시스템
+            시대영재 × 페이지원 영어학원 관리 시스템
           </p>
         </div>
 

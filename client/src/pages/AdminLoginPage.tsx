@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
               관리자 로그인
             </CardTitle>
             <p className="text-muted-foreground">
-              시대영재 학원 관리자 페이지
+              시대영재 × 페이지원 영어학원 관리자 페이지
             </p>
           </CardHeader>
           <CardContent>

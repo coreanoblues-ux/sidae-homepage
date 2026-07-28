@@ -7,8 +7,8 @@ import { useSEO } from "@/hooks/useSEO";
 export default function About() {
   // SEO 메타태그 — 학원 소개
   useSEO({
-    title: "봉선동 영어학원 시대영재학원 — 강사진 소개",
-    description: "봉선동 영어학원 시대영재학원 강사 소개. 강남영단기 1타강사·해커스 50만뷰 인기강사 출신 원장이 직접 지도하는 광주 남구 영어학원.",
+    title: "봉선동 영어학원 시대영재 × 페이지원 영어학원 — 원장 & 강사진 소개",
+    description: "봉선동 입시 영어의 더 큰 한 페이지를 엽니다. 시대영재 × 페이지원 영어학원 강사 소개 — 강남영단기 1타강사·해커스 50만뷰 인기강사 출신 원장 직강. 광주 남구 봉선동 영어학원.",
     ogUrl: "https://www.sidae-edu.com/about",
   });
 
@@ -21,11 +21,14 @@ export default function About() {
             <div className="fade-in">
               <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-sm mb-6">
                 <Presentation className="mr-2 w-4 h-4" />
-                원장 소개
+                시대영재 × 페이지원 · 원장 소개
               </div>
-              <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
-                시대영재 학원 원장
+              <h1 className="text-4xl lg:text-6xl font-bold mb-4 leading-tight">
+                시대영재 × 페이지원<br />영어학원 원장
               </h1>
+              <p className="text-lg lg:text-xl font-serif italic text-orange-200 mb-6 leading-snug">
+                봉선동 입시 영어의 <span className="font-bold not-italic">더 큰 한 페이지</span>를 엽니다.
+              </p>
               <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
                 강남영단기 1타강사, 해커스 50만뷰+ 인기강사, TOEIC 990점<br />
                 캐나다국적 원장이 직접 지도하는 중고등부 입시영어 전문교육
@@ -43,7 +46,7 @@ export default function About() {
             <div className="fade-in">
               <img
                 src="/images/IMG_6558_1758101099677.JPG"
-                alt="시대영재 학원 원장 프로필 사진"
+                alt="시대영재 × 페이지원 영어학원 원장 프로필 사진"
                 className="rounded-2xl shadow-2xl w-full max-w-md mx-auto object-cover aspect-[4/5]"
                 data-testid="img-profile-main"
               />
@@ -137,7 +140,7 @@ export default function About() {
               <div className="space-y-4">
                 <img
                   src="@assets/IMG_6554_1758101087993.JPG"
-                  alt="시대영재 학원 강사진 단체 사진"
+                  alt="시대영재 × 페이지원 영어학원 강사진 단체 사진"
                   className="rounded-xl shadow-lg object-cover aspect-[3/2] w-full"
                   data-testid="img-teaching-staff"
                 />
@@ -257,7 +260,7 @@ export default function About() {
               학생들의 평가
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              시대영재 학원 원장님과 함께 공부한 학생들의 생생한 후기입니다.
+              시대영재 × 페이지원 영어학원 원장님과 함께 공부한 학생들의 생생한 후기입니다.
             </p>
           </div>
 
@@ -319,7 +322,7 @@ export default function About() {
               함께 영어 실력을 높여보세요
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              시대영재 학원 원장과 함께 체계적이고 효과적인 영어 학습을 시작해보세요.
+              시대영재 × 페이지원 영어학원 원장과 함께 체계적이고 효과적인 영어 학습을 시작해보세요.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" data-testid="button-start-learning">
