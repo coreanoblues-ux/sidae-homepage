@@ -46,8 +46,8 @@ const heroSlides = [
 export default function Landing() {
   // SEO 메타태그 — 홈
   useSEO({
-    title: "봉선동 영어학원 | 시대영재 X 페이지원 영어학원 — 봉선동 입시 영어의 더 큰 한 페이지",
-    description: "봉선동 입시 영어의 더 큰 한 페이지를 엽니다. 시대영재 X 페이지원 영어학원 — 강남영단기 1타·해커스 인기강사 출신 원장 직강. 광주 남구 봉선동 중고등 내신·수능 영어 전문.",
+    title: "봉선동 영어학원 | 시대영재 X 페이지원 영어학원 — 오늘의 한 페이지가, 내일의 등급을 결정합니다",
+    description: "오늘의 한 페이지가, 내일의 등급을 결정합니다. 시대영재 X 페이지원 영어학원 — 강남영단기 1타·해커스 인기강사 출신 원장 직강. 광주 남구 봉선동 중고등 내신·수능 영어 전문.",
     ogUrl: "https://www.sidae-edu.com/",
   });
 
@@ -263,14 +263,20 @@ export default function Landing() {
               <p className="text-[11px] sm:text-xs font-semibold text-[#FF6B00] uppercase tracking-[0.25em] mb-1.5">
                 시대영재 × 페이지원 영어학원
               </p>
-              <p className="text-base sm:text-xl lg:text-2xl font-serif italic text-gray-700 leading-snug">
-                봉선동 입시 영어의
+              <p
+                className="text-lg sm:text-2xl lg:text-3xl text-gray-800 leading-snug"
+                style={{ fontFamily: '"Nanum Myeongjo", "Noto Serif KR", serif', fontWeight: 700, letterSpacing: '-0.01em' }}
+              >
+                오늘의 한 페이지가,
                 <span className="hidden sm:inline"> </span>
                 <br className="sm:hidden" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500 font-bold not-italic">
-                  더 큰 한 페이지
+                <span
+                  className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500"
+                  style={{ fontFamily: '"Nanum Myeongjo", "Noto Serif KR", serif', fontWeight: 800 }}
+                >
+                  내일의 등급
                 </span>
-                를 엽니다.
+                을 결정합니다.
               </p>
             </div>
 
@@ -666,8 +672,11 @@ export default function Landing() {
             <h2 className="text-3xl lg:text-4xl font-black text-foreground mb-3">
               검증된 강사진
             </h2>
-            <p className="text-base md:text-lg font-serif italic text-primary/90 max-w-3xl mx-auto leading-relaxed mb-3">
-              봉선동 입시 영어의 <span className="font-bold not-italic">더 큰 한 페이지</span>를 엽니다.
+            <p
+              className="text-lg md:text-xl text-primary/90 max-w-3xl mx-auto leading-relaxed mb-3"
+              style={{ fontFamily: '"Nanum Myeongjo", "Noto Serif KR", serif', fontWeight: 700, letterSpacing: '-0.01em' }}
+            >
+              오늘의 한 페이지가, <span style={{ fontWeight: 800 }} className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">내일의 등급</span>을 결정합니다.
             </p>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               (전)강남영단기 1타강사 출신 캐나다국적 원장과 함께
@@ -968,21 +977,24 @@ export default function Landing() {
               <div className="mb-4">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <img
-                    src="/images/logo-footer.png"
-                    alt="시대영재 학원"
+                    src="/images/pageone-logo-v2.png"
+                    alt="페이지원 영어학원"
                     className="h-9 sm:h-10 w-auto object-contain"
                   />
                   <span className="text-lg font-black text-secondary-foreground/60 select-none" aria-hidden="true">×</span>
                   <img
-                    src="/images/pageone-logo.png"
-                    alt="페이지원 영어학원"
-                    className="h-9 sm:h-10 w-auto object-contain rounded-md"
+                    src="/images/logo-footer.png"
+                    alt="시대영재 학원"
+                    className="h-9 sm:h-10 w-auto object-contain"
                   />
                 </div>
                 <p className="text-sm text-secondary-foreground/70 mt-2">광주광역시 남구 봉선중앙로16, 2층</p>
               </div>
-              <p className="text-base md:text-lg font-serif italic text-primary/90 mb-2 leading-relaxed">
-                봉선동 입시 영어의 <span className="font-bold not-italic">더 큰 한 페이지</span>를 엽니다.
+              <p
+                className="text-base md:text-lg text-primary/90 mb-2 leading-relaxed"
+                style={{ fontFamily: '"Nanum Myeongjo", "Noto Serif KR", serif', fontWeight: 700, letterSpacing: '-0.01em' }}
+              >
+                오늘의 한 페이지가, <span style={{ fontWeight: 800 }} className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">내일의 등급</span>을 결정합니다.
               </p>
               <p className="text-secondary-foreground/75 mb-4 leading-relaxed">
                 실력 있는 강사가 실력 있는 학생을 만든다는 믿음, 시대영재 × 페이지원의 시작입니다.

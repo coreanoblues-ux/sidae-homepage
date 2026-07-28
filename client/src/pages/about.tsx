@@ -8,7 +8,7 @@ export default function About() {
   // SEO 메타태그 — 학원 소개
   useSEO({
     title: "봉선동 영어학원 시대영재 × 페이지원 영어학원 — 원장 & 강사진 소개",
-    description: "봉선동 입시 영어의 더 큰 한 페이지를 엽니다. 시대영재 × 페이지원 영어학원 강사 소개 — 강남영단기 1타강사·해커스 50만뷰 인기강사 출신 원장 직강. 광주 남구 봉선동 영어학원.",
+    description: "오늘의 한 페이지가, 내일의 등급을 결정합니다. 시대영재 × 페이지원 영어학원 강사 소개 — 강남영단기 1타강사·해커스 50만뷰 인기강사 출신 원장 직강. 광주 남구 봉선동 영어학원.",
     ogUrl: "https://www.sidae-edu.com/about",
   });
 
@@ -26,8 +26,11 @@ export default function About() {
               <h1 className="text-4xl lg:text-6xl font-bold mb-4 leading-tight">
                 시대영재 × 페이지원<br />영어학원 원장
               </h1>
-              <p className="text-lg lg:text-xl font-serif italic text-orange-200 mb-6 leading-snug">
-                봉선동 입시 영어의 <span className="font-bold not-italic">더 큰 한 페이지</span>를 엽니다.
+              <p
+                className="text-xl lg:text-2xl text-orange-100 mb-6 leading-snug"
+                style={{ fontFamily: '"Nanum Myeongjo", "Noto Serif KR", serif', fontWeight: 700, letterSpacing: '-0.01em' }}
+              >
+                오늘의 한 페이지가, <span style={{ fontWeight: 800 }} className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-300">내일의 등급</span>을 결정합니다.
               </p>
               <p className="text-xl lg:text-2xl text-gray-200 mb-8 leading-relaxed">
                 강남영단기 1타강사, 해커스 50만뷰+ 인기강사, TOEIC 990점<br />

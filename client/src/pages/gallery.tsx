@@ -8,7 +8,7 @@ export default function GalleryPage() {
   // SEO 메타태그 — 갤러리/후기
   useSEO({
     title: "봉선동 영어학원 후기 — 시대영재 × 페이지원 영어학원",
-    description: "봉선동 입시 영어의 더 큰 한 페이지를 엽니다. 시대영재 × 페이지원 영어학원 수강 후기 및 갤러리 — 실제 학생들의 성적 향상 사례와 학원 생활을 확인하세요.",
+    description: "오늘의 한 페이지가, 내일의 등급을 결정합니다. 시대영재 × 페이지원 영어학원 수강 후기 및 갤러리 — 실제 학생들의 성적 향상 사례와 학원 생활을 확인하세요.",
     ogUrl: "https://www.sidae-edu.com/gallery",
   });
   // 데이터베이스에서 갤러리 이미지 불러오기 (visible=true인 것만)

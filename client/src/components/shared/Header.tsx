@@ -277,17 +277,17 @@ export function Header() {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 sm:gap-3">
             <img
-              src="/images/logo-transparent.png"
-              alt="시대영재 학원"
+              src="/images/pageone-logo-v2.png"
+              alt="페이지원 영어학원"
               className="h-9 sm:h-10 w-auto object-contain"
             />
             <span className="text-lg sm:text-xl font-black text-muted-foreground select-none" aria-hidden="true">
               ×
             </span>
             <img
-              src="/images/pageone-logo.png"
-              alt="페이지원 영어학원"
-              className="h-9 sm:h-10 w-auto object-contain rounded-md"
+              src="/images/logo-transparent.png"
+              alt="시대영재 학원"
+              className="h-9 sm:h-10 w-auto object-contain"
             />
           </Link>
 
