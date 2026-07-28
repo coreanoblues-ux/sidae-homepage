@@ -43,7 +43,7 @@ export default function Location() {
   useSEO({
     title: "봉선동 영어학원 시대영재 × 페이지원 영어학원 — 오시는 길 · 위치 · 약도",
     description:
-      "우리가 가르치는 것은 단지 영어 학습이 아닙니다. 아이가 살아갈 더 나은 내일의 한 페이지입니다. 시대영재 × 페이지원 영어학원 오시는 길 — 광주광역시 남구 봉선중앙로 16, 2층. 봉선중·봉선고 근방, 봉선동 아파트 단지에서 도보 가능. 전화 062-462-0990.",
+      "우리는 영어를 가르치지만, 아이들은 더 나은 내일의 한 페이지를 써 내려갑니다. 시대영재 × 페이지원 영어학원 오시는 길 — 광주광역시 남구 봉선중앙로 16, 2층. 봉선중·봉선고 근방, 봉선동 아파트 단지에서 도보 가능. 전화 062-462-0990.",
     keywords:
       "봉선동 영어학원, 봉선동 학원, 봉선동 영어, 시대영재, 시대영재학원 오시는 길, 페이지원, 페이지원영어학원, 페이지원 영어학원 오시는 길, 시대영재 페이지원, 광주 남구 영어학원, 봉선중 근처 영어학원, 봉선고 근처 영어학원, 봉선동 영어 과외, 봉선동 수능영어",
     ogTitle: "봉선동 영어학원 시대영재 × 페이지원 영어학원 — 오시는 길",
@@ -169,8 +169,8 @@ export default function Location() {
           >
             봉선동 영어학원 시대영재 × 페이지원 영어학원<br className="hidden md:block" /> — 오시는 길
           </h1>
-          <p className="tagline-serif text-base md:text-lg text-orange-100 mb-4 leading-relaxed">
-            우리가 가르치는 것은 단지 영어 학습이 아닙니다. <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-300">아이가 살아갈 더 나은 내일의 한 페이지</span>입니다.
+          <p className="tagline-serif text-lg md:text-xl lg:text-2xl text-orange-100 mb-4 leading-relaxed">
+            우리는 영어를 가르치지만,<br />아이들은 <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-300">더 나은 내일의 한 페이지</span>를 써 내려갑니다.
           </p>
           <p className="text-lg lg:text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
             광주광역시 남구 봉선동 중심, 봉선중학교·봉선고등학교 인근에

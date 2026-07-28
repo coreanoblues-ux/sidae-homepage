@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -87,20 +87,23 @@
     -webkit-backdrop-filter: blur(12px);
   }
 
-  /* 브랜드 감성 태그라인 — 부드럽고 프로페셔널한 한글 세리프 렌더링 */
+  /* 브랜드 감성 태그라인 — 따뜻하고 감성적인 한글 세리프 렌더링 */
   .tagline-serif {
-    font-family: 'Noto Serif KR', 'Nanum Myeongjo', Georgia, serif;
-    font-weight: 500;
-    letter-spacing: -0.015em;
+    font-family: 'Gowun Batang', 'Nanum Myeongjo', 'Noto Serif KR', Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    line-height: 1.75;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     font-feature-settings: "kern", "liga";
+    word-break: keep-all;
   }
 
   .tagline-serif-emph {
-    font-family: 'Noto Serif KR', 'Nanum Myeongjo', Georgia, serif;
+    font-family: 'Gowun Batang', 'Nanum Myeongjo', 'Noto Serif KR', Georgia, serif;
     font-weight: 700;
+    letter-spacing: -0.005em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;

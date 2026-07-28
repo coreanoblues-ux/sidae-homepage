@@ -47,8 +47,8 @@ const heroSlides = [
 export default function Landing() {
   // SEO 메타태그 — 홈
   useSEO({
-    title: "봉선동 영어학원 | 시대영재 X 페이지원 영어학원 — 우리가 가르치는 것은 단지 영어 학습이 아닙니다",
-    description: "우리가 가르치는 것은 단지 영어 학습이 아닙니다. 아이가 살아갈 더 나은 내일의 한 페이지입니다. 시대영재 X 페이지원 영어학원 — 강남영단기 1타·해커스 인기강사 출신 원장 직강. 광주 남구 봉선동 중고등 내신·수능 영어 전문.",
+    title: "봉선동 영어학원 | 시대영재 X 페이지원 영어학원 — 우리는 영어를 가르치지만, 아이들은 더 나은 내일의 한 페이지를 써 내려갑니다",
+    description: "우리는 영어를 가르치지만, 아이들은 더 나은 내일의 한 페이지를 써 내려갑니다. 시대영재 X 페이지원 영어학원 — 강남영단기 1타·해커스 인기강사 출신 원장 직강. 광주 남구 봉선동 중고등 내신·수능 영어 전문.",
     ogUrl: "https://www.sidae-edu.com/",
   });
 
@@ -267,13 +267,14 @@ export default function Landing() {
               <p className="text-[11px] sm:text-xs font-semibold text-[#FF6B00] uppercase tracking-[0.25em] mb-1.5">
                 시대영재 × 페이지원 영어학원
               </p>
-              <p className="tagline-serif text-base sm:text-lg lg:text-xl text-gray-800 leading-relaxed">
-                우리가 가르치는 것은 단지 영어 학습이 아닙니다.
+              <p className="tagline-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-800 leading-relaxed">
+                우리는 영어를 가르치지만,
                 <br />
+                아이들은{" "}
                 <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">
-                  아이가 살아갈 더 나은 내일의 한 페이지
+                  더 나은 내일의 한 페이지
                 </span>
-                입니다.
+                를 써 내려갑니다.
               </p>
             </div>
 
@@ -669,8 +670,8 @@ export default function Landing() {
             <h2 className="text-3xl lg:text-4xl font-black text-foreground mb-3">
               검증된 강사진
             </h2>
-            <p className="tagline-serif text-base md:text-lg text-primary/90 max-w-3xl mx-auto leading-relaxed mb-3">
-              우리가 가르치는 것은 단지 영어 학습이 아닙니다. <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">아이가 살아갈 더 나은 내일의 한 페이지</span>입니다.
+            <p className="tagline-serif text-lg md:text-xl lg:text-2xl text-primary/90 max-w-3xl mx-auto leading-relaxed mb-3">
+              우리는 영어를 가르치지만,<br />아이들은 <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">더 나은 내일의 한 페이지</span>를 써 내려갑니다.
             </p>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               (전)강남영단기 1타강사 출신 캐나다국적 원장과 함께
@@ -984,8 +985,8 @@ export default function Landing() {
                 </div>
                 <p className="text-sm text-secondary-foreground/70 mt-2">광주광역시 남구 봉선중앙로16, 2층</p>
               </div>
-              <p className="tagline-serif text-base md:text-lg text-primary/90 mb-2 leading-relaxed">
-                우리가 가르치는 것은 단지 영어 학습이 아닙니다. <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">아이가 살아갈 더 나은 내일의 한 페이지</span>입니다.
+              <p className="tagline-serif text-lg md:text-xl lg:text-2xl text-primary/90 mb-2 leading-relaxed">
+                우리는 영어를 가르치지만,<br />아이들은 <span className="tagline-serif-emph text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] to-orange-500">더 나은 내일의 한 페이지</span>를 써 내려갑니다.
               </p>
               <p className="text-secondary-foreground/75 mb-4 leading-relaxed">
                 실력 있는 강사가 실력 있는 학생을 만든다는 믿음, 시대영재 × 페이지원의 시작입니다.
