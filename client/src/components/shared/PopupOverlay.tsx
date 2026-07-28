@@ -52,9 +52,24 @@ function popupSig(p: Popup): string {
 }
 
 export function PopupOverlay() {
-  const { data: popups = [] } = useQuery<Popup[]>({
+  // ⚠️ 전역 queryClient 는 staleTime: Infinity 라서
+  //   관리자가 팝업을 추가/수정해도 방문자가 하드 리프레시 하지 않으면 반영되지 않는다.
+  //   → 이 쿼리만 refetch 정책을 짧게 잡고, 마운트마다 서버에서 가져온다.
+  const { data: popups = [], error } = useQuery<Popup[]>({
     queryKey: ["/api/popups"],
+    staleTime: 30 * 1000,          // 30초까지만 신선
+    gcTime: 60 * 1000,             // 캐시 1분 후 폐기
+    refetchOnMount: "always",       // 페이지 진입 시 항상 재요청
+    refetchOnWindowFocus: true,     // 탭 재활성화 시 재요청
+    refetchInterval: 60 * 1000,     // 페이지 열려있는 동안 1분마다 재확인
+    retry: 1,
   });
+
+  if (error) {
+    // 개발용 로그 — 배포 콘솔에서도 원인 파악 가능
+    // eslint-disable-next-line no-console
+    console.warn("[PopupOverlay] /api/popups 로드 실패:", error);
+  }
 
   // 표시 대상 팝업 ID 목록 (localStorage 기반 감춤 처리 이후)
   const [visibleIds, setVisibleIds] = useState<string[]>([]);
