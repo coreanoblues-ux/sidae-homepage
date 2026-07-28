@@ -287,7 +287,7 @@ export function Header() {
             <img
               src="/images/logo-transparent.png"
               alt="시대영재 학원"
-              className="h-9 sm:h-10 w-auto object-contain"
+              className="h-8 sm:h-9 w-auto object-contain"
             />
           </Link>
 

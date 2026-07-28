@@ -985,7 +985,7 @@ export default function Landing() {
                   <img
                     src="/images/logo-footer.png"
                     alt="시대영재 학원"
-                    className="h-9 sm:h-10 w-auto object-contain"
+                    className="h-8 sm:h-9 w-auto object-contain"
                   />
                 </div>
                 <p className="text-sm text-secondary-foreground/70 mt-2">광주광역시 남구 봉선중앙로16, 2층</p>
