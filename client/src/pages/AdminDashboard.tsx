@@ -1147,17 +1147,62 @@ const PopupManager = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="popup-image">이미지 URL</Label>
-                  <Input
-                    id="popup-image"
-                    type="url"
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    placeholder="/images/popup-example.png 또는 https://..."
-                    data-testid="input-popup-image"
-                  />
+                  <Label htmlFor="popup-image">이미지</Label>
+                  <div className="space-y-2">
+                    {formData.imageUrl && (
+                      <div className="relative inline-block">
+                        <img
+                          src={formData.imageUrl}
+                          alt="미리보기"
+                          className="max-h-40 rounded border object-contain bg-muted"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center hover:bg-red-600"
+                          aria-label="이미지 제거"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    <Input
+                      id="popup-image-file"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        // 5MB 상한 (base64 인코딩 시 ~6.7MB → 10MB 서버 한도 이내)
+                        if (file.size > 5 * 1024 * 1024) {
+                          alert('이미지는 5MB 이하로 업로드해주세요.');
+                          e.target.value = '';
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          setFormData({ ...formData, imageUrl: String(reader.result || '') });
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                      data-testid="input-popup-image-file"
+                    />
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-px bg-border" />
+                      <span className="text-xs text-muted-foreground">또는 URL 직접 입력</span>
+                      <div className="flex-1 h-px bg-border" />
+                    </div>
+                    <Input
+                      id="popup-image"
+                      type="text"
+                      value={formData.imageUrl.startsWith('data:') ? '' : formData.imageUrl}
+                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      placeholder="/images/popup-example.png 또는 https://..."
+                      data-testid="input-popup-image"
+                    />
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    비워두면 이미지 없이 텍스트만 표시됩니다.
+                    비워두면 이미지 없이 텍스트만 표시됩니다. 파일 업로드 최대 5MB.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">

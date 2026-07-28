@@ -61,8 +61,9 @@ app.use((_, res, next) => {
   next();
 });
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// 📸 팝업 이미지(base64) 업로드 등 큰 페이로드 허용 — 10MB
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(cookieParser());
 
 // 🎯 세션 & Passport 미들웨어 (라우트 등록 전에 반드시 위치)

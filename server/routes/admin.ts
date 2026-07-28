@@ -464,12 +464,20 @@ router.post('/popups', adminGuard, async (req, res) => {
     const data = insertPopupSchema.parse(req.body);
     const item = await storage.createPopup(data);
     res.json({ ok: true, item });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ ok: false, code: 'VALIDATION_ERROR', errors: error.errors });
     }
     console.error('Error creating popup:', error);
-    res.status(500).json({ ok: false, message: 'Failed to create popup' });
+    // "relation \"popups\" does not exist" 유형의 실제 DB 에러 메시지를 프론트에 노출
+    const detail = error?.message || error?.code || 'Unknown error';
+    res.status(500).json({
+      ok: false,
+      message: `팝업 생성 실패: ${detail}`,
+      hint: /relation .* does not exist/i.test(detail)
+        ? 'DB에 popups 테이블이 없습니다. 로컬에서 `npm run db:push` 실행 후 다시 배포하세요.'
+        : undefined,
+    });
   }
 });
 
