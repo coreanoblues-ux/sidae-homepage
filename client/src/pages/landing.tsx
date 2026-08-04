@@ -183,16 +183,14 @@ export default function Landing() {
       ],
     },
     {
-      slug: "haserin",
-      name: "하세린",
+      slug: "goeunchae",
+      name: "고은채",
       role: "강사",
-      image: "/images/하세린.png?v=2",
+      image: "/images/고은채.jpg?v=1",
       credentials: [
-        "이화여대 학사 졸업",
-        "영국 런던 LCF 저널리즘 석사",
-        "Harvard 교류프로그램 오프닝",
-        "목동·강남구청·서초 입시영어강의",
-        "법률사무소 김&장 변호사 비즈니스영어 레슨",
+        "이화여자대학교 학사 졸업",
+        "TOEIC 990점 만점",
+        "페이지원(구. 시대영재) 최상위반 전임강사",
       ],
     },
   ];

@@ -141,7 +141,7 @@ const defaultInstructorVideos = [
   { slug: 'jeongwooseok',  name: '정우석', youtubeUrl: null, order: 1 },
   { slug: 'kimmyounggeun', name: '김명근', youtubeUrl: null, order: 2 },
   { slug: 'leehongseok',   name: '이홍석', youtubeUrl: null, order: 3 },
-  { slug: 'haserin',       name: '하세린', youtubeUrl: null, order: 4 },
+  { slug: 'goeunchae',     name: '고은채', youtubeUrl: null, order: 4 },
 ];
 
 export async function seedInstructorVideosIfEmpty() {

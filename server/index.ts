@@ -144,7 +144,7 @@ server.listen({
 
   // 🌱 시드 데이터 초기화 (배포 환경에서 프로그램 데이터 없을 때 자동 생성)
   await seedProgramsIfEmpty();
-  // 🌱 강사 영상 4명 기본 행 보장 (slug: jeongwooseok / kimmyounggeun / leehongseok / haserin)
+  // 🌱 강사 영상 4명 기본 행 보장 (slug: jeongwooseok / kimmyounggeun / leehongseok / goeunchae)
   await seedInstructorVideosIfEmpty();
 
   // 🔒 보호 페이지 서버 가드 (관리자 로그인 필요)

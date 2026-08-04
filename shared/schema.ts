@@ -122,7 +122,7 @@ export const simpleVideos = pgTable("simple_videos", {
 // 강사 영상 테이블 (about 페이지의 강의 프리뷰 유튜브 링크 - 관리자 편집 가능)
 export const instructorVideos = pgTable("instructor_videos", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  slug: varchar("slug").unique().notNull(), // jeongwooseok, kimmyounggeun, leehongseok, haserin
+  slug: varchar("slug").unique().notNull(), // jeongwooseok, kimmyounggeun, leehongseok, goeunchae
   name: varchar("name").notNull(),          // 표시용 이름 (정우석, 김명근, ...)
   youtubeUrl: varchar("youtube_url"),       // 유튜브 링크 (관리자가 자주 교체)
   order: integer("order").default(0),
