@@ -355,11 +355,10 @@ export default function Landing() {
           </div>
 
           <h4 className="text-lg font-bold text-foreground mb-5">시대영재 × 페이지원 영어학원만의 독보적 시스템</h4>
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             {[
               { title: '학교별 맞춤 정밀 타격', desc: '광주 영재고 출제 경향을 완벽 분석한 자체 제작 교재. 학교별 내신 지문과 수능 변형 문제를 넘나드는 정독&스킬 강의로 실전 점수 향상을 보장합니다.' },
               { title: '검증된 강남 1타 노하우', desc: '강남 해커스·영단기 등 메이저 학원에서 검증된 마감 강사의 강의력. 문제의 정답이 보이는 구조적 접근법을 전수합니다.' },
-              { title: 'AI 기반 데이터 관리', desc: '매 수업 실전 모의 테스트와 AI 기반 오답 분석으로 학생의 현재 위치를 객관적으로 진단하고 부족한 1%를 채워나갑니다.' },
             ].map(({ title, desc }) => (
               <div key={title} className="rounded-xl border border-border bg-muted/40 p-5">
                 <p className="font-bold text-foreground mb-2">{title}</p>
